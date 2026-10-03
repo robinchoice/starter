@@ -21,7 +21,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://app:app@localhost:5432/app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       # Fails on high and critical advisories, lower ones only show up in the log

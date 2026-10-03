@@ -6,7 +6,7 @@
   {#each toasts as t (t.id)}
     <div class="toast {t.type}" role="alert">
       <span>{t.message}</span>
-      <button onclick={() => removeToast(t.id)} aria-label="Schließen">×</button>
+      <button type="button" onclick={() => removeToast(t.id)} aria-label="Schließen">×</button>
     </div>
   {/each}
 </div>

@@ -25,7 +25,10 @@ export const loginCodeSchema = z.object({ email });
 
 export const verifyCodeSchema = z.object({
   email,
-  code: z.string().trim().regex(/^\d{6}$/, 'Der Code hat 6 Ziffern.'),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Der Code hat 6 Ziffern.'),
 });
 
 export const updateMeSchema = z.object({

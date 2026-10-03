@@ -1,5 +1,5 @@
-import type { HandleClientError } from '@sveltejs/kit';
 import * as Sentry from '@sentry/browser';
+import type { HandleClientError } from '@sveltejs/kit';
 import { env } from '$env/dynamic/public';
 
 Sentry.init({
@@ -21,12 +21,12 @@ Sentry.init({
   maxBreadcrumbs: 0,
   tracesSampleRate: 0,
   sendClientReports: false,
-  integrations: (defaults) => defaults.filter((integration) =>
-    !['BrowserSession', 'Breadcrumbs', 'HttpContext'].includes(integration.name)),
+  integrations: (defaults) =>
+    defaults.filter((integration) => !['BrowserSession', 'Breadcrumbs', 'HttpContext'].includes(integration.name)),
   beforeSend(event) {
-    delete event.request
-    delete event.user
-    return event
+    delete event.request;
+    delete event.user;
+    return event;
   },
 });
 

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { auth, updateName } from '$lib/auth.svelte';
-  import { toast } from '$lib/toast.svelte';
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
+  import { toast } from '$lib/toast.svelte';
 
   let name = $state(auth.user?.name ?? '');
   let saving = $state(false);

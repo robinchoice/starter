@@ -15,6 +15,13 @@
       "when": 1791035678329,
       "tag": "0001_login_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791066930072,
+      "tag": "0002_rate_limits",
+      "breakpoints": true
     }
   ]
 }

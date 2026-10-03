@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { APP_NAME } from '@app/shared';
+  import { onMount } from 'svelte';
   import { auth, checkAuth } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
 

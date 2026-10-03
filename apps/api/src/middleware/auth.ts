@@ -1,8 +1,8 @@
+import { sessions, users } from '@app/db';
+import { and, eq, gt } from 'drizzle-orm';
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { createMiddleware } from 'hono/factory';
-import { and, eq, gt } from 'drizzle-orm';
-import { sessions, users } from '@app/db';
 import type { AppEnv } from '../types';
 
 export const SESSION_COOKIE = 'session';

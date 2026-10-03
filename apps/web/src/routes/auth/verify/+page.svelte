@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { safeNextPath } from '@app/shared';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { safeNextPath } from '@app/shared';
   import { auth, checkAuth, verify } from '$lib/auth.svelte';
 
   const token = page.url.searchParams.get('token');

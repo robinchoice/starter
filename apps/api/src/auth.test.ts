@@ -8,19 +8,23 @@ const db = createDb(process.env.DATABASE_URL!);
 const app = createApp(db);
 const log = spyOn(console, 'log');
 
-beforeAll(() => migrateDb(db));
+beforeAll(() => migrateDb(process.env.DATABASE_URL!));
 afterAll(() => db.$client.end());
 
 const freshEmail = () => `test-${crypto.randomUUID()}@example.com`;
 
+// Rate limits live in the database, so each run counts against its own address
+const ip = crypto.randomUUID();
+
 function post(path: string, body: unknown, headers: Record<string, string> = {}) {
   return app.request(`/api/v1${path}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', ...headers },
+    headers: { 'content-type': 'application/json', 'x-forwarded-for': ip, ...headers },
     body: JSON.stringify(body),
   });
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: the tests check the shape with expect
 async function body(res: Response | Promise<Response>): Promise<any> {
   return (await res).json();
 }

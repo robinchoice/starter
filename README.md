@@ -1,6 +1,6 @@
 # starter
 
-Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Login per Magic Link (Web) oder Code (App), Mail über SMTP, Rate-Limit, GlitchTip, Healthcheck, CI und Coolify-Deploy sind fertig eingebaut.
+Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Login per Magic Link (Web) oder Code (App), Mail über SMTP, Rate-Limit, Security-Header mit CSP, GlitchTip, Healthcheck, CI mit Browser-Test, Dependabot und Coolify-Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 
@@ -11,6 +11,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
    cp .env.example .env
    docker compose up -d
    bun install
+   bunx playwright install chromium   # einmalig, für den Browser-Test
    bun run dev
    ```
    Web läuft auf http://localhost:5173, die API auf Port 3000. Ohne `SMTP_HOST` stehen die Login-Links im API-Log.
@@ -25,7 +26,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 | `packages/shared` | App-Name, zod-Schemas und Typen für API und Web |
 | `apps/mobile` | Flutter-App, siehe unten. Reine Web-Projekte löschen den Ordner und `.github/workflows/mobile.yml` |
 
-Befehle: `bun run dev`, `check`, `test`, `build`, `db:generate`. Die API-Tests laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
+Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`. `test` umfasst die API-Tests und einen Browser-Test des Logins (Playwright, startet API und Web selbst oder nutzt die laufenden). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
 
 ## Deploy auf Coolify
 

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, integer } from 'drizzle-orm/pg-core';
+import { integer, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -37,4 +37,11 @@ export const sessions = pgTable('sessions', {
   tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Counters of lib/rate-limit.ts in the API
+export const rateLimits = pgTable('rate_limits', {
+  key: varchar('key', { length: 300 }).primaryKey(),
+  count: integer('count').notNull(),
+  resetAt: timestamp('reset_at').notNull(),
 });

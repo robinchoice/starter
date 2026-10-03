@@ -1,7 +1,4 @@
-import { Hono } from 'hono';
-import { deleteCookie, setCookie } from 'hono/cookie';
-import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
-import { loginCodes, magicLinks, sessions, users, type Database } from '@app/db';
+import { type Database, loginCodes, magicLinks, sessions, users } from '@app/db';
 import {
   loginCodeSchema,
   magicLinkSchema,
@@ -10,10 +7,13 @@ import {
   verifyCodeSchema,
   verifySchema,
 } from '@app/shared';
-import { currentUser, generateToken, hashToken, requireAuth, sessionToken, SESSION_COOKIE } from '../middleware/auth';
-import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
+import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
+import { Hono } from 'hono';
+import { deleteCookie, setCookie } from 'hono/cookie';
 import { sendLoginCodeEmail, sendMagicLinkEmail } from '../lib/mail';
+import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { validJson } from '../lib/validate';
+import { currentUser, generateToken, hashToken, requireAuth, SESSION_COOKIE, sessionToken } from '../middleware/auth';
 import type { AppEnv } from '../types';
 
 const MINUTE = 60 * 1000;
@@ -21,9 +21,9 @@ const SESSION_DAYS = 30;
 // Apps would otherwise ask for a new code every month
 const APP_SESSION_DAYS = 365;
 const CODE_ATTEMPTS = 5;
-const mailsPerAddress = rateLimit(5, 60 * MINUTE);
-const mailsPerIp = rateLimit(20, 60 * MINUTE);
-const codeChecksPerIp = rateLimit(30, 15 * MINUTE);
+const mailsPerAddress = rateLimit('mails-per-address', 5, 60 * MINUTE);
+const mailsPerIp = rateLimit('mails-per-ip', 20, 60 * MINUTE);
+const codeChecksPerIp = rateLimit('code-checks-per-ip', 30, 15 * MINUTE);
 
 const userColumns = { id: users.id, email: users.email, name: users.name };
 
@@ -48,14 +48,17 @@ async function startSession(db: Database, email: string, days: number) {
 export const authRoutes = new Hono<AppEnv>()
   .post('/magic-link', validJson(magicLinkSchema), async (c) => {
     const { email, next } = c.req.valid('json');
-    if (!mailsPerIp.hit(clientIp(c)) || !mailsPerAddress.hit(email)) return tooManyRequests(c);
+    if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
 
     const token = generateToken();
-    await c.get('db').insert(magicLinks).values({
-      email,
-      tokenHash: hashToken(token),
-      expiresAt: new Date(Date.now() + 15 * MINUTE),
-    });
+    await c
+      .get('db')
+      .insert(magicLinks)
+      .values({
+        email,
+        tokenHash: hashToken(token),
+        expiresAt: new Date(Date.now() + 15 * MINUTE),
+      });
     await sendMagicLinkEmail(email, token, safeNextPath(next));
     return c.json({ ok: true });
   })
@@ -92,21 +95,24 @@ export const authRoutes = new Hono<AppEnv>()
   // Mobile apps: a 6-digit code by mail instead of a link
   .post('/code', validJson(loginCodeSchema), async (c) => {
     const { email } = c.req.valid('json');
-    if (!mailsPerIp.hit(clientIp(c)) || !mailsPerAddress.hit(email)) return tooManyRequests(c);
+    if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
 
     const code = String(crypto.getRandomValues(new Uint32Array(1))[0]! % 1_000_000).padStart(6, '0');
-    await c.get('db').insert(loginCodes).values({
-      email,
-      codeHash: hashToken(code),
-      expiresAt: new Date(Date.now() + 15 * MINUTE),
-    });
+    await c
+      .get('db')
+      .insert(loginCodes)
+      .values({
+        email,
+        codeHash: hashToken(code),
+        expiresAt: new Date(Date.now() + 15 * MINUTE),
+      });
     await sendLoginCodeEmail(email, code);
     return c.json({ ok: true });
   })
 
   // Answers with the session token, the app sends it as a bearer token
   .post('/code/verify', validJson(verifyCodeSchema), async (c) => {
-    if (!codeChecksPerIp.hit(clientIp(c))) return tooManyRequests(c);
+    if (!(await codeChecksPerIp.hit(c, clientIp(c)))) return tooManyRequests(c);
     const { email, code } = c.req.valid('json');
     const db = c.get('db');
 
@@ -139,7 +145,11 @@ export const authRoutes = new Hono<AppEnv>()
 
   .post('/logout', async (c) => {
     const token = sessionToken(c);
-    if (token) await c.get('db').delete(sessions).where(eq(sessions.tokenHash, hashToken(token)));
+    if (token)
+      await c
+        .get('db')
+        .delete(sessions)
+        .where(eq(sessions.tokenHash, hashToken(token)));
     deleteCookie(c, SESSION_COOKIE, { path: '/' });
     return c.json({ ok: true });
   })

@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { APP_NAME } from '@app/shared';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { APP_NAME } from '@app/shared';
   import { auth, checkAuth, logout } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
 

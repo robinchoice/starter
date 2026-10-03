@@ -2,10 +2,9 @@ import './monitoring';
 import { createDb, migrateDb } from '@app/db';
 import { createApp } from './app';
 
-const db = createDb(process.env.DATABASE_URL!);
-
 // A failed migration aborts the boot.
-await migrateDb(db);
+await migrateDb(process.env.DATABASE_URL!);
+const db = createDb(process.env.DATABASE_URL!);
 console.log('[boot] Migrations up to date.');
 
 const port = Number(process.env.PORT || 3000);

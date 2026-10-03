@@ -1,6 +1,6 @@
-import { captureException } from './monitoring.server';
-import type { Handle, HandleServerError } from '@sveltejs/kit';
 import dns from 'node:dns';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
+import { captureException } from './monitoring.server';
 
 // Docker's embedded DNS doesn't answer AAAA queries, which otherwise stalls
 // the AAAA-before-A lookup order until it times out.
@@ -11,16 +11,30 @@ dns.setDefaultResultOrder('ipv4first');
 // proxy does the same.
 const API_ORIGIN = process.env.API_INTERNAL_URL || 'http://api:3000';
 
-export const handle: Handle = async ({ event, resolve }) => {
-  if (!event.url.pathname.startsWith('/api/')) return resolve(event);
+// The CSP comes from svelte.config.js. Browsers ignore HSTS over plain HTTP,
+// so it is harmless in dev.
+const SECURITY_HEADERS = {
+  'strict-transport-security': 'max-age=31536000',
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+};
 
-  const headers = new Headers(event.request.headers);
+export const handle: Handle = async ({ event, resolve }) => {
+  const response = event.url.pathname.startsWith('/api/')
+    ? await proxyToApi(event.request, event.url)
+    : await resolve(event);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) response.headers.set(name, value);
+  return response;
+};
+
+async function proxyToApi(request: Request, url: URL) {
+  const headers = new Headers(request.headers);
   headers.delete('host');
 
-  const res = await fetch(`${API_ORIGIN}${event.url.pathname}${event.url.search}`, {
-    method: event.request.method,
+  const res = await fetch(`${API_ORIGIN}${url.pathname}${url.search}`, {
+    method: request.method,
     headers,
-    body: event.request.method !== 'GET' && event.request.method !== 'HEAD' ? event.request.body : undefined,
+    body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
     // @ts-expect-error — Bun supports duplex
     duplex: 'half',
   });
@@ -32,7 +46,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   responseHeaders.delete('content-length');
 
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: responseHeaders });
-};
+}
 
 export const handleError: HandleServerError = ({ error }) => {
   captureException(error);

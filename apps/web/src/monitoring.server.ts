@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/bun'
+import * as Sentry from '@sentry/bun';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -22,10 +22,10 @@ Sentry.init({
   defaultIntegrations: false,
   integrations: [Sentry.onUncaughtExceptionIntegration(), Sentry.onUnhandledRejectionIntegration({ mode: 'strict' })],
   beforeSend(event) {
-    delete event.request
-    delete event.user
-    return event
+    delete event.request;
+    delete event.user;
+    return event;
   },
-})
+});
 
-export const captureException = Sentry.captureException
+export const captureException = Sentry.captureException;

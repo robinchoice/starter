@@ -1,5 +1,5 @@
-import nodemailer from 'nodemailer';
 import { APP_NAME } from '@app/shared';
+import nodemailer from 'nodemailer';
 
 const port = Number(process.env.SMTP_PORT || 587);
 

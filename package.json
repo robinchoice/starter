@@ -1,5 +1,5 @@
 {
-  "name": "starter-web",
+  "name": "starter",
   "private": true,
   "type": "module",
   "workspaces": ["packages/*", "apps/*"],

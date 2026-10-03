@@ -1,10 +1,10 @@
-# starter-web
+# starter
 
 Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Login per Magic Link (Web) oder Code (App), Mail über SMTP, Rate-Limit, GlitchTip, Healthcheck, CI und Coolify-Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 
-1. Repo aus der Vorlage anlegen: `gh repo create robinchoice/<name> --template robinchoice/starter-web --private --clone`
+1. Repo aus der Vorlage anlegen: `gh repo create robinchoice/<name> --template robinchoice/starter --private --clone`
 2. `APP_NAME` in `packages/shared/src/index.ts` setzen.
 3. Lokal starten:
    ```sh

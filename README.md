@@ -62,7 +62,7 @@ Flutter mit Riverpod und go_router, Karte mit flutter_map und OSM, Token in `flu
 
 `.github/workflows/mobile.yml` prüft jede Änderung an der App mit `flutter analyze` und `flutter test`. Auf `main` lädt die CI iOS zu TestFlight hoch und baut für Android ein signiertes AAB als Artefakt.
 
-- **GitHub-Variablen:** `API_URL` (`https://<domain>`, ohne geht kein Release), `SENTRY_DSN` (eigenes GlitchTip-Projekt für die App), `ASC_KEY_ID` und `ASC_ISSUER_ID`.
+- **GitHub-Variablen:** `API_URL` (`https://<domain>`, ohne werden beide Release-Jobs übersprungen), `SENTRY_DSN` (eigenes GlitchTip-Projekt für die App), `ASC_KEY_ID` und `ASC_ISSUER_ID`.
 - **GitHub-Secrets:** `ASC_KEY_P8` (App-Store-Connect-API-Key, base64), `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
 - Ohne `ASC_KEY_ID` wird der iOS-Job übersprungen, ohne Keystore signiert Android mit Debug-Keys (nur zum Testen).
 - Die App vorher in App Store Connect mit der Bundle-ID anlegen. Team-ID steht in `ios/ExportOptions.plist` und im Xcode-Projekt.

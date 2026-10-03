@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://app:app@localhost:5432/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run test
+      - run: bun run build
+
+  # Coolify's auto-deploy stays off; only a green main gets deployed.
+  deploy:
+    needs: check
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+      COOLIFY_UUID: ${{ secrets.COOLIFY_UUID }}
+    steps:
+      - name: Deploy to Coolify
+        run: |
+          if [ -z "$COOLIFY_TOKEN" ]; then
+            echo "No COOLIFY_TOKEN secret yet, skipping deploy"
+            exit 0
+          fi
+          status=$(curl -s -o response.txt -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            "https://coolify.pleasance.org/api/v1/deploy?uuid=$COOLIFY_UUID")
+          echo "HTTP $status: $(cat response.txt)"
+          [ "$status" -lt 300 ]

@@ -41,3 +41,19 @@ export function sendMagicLinkEmail(email: string, token: string, next: string | 
     `,
   });
 }
+
+export function sendLoginCodeEmail(email: string, code: string) {
+  return sendMail({
+    to: email,
+    subject: `${code} ist dein Login-Code für ${APP_NAME}`,
+    text: `Dein Code: ${code}\n\nEr gilt 15 Minuten. Wenn du ihn nicht angefordert hast, ignorier diese Mail.`,
+    html: `
+      <div style="font-family: system-ui, sans-serif; max-width: 460px; margin: 0 auto; padding: 2rem; color: #1a1a1a;">
+        <h1 style="font-size: 1.4rem; margin: 0 0 1rem;">${APP_NAME}</h1>
+        <p style="margin: 0 0 1rem;">Gib diesen Code in der App ein:</p>
+        <p style="font-size: 2rem; font-weight: 700; letter-spacing: 0.3rem; margin: 0 0 1.5rem;">${code}</p>
+        <p style="color: #666; font-size: 0.85rem; margin: 0;">Der Code gilt 15 Minuten. Wenn du ihn nicht angefordert hast, ignorier diese Mail.</p>
+      </div>
+    `,
+  });
+}

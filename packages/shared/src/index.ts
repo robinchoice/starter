@@ -21,6 +21,13 @@ export const verifySchema = z.object({
   token: z.string().min(1).max(200),
 });
 
+export const loginCodeSchema = z.object({ email });
+
+export const verifyCodeSchema = z.object({
+  email,
+  code: z.string().trim().regex(/^\d{6}$/, 'Der Code hat 6 Ziffern.'),
+});
+
 export const updateMeSchema = z.object({
   name: z.string().trim().min(1).max(255),
 });

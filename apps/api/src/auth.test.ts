@@ -31,6 +31,13 @@ function lastMailedToken() {
   return mail?.match(/token=([0-9a-f]+)/)?.[1];
 }
 
+function lastMailedCode() {
+  const mail = log.mock.calls.map((args) => String(args[0])).findLast((line) => line.startsWith('[mail]'));
+  return mail?.match(/Dein Code: (\d{6})/)?.[1];
+}
+
+const otherCode = (code: string) => (code === '000000' ? '000001' : '000000');
+
 test('health checks the database', async () => {
   const res = await app.request('/api/health');
   expect(res.status).toBe(200);
@@ -90,4 +97,30 @@ test('invalid input answers with an error message', async () => {
   const res = await post('/auth/magic-link', { email: 'no-address' });
   expect(res.status).toBe(400);
   expect(typeof (await body(res)).error).toBe('string');
+});
+
+test('apps log in with a code and get a bearer token', async () => {
+  const email = freshEmail();
+  expect((await post('/auth/code', { email })).status).toBe(200);
+  const code = lastMailedCode()!;
+
+  expect((await post('/auth/code/verify', { email, code: otherCode(code) })).status).toBe(400);
+  const verify = await post('/auth/code/verify', { email, code });
+  expect(verify.status).toBe(200);
+  expect(verify.headers.get('set-cookie')).toBeNull();
+  const { user, token } = await body(verify);
+  expect(user.email).toBe(email);
+
+  const me = await app.request('/api/v1/auth/me', { headers: { authorization: `Bearer ${token}` } });
+  expect((await body(me)).user.id).toBe(user.id);
+
+  expect((await post('/auth/code/verify', { email, code })).status).toBe(400);
+});
+
+test('a code stops working after five wrong tries', async () => {
+  const email = freshEmail();
+  await post('/auth/code', { email });
+  const code = lastMailedCode()!;
+  for (let i = 0; i < 5; i++) await post('/auth/code/verify', { email, code: otherCode(code) });
+  expect((await post('/auth/code/verify', { email, code })).status).toBe(400);
 });

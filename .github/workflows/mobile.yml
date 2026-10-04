@@ -36,7 +36,8 @@ jobs:
 
   ios:
     needs: check
-    # Skipped until the variables API_URL, ASC_KEY_ID and ASC_ISSUER_ID and the secret ASC_KEY_P8 exist
+    # Skipped until the variables API_URL and ASC_KEY_ID exist. Also needs ASC_ISSUER_ID and the
+    # secrets ASC_KEY_P8, IOS_DEV_CERTIFICATE and IOS_DEV_CERTIFICATE_PASSWORD
     if: github.event_name != 'pull_request' && vars.API_URL != '' && vars.ASC_KEY_ID != ''
     runs-on: macos-15
     steps:
@@ -60,6 +61,26 @@ jobs:
           mkdir -p ~/.appstoreconnect/private_keys
           echo "${{ secrets.ASC_KEY_P8 }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ vars.ASC_KEY_ID }}.p8
           chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${{ vars.ASC_KEY_ID }}.p8
+
+      # Fixed development certificate for the archive. Without it Xcode creates a new one
+      # on every run until the team hits Apple's certificate limit. Profiles and export stay automatic.
+      - name: Signing-Zertifikat installieren
+        env:
+          IOS_DEV_CERTIFICATE: ${{ secrets.IOS_DEV_CERTIFICATE }}
+          IOS_DEV_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DEV_CERTIFICATE_PASSWORD }}
+        run: |
+          [ -n "$IOS_DEV_CERTIFICATE" ] || { echo "Secret IOS_DEV_CERTIFICATE fehlt"; exit 1; }
+          umask 077
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 32)
+          echo "::add-mask::$KEYCHAIN_PASSWORD"
+          printf '%s' "$IOS_DEV_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/signing.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$RUNNER_TEMP/signing.p12" -P "$IOS_DEV_CERTIFICATE_PASSWORD" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
 
       # Eindeutige, steigende Build-Nummer pro Lauf, TestFlight lehnt Duplikate ab.
       - name: Flutter-Build vorbereiten

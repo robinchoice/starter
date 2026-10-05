@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config.dart';
 import '../../core/api.dart';
 import '../../core/auth.dart';
+import '../../core/brand.dart';
 
 /// Email first, then the code from the mail. Once the code is accepted the
 /// router moves on by itself.
@@ -55,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      bottomNavigationBar: const PleasanceFooter(),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

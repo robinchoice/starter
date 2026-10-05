@@ -47,7 +47,10 @@
   }
   .brand {
     margin-right: auto;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 750;
+    font-stretch: 80%;
     text-decoration: none;
   }
   .user {

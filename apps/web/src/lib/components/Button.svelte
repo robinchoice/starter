@@ -49,8 +49,8 @@
     cursor: default;
   }
   .primary {
-    background: var(--accent);
-    color: var(--accent-text);
+    background: var(--gradient);
+    color: var(--text);
   }
   .secondary {
     background: var(--surface);

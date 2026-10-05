@@ -51,23 +51,23 @@ Kontrast: Alle glow-Töne erreichen auf `#0E0D12` mindestens 5,7:1, und `#17171A
 
 ## Produktfarbe
 
-Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält den Ton der eigenen Stufe und läuft in Richtung einer Nachbarstufe, er ist 0,3 bis 1,0 Stufen breit. Daraus ergibt sich ein Verlauf mit drei Stops: von, Mitte, bis. Auf dunklem Grund nimmt man die glow-Werte, auf hellem die deep-Werte.
+Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält den Ton der eigenen Stufe und läuft in Richtung einer Nachbarstufe, er ist 0,3 bis 1,0 Stufen breit. Daraus ergibt sich ein Verlauf mit drei Stops: von, Mitte, bis. Verlaufsflächen wie Buttons oder die Markierung im Absender nehmen immer die glow-Werte. Die deep-Werte sind für Text, Links und dünne Linien auf hellem Grund, die Mitte des Ausschnitts dient als Akzentfarbe.
 
 | Produkt | Stufe | Ausschnitt | glow (von · Mitte · bis) | deep (von · Mitte · bis) | Zeichen (vorläufig) |
 |---|---|---|---|---|---|
 | Fahrbar | 1 | 1,00–1,35 | `#F2545B` `#F45E57` `#F56853` | `#B3262D` `#B12C2A` `#AF3126` | Route mit Ziel |
 | Music Hub | 2 | 1,35–2,20 | `#F56853` `#F97F4A` `#F99747` | `#AF3126` `#AA3F1E` `#A14B16` | Welle |
 | Döner-App | 3 | 2,55–3,20 | `#F6A94A` `#F3BA4D` `#D7C45B` | `#965410` `#8B5D0A` `#726214` | Spieß |
-| MusicLink | 4 | 3,85–4,55 | `#80CD84` `#64CC9E` `#57C6BB` | `#2D683B` `#1B6A52` `#196A69` | zwei Ringe |
+| MusicLink | 4 | 3,85–4,55 | `#80CD84` `#64CC9E` `#57C6BB` | `#2D693B` `#1B6A52` `#196A69` | zwei Ringe |
 | DocPilot | 5 | 4,75–5,45 | `#50C3CC` `#4DBBE2` `#66ABEB` | `#176A77` `#19668B` `#265696` | Blatt |
-| Savor | 6 | 5,50–6,45 | `#6AA8EC` `#8C93F7` `#A696F5` | `#285498` `#3A3FA7` `#5039A4` | Ring mit Kern |
+| Savor | 6 | 5,50–6,45 | `#6AA9EC` `#8C93F7` `#A696F5` | `#285498` `#3A3FA7` `#5039A4` | Ring mit Kern |
 | Khala | 7 | 6,45–7,00 | `#A696F5` `#B499F4` `#C39BF2` | `#5039A4` `#5D36A2` `#6A33A0` | Sternbild |
 
 ### Neuer Prototyp
 
 1. Thema bestimmen, daraus folgt die Stufe.
 2. Freien Ausschnitt wählen. Liegt auf derselben Stufe schon ein Produkt, sollen sich die Ausschnitte nur teilweise überdecken.
-3. Stops berechnen und das Produkt in die Tabelle oben eintragen, hier im Starter.
+3. Ausschnitt in `APP_BAND` (`packages/shared/src/index.ts`) und `appBand` (`apps/mobile/lib/config.dart`) setzen. Die Farben rechnen `bandColor` und `bandGradient` daraus aus. Das Produkt in die Tabelle oben eintragen, hier im Starter.
 4. Zeichen nach den Regeln unten entwerfen und einfarbig in 20 px prüfen.
 
 ## Verlauf
@@ -91,7 +91,7 @@ Die Zeichen in der Tabelle sind Platzhalter. Ausgearbeitet werden sie in einem e
 
 ## Typografie
 
-Bricolage Grotesque, selbst gehostet (OFL, Dateien im pleasance-Repo unter `fonts/`). Produktname, Überschriften und große Zahlen schmal und fett: wdth 75–80 %, wght 750–800, eng gesetzt. Für Oberflächen und Fließtext ist die Schrift frei, also Geist, Inter oder die Systemschrift. In Flutter wird die Schrift als Asset eingebunden.
+Bricolage Grotesque, selbst gehostet (OFL): im Web unter `apps/web/static/fonts`, in der App unter `apps/mobile/assets/fonts`. Produktname, Überschriften und große Zahlen schmal und fett: wdth 75–80 %, wght 750–800, eng gesetzt. Für Oberflächen und Fließtext ist die Schrift frei, also Geist, Inter oder die Systemschrift.
 
 ## Neutrale
 
@@ -99,7 +99,7 @@ Hell: Paper `#F4F4F1`, Ink `#17171A` für Text und Linien, Muted `#5E5E66`. Dunk
 
 ## Absender
 
-Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ und dahinter die Pleasance-Wortmarke (`img/pleasance-logo-mask.svg` aus dem pleasance-Repo, per CSS-Mask in Textfarbe). Er verlinkt auf https://pleasance.org. Rechts daneben steht das Farbband als 3-px-Linie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist darauf als 9 px hohe Pille im Produktverlauf markiert.
+Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ und dahinter die Pleasance-Wortmarke in Textfarbe. Fertig gebaut ist das als `PleasanceFooter`, im Web in `$lib/components`, in der App in `lib/core/brand.dart`. Im Web verlinkt der Absender auf https://pleasance.org. Rechts daneben steht das Farbband als 3-px-Linie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist darauf als 9 px hohe Pille im Produktverlauf markiert.
 
 ## Pleasance als Dach
 

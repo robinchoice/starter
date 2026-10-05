@@ -5,7 +5,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 ## Neues Projekt
 
 1. Repo aus der Vorlage anlegen: `gh repo create robinchoice/<name> --template robinchoice/starter --private --clone`
-2. `APP_NAME` in `packages/shared/src/index.ts` setzen.
+2. `APP_NAME` und `APP_BAND` in `packages/shared/src/index.ts` setzen. Welcher Ausschnitt aus dem Farbband passt, steht in DESIGN.md.
 3. Lokal starten:
    ```sh
    cp .env.example .env
@@ -52,7 +52,7 @@ Flutter mit Riverpod und go_router, Karte mit flutter_map und OSM, Token in `flu
    grep -rl org.pleasance.starter lib android ios | xargs sed -i 's/org\.pleasance\.starter/org.pleasance.<name>/g'
    mv android/app/src/main/kotlin/org/pleasance/starter android/app/src/main/kotlin/org/pleasance/<name>
    ```
-   Anzeigename in `lib/config.dart` (`appName`), `android/app/src/main/AndroidManifest.xml` (`android:label`) und `ios/Runner/Info.plist` (`CFBundleDisplayName`).
+   Anzeigename in `lib/config.dart` (`appName`), `android/app/src/main/AndroidManifest.xml` (`android:label`) und `ios/Runner/Info.plist` (`CFBundleDisplayName`). Den Farbband-Ausschnitt wie im Web in `lib/config.dart` (`appBand`).
 2. Lokal starten, die API läuft dabei über `bun run dev`:
    ```sh
    cd apps/mobile

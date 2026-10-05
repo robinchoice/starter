@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth.dart';
+import '../../core/brand.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -38,6 +39,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = ref.watch(authProvider).value;
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
+      bottomNavigationBar: const PleasanceFooter(),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

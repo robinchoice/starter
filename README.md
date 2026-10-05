@@ -35,7 +35,7 @@ VPS 1 baut nichts. Die CI baut bei jedem grünen Push auf `main` die Images `ghc
 1. Ressource aus dem GitHub-Repo im Projekt `pleasance-<name>` oder `privat-<name>`, Build Pack „Docker Compose“, Datei `docker-compose.prod.yml`.
 2. Domain nur beim Service `web` eintragen, mit Port: `https://<domain>:3000`.
 3. Variablen aus `.env.production.example` setzen. `IMAGE_PREFIX` und `IMAGE_TAG` setzt die CI.
-4. In GitHub die Secrets `COOLIFY_TOKEN` (Coolify-API-Token mit den Rechten `read`, `write` und `deploy`) und `COOLIFY_UUID` (UUID der Ressource) setzen. Ohne `COOLIFY_TOKEN` überspringt die CI den Deploy. Mit Token setzt sie `IMAGE_PREFIX` und `IMAGE_TAG`, schaltet das Auto-Deploy der Ressource aus, ersetzt den Build durch `docker compose pull`, startet mit `up -d --no-build --remove-orphans` und wartet, bis Coolify den Deploy abgeschlossen hat.
+4. In GitHub die Secrets `COOLIFY_TOKEN` (eigener Coolify-API-Token `ci-<repo>` mit den Rechten `read`, `write` und `deploy`, nie den Laptop-Token aus `~/.secrets`) und `COOLIFY_UUID` (UUID der Ressource) setzen. Ohne `COOLIFY_TOKEN` überspringt die CI den Deploy. Mit Token setzt sie `IMAGE_PREFIX` und `IMAGE_TAG`, schaltet das Auto-Deploy der Ressource aus, ersetzt den Build durch `docker compose pull`, startet mit `up -d --no-build --remove-orphans` und wartet, bis Coolify den Deploy abgeschlossen hat.
 5. GlitchTip: Projekt anlegen, DSN in `SENTRY_DSN` und `PUBLIC_SENTRY_DSN`.
 6. Uptime Kuma: HTTP-Monitor auf `https://<domain>/api/health`.
 7. Neue Software in `vps1/advisory-alarm` aufnehmen, siehe `infra.md`.

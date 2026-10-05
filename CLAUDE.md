@@ -1,6 +1,6 @@
 # Konventionen
 
-Stack und Aufbau: siehe README.md.
+Stack und Aufbau: siehe README.md. Gestaltung: siehe DESIGN.md.
 
 - Neue Tabelle: `packages/db/src/schema.ts` ändern, `bun run db:generate`. Die Migration läuft beim nächsten API-Start.
 - Neue Route: Datei in `apps/api/src/routes`, in `app.ts` einhängen. `requireAuth` für eingeloggte Nutzer (danach `c.get('user')`), `validJson(schema)` mit dem Schema aus `packages/shared`.

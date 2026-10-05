@@ -30,10 +30,12 @@ Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `d
 
 ## Deploy auf Coolify
 
+VPS 1 baut nichts. Die CI baut bei jedem grünen Push auf `main` die Images `ghcr.io/<owner>/<repo>-web` und `-api` für arm64 (Tags `:<sha>` und `:latest`), Coolify zieht sie nur. Die GHCR-Packages bleiben privat. VPS 1 zieht sie mit dem vorhandenen Pull-Token `vps1-ghcr-pull`, pro Projekt ist dafür nichts einzurichten.
+
 1. Ressource aus dem GitHub-Repo im Projekt `pleasance-<name>` oder `privat-<name>`, Build Pack „Docker Compose“, Datei `docker-compose.prod.yml`.
 2. Domain nur beim Service `web` eintragen, mit Port: `https://<domain>:3000`.
-3. Variablen aus `.env.production.example` setzen.
-4. Auto-Deploy der Ressource ausschalten. In GitHub die Secrets `COOLIFY_TOKEN` (Coolify-API-Token mit Deploy-Recht) und `COOLIFY_UUID` (UUID der Ressource) setzen. Ab dann deployt die CI jeden grünen Push auf `main`.
+3. Variablen aus `.env.production.example` setzen. `IMAGE_PREFIX` und `IMAGE_TAG` setzt die CI.
+4. In GitHub die Secrets `COOLIFY_TOKEN` (Coolify-API-Token mit den Rechten `read`, `write` und `deploy`) und `COOLIFY_UUID` (UUID der Ressource) setzen. Ohne `COOLIFY_TOKEN` überspringt die CI den Deploy. Mit Token setzt sie `IMAGE_PREFIX` und `IMAGE_TAG`, schaltet das Auto-Deploy der Ressource aus, ersetzt den Build durch `docker compose pull`, startet mit `up -d --no-build --remove-orphans` und wartet, bis Coolify den Deploy abgeschlossen hat.
 5. GlitchTip: Projekt anlegen, DSN in `SENTRY_DSN` und `PUBLIC_SENTRY_DSN`.
 6. Uptime Kuma: HTTP-Monitor auf `https://<domain>/api/health`.
 7. Neue Software in `vps1/advisory-alarm` aufnehmen, siehe `infra.md`.

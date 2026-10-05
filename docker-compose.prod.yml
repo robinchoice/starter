@@ -1,10 +1,9 @@
 # Coolify resource (build pack "Docker Compose"). Only web gets a domain,
-# it forwards /api to the API internally.
+# it forwards /api to the API internally. The CI builds the images and sets
+# IMAGE_PREFIX and IMAGE_TAG on every deploy, Coolify only pulls them.
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-web:${IMAGE_TAG:?IMAGE_TAG is required}
     environment:
       - API_INTERNAL_URL=http://api:3000
       - ORIGIN=${APP_URL}
@@ -17,9 +16,7 @@ services:
     restart: unless-stopped
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-api:${IMAGE_TAG:?IMAGE_TAG is required}
     environment:
       - DATABASE_URL=postgresql://app:${POSTGRES_PASSWORD}@postgres:5432/app
       - APP_URL=${APP_URL}

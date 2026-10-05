@@ -2,6 +2,7 @@
   import { auth, updateName } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
+  import { t } from '$lib/i18n';
   import { toast } from '$lib/toast.svelte';
 
   let name = $state(auth.user?.name ?? '');
@@ -12,7 +13,7 @@
     saving = true;
     try {
       await updateName(name);
-      toast('Gespeichert');
+      toast(t().saved);
     } catch {
       // The API client already shows the error as a toast
     } finally {
@@ -21,12 +22,12 @@
   }
 </script>
 
-<h1>Hallo {auth.user?.name}</h1>
-<p>Hier beginnt der Prototyp.</p>
+<h1>{t().hello(auth.user?.name ?? '')}</h1>
+<p>{t().prototypeStarts}</p>
 
 <form onsubmit={save}>
-  <Input label="Anzeigename" bind:value={name} required />
-  <Button type="submit" loading={saving}>Speichern</Button>
+  <Input label={t().displayName} bind:value={name} required />
+  <Button type="submit" loading={saving}>{t().save}</Button>
 </form>
 
 <style>

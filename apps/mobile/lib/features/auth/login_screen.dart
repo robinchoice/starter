@@ -5,6 +5,7 @@ import '../../config.dart';
 import '../../core/api.dart';
 import '../../core/auth.dart';
 import '../../core/brand.dart';
+import '../../core/locale.dart';
 
 /// Email first, then the code from the mail. Once the code is accepted the
 /// router moves on by itself.
@@ -55,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = ref.watch(messagesProvider);
     return Scaffold(
       bottomNavigationBar: const PleasanceFooter(),
       body: SafeArea(
@@ -68,9 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(appName, style: theme.textTheme.headlineMedium, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Text(
-                  _codeSent
-                      ? 'Wir haben dir einen 6-stelligen Code geschickt.'
-                      : 'Kein Passwort nötig, wir schicken dir einen Code per Mail.',
+                  _codeSent ? t.codeSent : t.loginIntro,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                 ),
@@ -81,7 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                   autocorrect: false,
-                  decoration: const InputDecoration(labelText: 'E-Mail', prefixIcon: Icon(Icons.mail_outline)),
+                  decoration: InputDecoration(labelText: t.email, prefixIcon: const Icon(Icons.mail_outline)),
                   onSubmitted: (_) => _sendCode(),
                 ),
                 if (_codeSent) ...[
@@ -93,7 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     keyboardType: TextInputType.number,
                     autofillHints: const [AutofillHints.oneTimeCode],
                     maxLength: 6,
-                    decoration: const InputDecoration(labelText: 'Code', prefixIcon: Icon(Icons.pin_outlined)),
+                    decoration: InputDecoration(labelText: t.code, prefixIcon: const Icon(Icons.pin_outlined)),
                     onSubmitted: (_) => _verify(),
                   ),
                 ],
@@ -106,12 +106,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: _busy ? null : (_codeSent ? _verify : _sendCode),
                   child: _busy
                       ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text(_codeSent ? 'Anmelden' : 'Code schicken'),
+                      : Text(_codeSent ? t.logIn : t.sendCode),
                 ),
                 if (_codeSent)
                   TextButton(
                     onPressed: _busy ? null : () => setState(() => _codeSent = false),
-                    child: const Text('Andere E-Mail / neuen Code'),
+                    child: Text(t.otherEmail),
                   ),
               ],
             ),

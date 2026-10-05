@@ -1,6 +1,6 @@
 # starter
 
-Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Login per Magic Link (Web) oder Code (App), Mail über SMTP, Rate-Limit, Security-Header mit CSP, GlitchTip, Healthcheck, CI mit Browser-Test, Dependabot und Coolify-Deploy sind fertig eingebaut.
+Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Magic Link (Web) oder Code (App), Mail über SMTP, Rate-Limit, Security-Header mit CSP, GlitchTip, Healthcheck, CI mit Browser-Test, Dependabot und Coolify-Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 

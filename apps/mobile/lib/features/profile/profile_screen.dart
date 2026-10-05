@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth.dart';
 import '../../core/brand.dart';
+import '../../core/locale.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -26,7 +27,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _busy = true);
     try {
       await ref.read(authProvider.notifier).updateName(_name.text.trim());
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gespeichert')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ref.read(messagesProvider).saved)));
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
@@ -37,8 +38,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).value;
+    final t = ref.watch(messagesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(title: Text(t.profile)),
       bottomNavigationBar: const PleasanceFooter(),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -48,14 +50,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextField(
             controller: _name,
             maxLength: 255,
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration: InputDecoration(labelText: t.name),
             onSubmitted: (_) => _save(),
           ),
-          FilledButton(onPressed: _busy ? null : _save, child: const Text('Speichern')),
+          FilledButton(onPressed: _busy ? null : _save, child: Text(t.save)),
           const SizedBox(height: 32),
           OutlinedButton(
             onPressed: () => ref.read(authProvider.notifier).logout(),
-            child: const Text('Abmelden'),
+            child: Text(t.logOut),
           ),
         ],
       ),

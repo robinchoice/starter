@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../config.dart';
+import 'locale.dart';
 
 // Family colour band, see DESIGN.md. Same values as packages/shared/src/band.ts:
 // glow for gradient surfaces and dark backgrounds, deep for text on light ones.
@@ -91,13 +93,15 @@ ThemeData buildTheme() {
   );
 }
 
-/// Sender line at the bottom of a screen: made by Pleasance, and where this app
-/// sits on the family band.
-class PleasanceFooter extends StatelessWidget {
+/// Sender line at the bottom of a screen: made by Pleasance, where this app
+/// sits on the family band, and the language button.
+class PleasanceFooter extends ConsumerWidget {
   const PleasanceFooter({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(messagesProvider);
+    final small = Theme.of(context).textTheme.bodySmall?.copyWith(color: muted);
     return SafeArea(
       top: false,
       child: Container(
@@ -107,7 +111,7 @@ class PleasanceFooter extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text('ein Werkzeug von', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted)),
+            Text(t.madeBy, style: small),
             const SizedBox(width: 8),
             SvgPicture.asset(
               'assets/pleasance-wordmark.svg',
@@ -115,8 +119,20 @@ class PleasanceFooter extends StatelessWidget {
               colorFilter: const ColorFilter.mode(muted, BlendMode.srcIn),
               semanticsLabel: 'Pleasance',
             ),
-            const Spacer(),
-            const _BandLine(),
+            const SizedBox(width: 16),
+            const Expanded(child: Align(alignment: Alignment.centerRight, heightFactor: 1, child: _BandLine())),
+            const SizedBox(width: 12),
+            TextButton(
+              onPressed: () => ref.read(localeProvider.notifier).toggle(),
+              style: TextButton.styleFrom(
+                foregroundColor: muted,
+                textStyle: small,
+                minimumSize: Size.zero,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(t.otherLanguage),
+            ),
           ],
         ),
       ),
@@ -127,41 +143,42 @@ class PleasanceFooter extends StatelessWidget {
 class _BandLine extends StatelessWidget {
   const _BandLine();
 
-  static const _width = 120.0;
-
   @override
   Widget build(BuildContext context) {
+    // 120 wide, narrower when the footer runs out of room
     return SizedBox(
-      width: _width,
+      width: 120,
       height: 9,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 3,
-            height: 3,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                gradient: LinearGradient(colors: [for (final c in glow) Color.lerp(c, Colors.white, 0.6)!]),
+      child: LayoutBuilder(
+        builder: (context, constraints) => Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 3,
+              height: 3,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                  gradient: LinearGradient(colors: [for (final c in glow) Color.lerp(c, Colors.white, 0.6)!]),
+                ),
               ),
             ),
-          ),
-          Positioned(
-            left: _width * (appBand.from - 1) / 6,
-            top: 0,
-            width: math.max(9, _width * (appBand.to - appBand.from) / 6),
-            height: 9,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: bandGradient(glow),
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                boxShadow: const [BoxShadow(color: paper, spreadRadius: 2)],
+            Positioned(
+              left: constraints.maxWidth * (appBand.from - 1) / 6,
+              top: 0,
+              width: math.max(9, constraints.maxWidth * (appBand.to - appBand.from) / 6),
+              height: 9,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: bandGradient(glow),
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  boxShadow: const [BoxShadow(color: paper, spreadRadius: 2)],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

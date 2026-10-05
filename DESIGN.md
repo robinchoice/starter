@@ -99,7 +99,7 @@ Hell: Paper `#F4F4F1`, Ink `#17171A` für Text und Linien, Muted `#5E5E66`. Dunk
 
 ## Absender
 
-Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ und dahinter die Pleasance-Wortmarke in Textfarbe. Fertig gebaut ist das als `PleasanceFooter`, im Web in `$lib/components`, in der App in `lib/core/brand.dart`. Im Web verlinkt der Absender auf https://pleasance.org. Rechts daneben steht das Farbband als 3-px-Linie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist darauf als 9 px hohe Pille im Produktverlauf markiert.
+Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ (englisch „a tool by“) und dahinter die Pleasance-Wortmarke in Textfarbe. Fertig gebaut ist das als `PleasanceFooter`, im Web in `$lib/components`, in der App in `lib/core/brand.dart`. Im Web verlinkt der Absender auf https://pleasance.org. Rechts daneben steht das Farbband als 3-px-Linie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist darauf als 9 px hohe Pille im Produktverlauf markiert. Ganz rechts sitzt der Sprachumschalter, er nennt die andere Sprache: „English“ oder „Deutsch“.
 
 ## Pleasance als Dach
 

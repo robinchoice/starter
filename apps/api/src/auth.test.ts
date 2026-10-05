@@ -30,14 +30,16 @@ async function body(res: Response | Promise<Response>): Promise<any> {
 }
 
 // Without SMTP_HOST the login mail lands in the log
+function lastMail() {
+  return log.mock.calls.map((args) => String(args[0])).findLast((line) => line.startsWith('[mail]'));
+}
+
 function lastMailedToken() {
-  const mail = log.mock.calls.map((args) => String(args[0])).findLast((line) => line.startsWith('[mail]'));
-  return mail?.match(/token=([0-9a-f]+)/)?.[1];
+  return lastMail()?.match(/token=([0-9a-f]+)/)?.[1];
 }
 
 function lastMailedCode() {
-  const mail = log.mock.calls.map((args) => String(args[0])).findLast((line) => line.startsWith('[mail]'));
-  return mail?.match(/Dein Code: (\d{6})/)?.[1];
+  return lastMail()?.match(/Dein Code: (\d{6})/)?.[1];
 }
 
 const otherCode = (code: string) => (code === '000000' ? '000001' : '000000');
@@ -101,6 +103,19 @@ test('invalid input answers with an error message', async () => {
   const res = await post('/auth/magic-link', { email: 'no-address' });
   expect(res.status).toBe(400);
   expect(typeof (await body(res)).error).toBe('string');
+});
+
+test('errors and mails follow Accept-Language, German by default', async () => {
+  const english = { 'accept-language': 'fr-FR,fr;q=0.9,en;q=0.8' };
+  expect((await body(post('/auth/magic-link', { email: 'no-address' }, english))).error).toBe(
+    'The email address is invalid.',
+  );
+  expect((await body(post('/auth/magic-link', { email: 'no-address' }))).error).toBe(
+    'Die E-Mail-Adresse ist ungültig.',
+  );
+
+  await post('/auth/code', { email: freshEmail() }, english);
+  expect(lastMail()).toContain('is your login code');
 });
 
 test('apps log in with a code and get a bearer token', async () => {

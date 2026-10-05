@@ -4,6 +4,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app.dart';
 import 'core/auth.dart';
+import 'core/locale.dart';
 
 Future<void> main() async {
   // Empty DSN = GlitchTip off
@@ -22,8 +23,10 @@ Future<void> main() async {
 Future<void> startApp() async {
   WidgetsFlutterBinding.ensureInitialized();
   // The saved session is read before the first frame, so the router never
-  // shows the login screen to someone who is logged in.
+  // shows the login screen to someone who is logged in. The language too, so
+  // no text flips after the start.
   final container = ProviderContainer();
   await container.read(authProvider.future);
+  await container.read(localeProvider.future);
   runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

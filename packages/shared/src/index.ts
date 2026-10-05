@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { Band } from './band';
 
 export * from './band';
+export * from './messages';
 
 // The one place to rename a new project. API mails and web titles read it.
 export const APP_NAME = 'Starter';
@@ -16,7 +17,8 @@ export type User = {
   name: string;
 };
 
-const email = z.string().trim().toLowerCase().pipe(z.email());
+// Custom error messages are keys of messages.ts, the API translates them.
+const email = z.string().trim().toLowerCase().pipe(z.email('invalidEmail'));
 
 export const magicLinkSchema = z.object({
   email,
@@ -35,7 +37,7 @@ export const verifyCodeSchema = z.object({
   code: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, 'Der Code hat 6 Ziffern.'),
+    .regex(/^\d{6}$/, 'codeDigits'),
 });
 
 export const updateMeSchema = z.object({

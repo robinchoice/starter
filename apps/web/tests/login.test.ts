@@ -30,6 +30,18 @@ test('the login form sends a magic link', async ({ page }) => {
   await expect(page.getByText('Check deine E-Mails')).toBeVisible();
 });
 
+test('the language button switches to English and keeps it', async ({ page }) => {
+  await openHydrated(page, '/login');
+  await page.getByRole('button', { name: 'English' }).click();
+  await expect(page.getByRole('heading', { name: 'Log in' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+
+  await Promise.all([page.waitForResponse('**/api/v1/auth/me'), page.reload()]);
+  await expect(page.getByRole('heading', { name: 'Log in' })).toBeVisible();
+  await page.getByRole('button', { name: 'Deutsch' }).click();
+  await expect(page.getByRole('heading', { name: 'Einloggen' })).toBeVisible();
+});
+
 test('a magic link opens the dashboard until logout', async ({ page }) => {
   // Stored like the API does it: only the hash of the token
   const email = freshEmail();

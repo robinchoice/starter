@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../config.dart';
+import 'messages.dart';
 
 final httpClientProvider = Provider((ref) => http.Client());
 final apiProvider = Provider((ref) => Api(ref.watch(httpClientProvider), '$apiUrl/api/v1'));
@@ -21,10 +22,11 @@ class ApiException implements Exception {
 
 /// No response from the server (offline, timeout, DNS), safe to retry later.
 class OfflineException implements Exception {
-  const OfflineException();
+  final String message;
+  const OfflineException(this.message);
 
   @override
-  String toString() => 'Keine Verbindung zum Server';
+  String toString() => message;
 }
 
 /// JSON client for the Hono API. Native clients have no cookie jar and send
@@ -33,6 +35,9 @@ class Api {
   final http.Client _client;
   final String _baseUrl;
   String? token;
+
+  /// Language of error texts and mails, set by localeProvider.
+  AppLocale locale = AppLocale.de;
 
   /// Called when the server rejects our session token.
   void Function()? onUnauthorized;
@@ -48,6 +53,7 @@ class Api {
     final auth = token;
     final request = http.Request(method, Uri.parse('$_baseUrl$path'))
       ..headers['accept'] = 'application/json'
+      ..headers['accept-language'] = locale.name
       ..headers['content-type'] = 'application/json';
     if (auth != null) request.headers['authorization'] = 'Bearer $auth';
     if (body != null) request.body = jsonEncode(body);
@@ -57,7 +63,7 @@ class Api {
       response = await http.Response.fromStream(await _client.send(request).timeout(const Duration(seconds: 20)));
     } catch (e) {
       debugPrint('API $method $path failed: $e');
-      throw const OfflineException();
+      throw OfflineException(locale.messages.offline);
     }
 
     final text = utf8.decode(response.bodyBytes);
@@ -67,7 +73,7 @@ class Api {
       try {
         message = (jsonDecode(text) as Map<String, dynamic>)['error'] as String;
       } catch (_) {
-        message = 'Serverfehler (${response.statusCode})';
+        message = locale.messages.serverError(response.statusCode);
       }
       throw ApiException(response.statusCode, message);
     }

@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../config.dart';
+import '../../core/locale.dart';
 
 /// Freiburg, until the user shares their location.
 const _fallbackCenter = LatLng(47.999, 7.842);
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _map = MapController();
   LatLng? _position;
 
@@ -24,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      if (mounted) _showMessage('Standort nicht freigegeben');
+      if (mounted) _showMessage(ref.read(messagesProvider).locationDenied);
       return;
     }
     try {
@@ -36,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _map.move(_position!, 15);
     } catch (e) {
       // Location services off or timeout
-      if (mounted) _showMessage('Standort nicht verfügbar');
+      if (mounted) _showMessage(ref.read(messagesProvider).locationUnavailable);
     }
   }
 
@@ -62,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _locate,
-        tooltip: 'Mein Standort',
+        tooltip: ref.watch(messagesProvider).myLocation,
         child: const Icon(Icons.my_location),
       ),
     );

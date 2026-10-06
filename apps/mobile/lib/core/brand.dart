@@ -93,8 +93,9 @@ ThemeData buildTheme() {
   );
 }
 
-/// Sender line at the bottom of a screen: made by Pleasance, where this app
-/// sits on the family band, and the language button.
+/// Sender line at the bottom of a screen: made by Pleasance, signed with the
+/// wordmark over the family band that marks where this app sits, and the
+/// language button.
 class PleasanceFooter extends ConsumerWidget {
   const PleasanceFooter({super.key});
 
@@ -111,17 +112,39 @@ class PleasanceFooter extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Text(t.madeBy, style: small),
-            const SizedBox(width: 8),
-            SvgPicture.asset(
-              'assets/pleasance-wordmark.svg',
-              height: 13,
-              colorFilter: const ColorFilter.mode(muted, BlendMode.srcIn),
-              semanticsLabel: 'Pleasance',
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.madeBy,
+                  style: const TextStyle(
+                    color: muted,
+                    fontFamily: displayFont,
+                    fontSize: 14,
+                    height: 1,
+                    fontWeight: FontWeight.w600,
+                    fontVariations: [FontVariation('wdth', 80), FontVariation('wght', 650)],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/pleasance-wordmark.svg',
+                      width: _signatureWidth,
+                      height: 11,
+                      colorFilter: const ColorFilter.mode(muted, BlendMode.srcIn),
+                      semanticsLabel: 'Pleasance',
+                    ),
+                    const SizedBox(height: 4),
+                    const _BandLine(),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            const Expanded(child: Align(alignment: Alignment.centerRight, heightFactor: 1, child: _BandLine())),
-            const SizedBox(width: 12),
+            const Spacer(),
             TextButton(
               onPressed: () => ref.read(localeProvider.notifier).toggle(),
               style: TextButton.styleFrom(
@@ -140,45 +163,44 @@ class PleasanceFooter extends ConsumerWidget {
   }
 }
 
+// Width of the wordmark at 11 high, the band below spans exactly that.
+const _signatureWidth = 99.0;
+
 class _BandLine extends StatelessWidget {
   const _BandLine();
 
   @override
   Widget build(BuildContext context) {
-    // 120 wide, narrower when the footer runs out of room
     return SizedBox(
-      width: 120,
-      height: 9,
-      child: LayoutBuilder(
-        builder: (context, constraints) => Stack(
-          children: [
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 3,
-              height: 3,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                  gradient: LinearGradient(colors: [for (final c in glow) Color.lerp(c, Colors.white, 0.6)!]),
-                ),
+      width: _signatureWidth,
+      height: 4,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 1,
+            height: 2,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(1)),
+                gradient: LinearGradient(colors: [for (final c in glow) Color.lerp(c, Colors.white, 0.6)!]),
               ),
             ),
-            Positioned(
-              left: constraints.maxWidth * (appBand.from - 1) / 6,
-              top: 0,
-              width: math.max(9, constraints.maxWidth * (appBand.to - appBand.from) / 6),
-              height: 9,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: bandGradient(glow),
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
-                  boxShadow: const [BoxShadow(color: paper, spreadRadius: 2)],
-                ),
+          ),
+          Positioned(
+            left: _signatureWidth * (appBand.from - 1) / 6,
+            top: 0,
+            width: math.max(6, _signatureWidth * (appBand.to - appBand.from) / 6),
+            height: 4,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: bandGradient(glow),
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

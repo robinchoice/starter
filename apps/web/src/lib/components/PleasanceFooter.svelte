@@ -7,12 +7,17 @@
 </script>
 
 <footer>
-  <a href="https://pleasance.org">{t().madeBy} <span class="wordmark" role="img" aria-label="Pleasance"></span></a>
-  <span class="band" aria-hidden="true"><span
-      class="marker"
-      style:left="{((APP_BAND.from - 1) / 6) * 100}%"
-      style:width="{((APP_BAND.to - APP_BAND.from) / 6) * 100}%"
-    ></span></span>
+  <a href="https://pleasance.org">
+    <span class="by">{t().madeBy}</span>
+    <span class="signature">
+      <span class="wordmark" role="img" aria-label="Pleasance"></span>
+      <span class="band" aria-hidden="true"><span
+          class="marker"
+          style:left="{((APP_BAND.from - 1) / 6) * 100}%"
+          style:width="{((APP_BAND.to - APP_BAND.from) / 6) * 100}%"
+        ></span></span>
+    </span>
+  </a>
   <button type="button" lang={other} onclick={() => setLocale(other)}>{t().otherLanguage}</button>
 </footer>
 
@@ -21,31 +26,51 @@
     display: flex;
     gap: 1rem;
     align-items: center;
-    padding: 1rem 1.5rem;
+    justify-content: space-between;
+    padding: 1.125rem 1.5rem;
     border-top: 1px solid var(--border);
     color: var(--muted);
     font-size: 0.8125rem;
   }
   a {
     display: inline-flex;
-    flex-shrink: 0;
     gap: 0.5rem;
-    align-items: center;
+    align-items: baseline;
     text-decoration: none;
   }
+  .by {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 650;
+    font-stretch: 80%;
+    transform: translateY(2px);
+  }
+  .signature {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 5px;
+    transform: translateY(4px);
+  }
   .wordmark {
-    width: 76px;
-    height: 14px;
+    width: 99px;
+    height: 11px;
     background: currentColor;
     mask: url('/pleasance-wordmark.svg') left center / contain no-repeat;
   }
   .band {
     position: relative;
-    width: 8.5rem;
-    height: 3px;
-    margin-left: auto;
-    border-radius: 2px;
+    width: 99px;
+    height: 2px;
+    border-radius: 1px;
     background: linear-gradient(rgb(255 255 255 / 0.6), rgb(255 255 255 / 0.6)), var(--spectrum);
+  }
+  .marker {
+    position: absolute;
+    top: -1px;
+    min-width: 6px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--gradient);
   }
   button {
     padding: 0.25rem 0;
@@ -56,14 +81,5 @@
     text-decoration: underline;
     text-underline-offset: 0.2em;
     cursor: pointer;
-  }
-  .marker {
-    position: absolute;
-    top: -3px;
-    min-width: 9px;
-    height: 9px;
-    border-radius: 5px;
-    background: var(--gradient);
-    box-shadow: 0 0 0 2px var(--bg);
   }
 </style>

@@ -62,6 +62,7 @@ Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält
 | MusicLink | 4 | 3,85–4,55 | `#80CD84` `#64CC9E` `#57C6BB` | `#2D693B` `#1B6A52` `#196A69` | zwei Ringe |
 | DocPilot | 5 | 4,75–5,45 | `#50C3CC` `#4DBBE2` `#66ABEB` | `#176A77` `#19668B` `#265696` | Blatt |
 | Savor | 6 | 5,50–6,45 | `#6AA9EC` `#8C93F7` `#A696F5` | `#285498` `#3A3FA7` `#5039A4` | Ring mit Kern |
+| Lighthouse | 6 | 6,00–6,60 | `#8E92F8` `#9E95F6` `#AE97F4` | `#3B3EA8` `#493BA6` `#5737A3` | Leuchtturm |
 | Khala | 7 | 6,45–7,00 | `#A696F5` `#B499F4` `#C39BF2` | `#5039A4` `#5D36A2` `#6A33A0` | Sternbild |
 
 ### Neuer Prototyp

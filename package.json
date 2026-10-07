@@ -12,7 +12,8 @@
     "test": "bun run --filter '*' test",
     "build": "bun run --filter '*' build",
     "db:generate": "bun run --filter @app/db db:generate",
-    "format": "biome check --write"
+    "format": "biome check --write",
+    "standards": "bun --port 4300 standards/index.html"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

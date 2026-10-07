@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Standards der Prototyp-Fabrik</title>
+    <link rel="icon" href="../apps/web/static/favicon.svg" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="in">
+        <div class="eyebrow">Prototyp-Fabrik · intern</div>
+        <h1 class="display">Standards</h1>
+        <p class="lead">
+          Jedes Werkzeug hat ein eigenes Zeichen und einen Ausschnitt aus dem Farbband. Darunter liegen derselbe Stack,
+          dieselben Namen und dieselben Regeln. Quellen: DESIGN.md, README.md, AGENTS.md und die globalen Rules.
+        </p>
+        <div>
+          <div class="strip"></div>
+          <div class="stages" id="stages"></div>
+          <div class="lanes" id="lanes"></div>
+        </div>
+        <div class="wall" id="wall"></div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav id="nav">
+        <a href="#namen" class="on">Namen</a>
+        <a href="#farbe">Farbe</a>
+        <a href="#ablauf">Ablauf</a>
+        <a href="#stack">Stack</a>
+        <a href="#regeln">Regeln</a>
+      </nav>
+      <main>
+        <section id="namen">
+          <div class="eyebrow">1 · Ein Slug für alles</div>
+          <h2 class="display">Namensrechner</h2>
+          <p class="sub">
+            Slug eintippen, alles andere folgt daraus. ASCII-Kleinbuchstaben und Ziffern, beginnt mit einem Buchstaben,
+            ein Wort ohne Bindestrich. Anzeigenamen dürfen abweichen.
+          </p>
+          <div class="panel">
+            <div class="slugrow">
+              <label class="slugin"
+                ><span>robinchoice/</span><input id="slug" value="taktgeber" spellcheck="false" autocomplete="off"
+              /></label>
+              <div class="seg" id="area">
+                <button type="button" data-a="pleasance" aria-pressed="true">pleasance</button>
+                <button type="button" data-a="privat">privat</button>
+              </div>
+            </div>
+            <div class="valid" id="valid"></div>
+            <div class="ngroups" id="names"></div>
+          </div>
+        </section>
+
+        <section id="farbe">
+          <div class="eyebrow">2 · Zeichen und Ausschnitt</div>
+          <h2 class="display">Farbband-Werkbank</h2>
+          <p class="sub">
+            Ausschnitt wählen oder ein Produkt anklicken. Die Vorschau zeigt den Verlauf dort, wo gehandelt wird. Der
+            Ausschnitt enthält den Ton der eigenen Stufe und ist 0,3 bis 1,0 Stufen breit.
+          </p>
+          <div class="panel">
+            <div class="bandbar"><div class="sel" id="sel"></div></div>
+            <div class="ticks" id="ticks"></div>
+            <div class="blanes" id="blanes"></div>
+            <div class="sliders">
+              <label>von <input type="range" id="from" min="1" max="7" step="0.05" value="2.2" /></label>
+              <label>bis <input type="range" id="to" min="1" max="7" step="0.05" value="2.55" /></label>
+            </div>
+            <div class="bwork">
+              <div class="stack">
+                <div class="prev dark" id="pdark"></div>
+                <div class="prev light" id="plight"></div>
+              </div>
+              <div class="stack">
+                <div class="facts" id="facts"></div>
+                <div class="snip" id="snip"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="ablauf">
+          <div class="eyebrow">3 · Von der Idee bis es läuft</div>
+          <h2 class="display">Ablauf</h2>
+          <p class="sub">Schwarz hinterlegt: Hier wartet der Agent auf Robin. Alles andere läuft durch.</p>
+          <div class="flow" id="flow"></div>
+        </section>
+
+        <section id="stack">
+          <div class="eyebrow">4 · Was darunter liegt</div>
+          <h2 class="display">Stack</h2>
+          <p class="sub">
+            Abweichen nur nach Rückfrage. Bestehende Apps werden nicht nur wegen des Standards umgebaut.
+          </p>
+          <div id="layers"></div>
+          <div class="builtin" id="builtin"></div>
+        </section>
+
+        <section id="regeln">
+          <div class="eyebrow">5 · So und nicht so</div>
+          <h2 class="display">Regeln</h2>
+          <div class="seg" id="rtabs"></div>
+          <div class="rgrid" id="rules"></div>
+        </section>
+      </main>
+    </div>
+
+    <footer>
+      <span class="by">ein Werkzeug von</span>
+      <span class="sig"><img src="../apps/web/static/pleasance-wordmark.svg" alt="Pleasance" /><span></span></span>
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

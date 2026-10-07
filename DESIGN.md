@@ -25,7 +25,7 @@ typography:
 
 ## Überblick
 
-Zum Durchklicken mit Namensrechner und Farbband-Werkbank: `standards.html` im Browser öffnen.
+Zum Durchklicken mit Namensrechner und Farbband-Werkbank: `bun run standards`, dann http://localhost:4300. Die Seite liest Stufen und Produkte aus den Tabellen hier.
 
 Jeder Prototyp ist ein Werkzeug von Pleasance. Man erkennt die Familie an vier Dingen, die überall gleich sind: der dunklen Kachel mit dem Zeichen, der Display-Schrift, dem Farbverlauf und dem Absender. Unterscheiden lassen sich die Produkte über ihr **Zeichen**, das ist die Identität und davon gibt es beliebig viele, und über ihren **Ausschnitt aus dem Farbband**, der die Nachbarschaft zeigt. Benachbarte Produkte dürfen ähnliche Farben haben, denn das Zeichen trennt sie.
 
@@ -72,7 +72,7 @@ Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält
 
 1. Thema bestimmen, daraus folgt die Stufe.
 2. Freien Ausschnitt wählen. Liegt auf derselben Stufe schon ein Produkt, sollen sich die Ausschnitte nur teilweise überdecken.
-3. Ausschnitt in `APP_BAND` (`packages/shared/src/index.ts`) und `appBand` (`apps/mobile/lib/config.dart`) setzen. Die Farben rechnen `bandColor` und `bandGradient` daraus aus. Das Produkt in die Tabelle oben und in `PRODUCTS` in `standards.html` eintragen, hier im Starter.
+3. Ausschnitt in `APP_BAND` (`packages/shared/src/index.ts`) und `appBand` (`apps/mobile/lib/config.dart`) setzen. Die Farben rechnen `bandColor` und `bandGradient` daraus aus. Das Produkt in die Tabelle oben eintragen, hier im Starter.
 4. Zeichen nach den Regeln unten entwerfen und einfarbig in 20 px prüfen.
 
 ## Verlauf

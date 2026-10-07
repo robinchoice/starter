@@ -74,6 +74,7 @@ Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält
 2. Freien Ausschnitt wählen. Liegt auf derselben Stufe schon ein Produkt, sollen sich die Ausschnitte nur teilweise überdecken.
 3. Ausschnitt in `APP_BAND` (`packages/shared/src/index.ts`) und `appBand` (`apps/mobile/lib/config.dart`) setzen. Die Farben rechnen `bandColor` und `bandGradient` daraus aus. Das Produkt in die Tabelle oben eintragen, hier im Starter.
 4. Zeichen nach den Regeln unten entwerfen und einfarbig in 20 px prüfen.
+5. Sobald das Produkt öffentlich ist: Kachel als SVG nach `img/werkzeuge/<slug>.svg` im pleasance-Repo legen und das Produkt in die Werkzeug-Wand auf `werkstatt.html` und in die Reihe auf `software.html` aufnehmen, in der Reihenfolge des Farbbands.
 
 ## Verlauf
 

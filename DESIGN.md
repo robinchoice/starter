@@ -25,7 +25,7 @@ typography:
 
 ## Überblick
 
-Zum Durchklicken mit Namensrechner und Farbband-Werkbank: `bun run standards`, dann http://localhost:4300. Die Seite liest Stufen und Produkte aus den Tabellen hier.
+Zum Durchklicken mit Namensrechner und Farbband-Werkbank: https://standards.pleasance.org im Tailnet oder lokal `bun run standards`, dann http://localhost:4300. Die Seite liest Stufen und Produkte aus den Tabellen hier.
 
 Jeder Prototyp ist ein Werkzeug von Pleasance. Man erkennt die Familie an vier Dingen, die überall gleich sind: der dunklen Kachel mit dem Zeichen, der Display-Schrift, dem Farbverlauf und dem Absender. Unterscheiden lassen sich die Produkte über ihr **Zeichen**, das ist die Identität und davon gibt es beliebig viele, und über ihren **Ausschnitt aus dem Farbband**, der die Nachbarschaft zeigt. Benachbarte Produkte dürfen ähnliche Farben haben, denn das Zeichen trennt sie.
 

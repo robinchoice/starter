@@ -15,6 +15,7 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 - Ein Push auf `main` baut nach grüner CI die Images und deployt sie über die Coolify-API. Ohne das Secret `COOLIFY_TOKEN` überspringt die CI den Deploy, so auch hier in der Vorlage.
 - Prüfen: `gh run watch`, dann `curl -s https://<slug>.pleasance.org/api/health`.
+- Nur hier in der Vorlage: `.github/workflows/standards.yml` baut `standards/` als Image `starter-site` und deployt es über das Tailnet nach https://standards.pleasance.org (Coolify VPS 3, nur aus dem Tailnet). Aus der Vorlage erzeugte Repos überspringen den Workflow und können ihn mit `standards/` löschen.
 
 ## Fallen
 

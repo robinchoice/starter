@@ -62,6 +62,7 @@ Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält
 | Döner-App | 3 | 2,55–3,20 | `#F6A94A` `#F3BA4D` `#D7C45B` | `#965410` `#8B5D0A` `#726214` | Spieß |
 | Fieldtest | 3 | 3,20–3,85 | `#D7C45B` `#ACC870` `#80CD84` | `#726214` `#4F6527` `#2D693B` | Blitz im Rahmen |
 | MusicLink | 4 | 3,85–4,55 | `#80CD84` `#64CC9E` `#57C6BB` | `#2D693B` `#1B6A52` `#196A69` | zwei Ringe |
+| Chronik | 4 | 4,45–5,00 | `#5BC8B3` `#50C3C9` `#46BFE0` | `#196A63` `#176A75` `#156A88` | Zeitachse mit drei Zweigen |
 | DocPilot | 5 | 4,75–5,45 | `#50C3CC` `#4DBBE2` `#66ABEB` | `#176A77` `#19668B` `#265696` | Blatt |
 | Savor | 6 | 5,50–6,45 | `#6AA9EC` `#8C93F7` `#A696F5` | `#285498` `#3A3FA7` `#5039A4` | Ring mit Kern |
 | Lighthouse | 6 | 6,00–6,60 | `#8E92F8` `#9E95F6` `#AE97F4` | `#3B3EA8` `#493BA6` `#5737A3` | Leuchtturm |

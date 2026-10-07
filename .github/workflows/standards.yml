@@ -1,0 +1,93 @@
+name: Standards
+
+# Publishes standards/ as standards.pleasance.org on VPS 3, reachable only in the tailnet.
+# Projects made from the template skip it.
+on:
+  push:
+    branches: [main]
+    paths:
+      - DESIGN.md
+      - standards/**
+      - packages/shared/src/band.ts
+      - apps/web/static/**
+      - .github/workflows/standards.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standards
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    if: github.repository == 'robinchoice/starter'
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: standards/Dockerfile
+          push: true
+          platforms: linux/arm64
+          provenance: false
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          tags: |
+            ghcr.io/robinchoice/starter-site:latest
+            ghcr.io/robinchoice/starter-site:${{ github.sha }}
+
+  # Coolify on VPS 3 answers only in the tailnet. The job joins it as a
+  # short-lived tag:ci node, which the ACL lets reach only vps3:8000.
+  deploy:
+    needs: build-and-push
+    if: vars.COOLIFY_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_SITE_TOKEN }}
+      COOLIFY_UUID: ${{ secrets.COOLIFY_SITE_UUID }}
+      COOLIFY_API: ${{ vars.COOLIFY_URL }}/api/v1
+    steps:
+      - uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+          args: --login-server=${{ vars.TS_LOGIN_SERVER }}
+      - name: Deploy the new image
+        run: |
+          set -euo pipefail
+          jq -n --arg sha "$GITHUB_SHA" '{docker_registry_image_tag: $sha}' |
+            curl --fail-with-body --silent --show-error --output /dev/null \
+              -X PATCH -H "Authorization: Bearer $COOLIFY_TOKEN" \
+              -H 'Content-Type: application/json' --data-binary @- \
+              "$COOLIFY_API/applications/$COOLIFY_UUID"
+
+          deployment=$(curl --fail-with-body --silent --show-error -X POST \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_API/deploy?uuid=$COOLIFY_UUID&force=true" |
+            jq -er '.deployments[0].deployment_uuid')
+
+          for _ in {1..60}; do
+            status=$(curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $COOLIFY_TOKEN" \
+              "$COOLIFY_API/deployments/$deployment" | jq -er '.status')
+            echo "Deployment $deployment: $status"
+            case "$status" in
+              finished) exit 0 ;;
+              failed|cancelled-by-user) exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo 'Deployment timed out.' >&2
+          exit 1

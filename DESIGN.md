@@ -63,6 +63,7 @@ Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält
 | DocPilot | 5 | 4,75–5,45 | `#50C3CC` `#4DBBE2` `#66ABEB` | `#176A77` `#19668B` `#265696` | Blatt |
 | Savor | 6 | 5,50–6,45 | `#6AA9EC` `#8C93F7` `#A696F5` | `#285498` `#3A3FA7` `#5039A4` | Ring mit Kern |
 | Lighthouse | 6 | 6,00–6,60 | `#8E92F8` `#9E95F6` `#AE97F4` | `#3B3EA8` `#493BA6` `#5737A3` | Leuchtturm |
+| Agents | 6 | 6,35–6,85 | `#A195F6` `#AE97F4` `#BB9AF3` | `#4B3AA5` `#5737A3` `#6335A1` | Dreieck aus drei Knoten |
 | Khala | 7 | 6,45–7,00 | `#A696F5` `#B499F4` `#C39BF2` | `#5039A4` `#5D36A2` `#6A33A0` | Sternbild |
 
 ### Neuer Prototyp

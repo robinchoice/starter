@@ -42,6 +42,9 @@ class Api {
   /// Called when the server rejects our session token.
   void Function()? onUnauthorized;
 
+  /// The last failed calls, newest first. Feedback sends them along.
+  final recentErrors = <String>[];
+
   Api(this._client, this._baseUrl);
 
   Future<dynamic> get(String path) => send('GET', path);
@@ -63,11 +66,13 @@ class Api {
       response = await http.Response.fromStream(await _client.send(request).timeout(const Duration(seconds: 20)));
     } catch (e) {
       debugPrint('API $method $path failed: $e');
+      _noteError(method, path, 'offline');
       throw OfflineException(locale.messages.offline);
     }
 
     final text = utf8.decode(response.bodyBytes);
     if (response.statusCode >= 400) {
+      _noteError(method, path, response.statusCode);
       if (response.statusCode == 401 && auth != null) onUnauthorized?.call();
       String message;
       try {
@@ -78,5 +83,10 @@ class Api {
       throw ApiException(response.statusCode, message);
     }
     return text.isEmpty ? null : jsonDecode(text);
+  }
+
+  void _noteError(String method, String path, Object status) {
+    recentErrors.insert(0, '$method /api/v1$path → $status');
+    if (recentErrors.length > 5) recentErrors.removeLast();
   }
 }

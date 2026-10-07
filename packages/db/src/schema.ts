@@ -1,4 +1,7 @@
-import { integer, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import type { FeedbackContext } from '@app/shared';
+import { customType, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+
+const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' });
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -44,4 +47,17 @@ export const rateLimits = pgTable('rate_limits', {
   key: varchar('key', { length: 300 }).primaryKey(),
   count: integer('count').notNull(),
   resetAt: timestamp('reset_at').notNull(),
+});
+
+// Bug reports and ideas from the feedback button, also mailed and filed as
+// GitHub issues. The random id is the key of the screenshot URL.
+export const feedback = pgTable('feedback', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  kind: varchar('kind', { length: 10 }).notNull(),
+  message: text('message').notNull(),
+  screenshot: bytea('screenshot'),
+  context: jsonb('context').$type<FeedbackContext & { api: string }>().notNull(),
+  issueUrl: varchar('issue_url', { length: 300 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });

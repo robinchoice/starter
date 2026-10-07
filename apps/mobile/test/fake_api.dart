@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:starter/core/api.dart';
 
-/// Stands in for the auth routes of the Hono API. The code is always 123456.
+/// Stands in for the auth and feedback routes of the Hono API. The code is
+/// always 123456.
 class FakeApi {
   final requests = <http.Request>[];
   bool online = true;
@@ -30,6 +31,9 @@ class FakeApi {
         if (!loggedIn) return _json({'error': 'Nicht angemeldet'}, 401);
         user = {...user, 'name': jsonDecode(request.body)['name'] as String};
         return _json({'user': user});
+      case ('POST', '/api/v1/feedback'):
+        if (!loggedIn) return _json({'error': 'Nicht angemeldet'}, 401);
+        return _json({'ok': true});
       case ('POST', '/api/v1/auth/logout'):
         validToken = null;
         return _json({'ok': true});

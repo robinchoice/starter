@@ -68,6 +68,10 @@ jobs:
           push: true
           platforms: linux/arm64
           provenance: false
+          # Feedback reports the commit and files issues in this repo
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+            GITHUB_REPOSITORY=${{ github.repository }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}

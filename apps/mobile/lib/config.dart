@@ -11,6 +11,9 @@ const appBand = (from: 1.0, to: 7.0);
 // from CI, debug builds talk to the local API from `bun run dev`.
 const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:3000');
 
+// Commit of the build, set by CI. Feedback sends it along.
+const appVersion = String.fromEnvironment('APP_VERSION', defaultValue: 'dev');
+
 // OSM tiles are fine for prototypes. Heavier use needs a tile server of our own.
 const mapTileUrl = String.fromEnvironment(
   'MAP_TILE_URL',

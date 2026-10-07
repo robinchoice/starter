@@ -25,6 +25,8 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - EMAIL_FROM=${EMAIL_FROM:-}
+      - FEEDBACK_EMAIL=${FEEDBACK_EMAIL:-}
+      - FEEDBACK_GITHUB_TOKEN=${FEEDBACK_GITHUB_TOKEN:-}
       - SENTRY_DSN=${SENTRY_DSN:-}
     depends_on:
       postgres:

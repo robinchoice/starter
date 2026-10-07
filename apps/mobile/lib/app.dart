@@ -7,6 +7,7 @@ import 'core/brand.dart';
 import 'core/locale.dart';
 import 'core/messages.dart';
 import 'core/router.dart';
+import 'features/feedback/feedback_button.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -18,6 +19,7 @@ class App extends ConsumerWidget {
       title: appName,
       theme: buildTheme(),
       routerConfig: ref.watch(routerProvider),
+      builder: (context, child) => FeedbackButton(child: child!),
       // Material's own texts such as tooltips follow the chosen language too
       locale: Locale(locale.name),
       supportedLocales: [for (final l in AppLocale.values) Locale(l.name)],

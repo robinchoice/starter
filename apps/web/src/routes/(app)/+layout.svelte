@@ -5,6 +5,8 @@
   import { page } from '$app/state';
   import { auth, checkAuth, logout } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
+  import Feedback from '$lib/components/Feedback.svelte';
+  import { openFeedback } from '$lib/feedback.svelte';
   import { t } from '$lib/i18n';
 
   let { children } = $props();
@@ -30,11 +32,13 @@
   <header>
     <a href="/dashboard" class="brand">{APP_NAME}</a>
     <span class="user">{auth.user.name}</span>
+    <Button variant="secondary" onclick={() => openFeedback('idea')}>{t().giveFeedback}</Button>
     <Button variant="secondary" onclick={handleLogout}>{t().logOut}</Button>
   </header>
   <main>
     {@render children()}
   </main>
+  <Feedback />
 {/if}
 
 <style>
@@ -56,6 +60,11 @@
   }
   .user {
     color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .user {
+      display: none;
+    }
   }
   main {
     max-width: 960px;

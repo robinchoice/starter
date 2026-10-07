@@ -44,6 +44,29 @@ export const updateMeSchema = z.object({
   name: z.string().trim().min(1).max(255),
 });
 
+// What web and app send along with feedback. The API adds its own version.
+export const feedbackContextSchema = z.object({
+  platform: z.enum(['web', 'ios', 'android']),
+  page: z.string().max(500),
+  // App build; the web runs the same commit as the API
+  version: z.string().max(100).optional(),
+  device: z.string().max(300),
+  viewport: z.string().max(50),
+  locale: z.string().max(10),
+  // Failed API calls as "METHOD /path → status", newest first
+  errors: z.array(z.string().max(300)).max(5),
+});
+
+export type FeedbackContext = z.infer<typeof feedbackContextSchema>;
+
+export const feedbackSchema = z.object({
+  kind: z.enum(['bug', 'idea']),
+  message: z.string().trim().min(5, 'feedbackTooShort').max(5000),
+  // PNG or JPEG, up to about 5 MB
+  screenshot: z.base64().max(7_000_000).optional(),
+  context: feedbackContextSchema,
+});
+
 // A path on this site to return to after login. Anything that would resolve to
 // another origin (//host, /\host, or tabs and newlines that browsers strip) is
 // dropped, so a crafted link can't redirect elsewhere.

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/auth.dart';
 import '../../core/brand.dart';
 import '../../core/locale.dart';
+import '../feedback/feedback_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -55,6 +56,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           FilledButton(onPressed: _busy ? null : _save, child: Text(t.save)),
           const SizedBox(height: 32),
+          OutlinedButton.icon(
+            onPressed: () => showFeedbackSheet(context, ref, FeedbackKind.idea),
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: Text(t.giveFeedback),
+          ),
+          const SizedBox(height: 8),
           OutlinedButton(
             onPressed: () => ref.read(authProvider.notifier).logout(),
             child: Text(t.logOut),

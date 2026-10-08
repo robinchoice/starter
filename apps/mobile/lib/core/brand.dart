@@ -32,6 +32,15 @@ const paper = Color(0xFFF4F4F1);
 const ink = Color(0xFF17171A);
 const muted = Color(0xFF5E5E66);
 const hairline = Color(0x2917171A);
+
+// Signal colours, see DESIGN.md: the same in every product, never the product colour.
+// Filled counters take glow with ink text, text and lines on paper take deep.
+const needsGlow = Color(0xFFF4B44C);
+const needsDeep = Color(0xFF8F5A0C);
+const newGlow = Color(0xFF6CCF8E);
+const newDeep = Color(0xFF1D6A44);
+const errorGlow = Color(0xFFF2545B);
+const errorDeep = Color(0xFFB3262D);
 const displayFont = 'Bricolage Grotesque';
 const _radius = BorderRadius.all(Radius.circular(8));
 
@@ -56,7 +65,7 @@ LinearGradient bandGradient(List<Color> tones) => LinearGradient(
 ThemeData buildTheme() {
   final accent = bandColor((appBand.from + appBand.to) / 2, deep);
   final base = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: accent, primary: accent, surface: paper, onSurface: ink),
+    colorScheme: ColorScheme.fromSeed(seedColor: accent, primary: accent, error: errorDeep, surface: paper, onSurface: ink),
     scaffoldBackgroundColor: paper,
   );
   TextStyle? display(TextStyle? style) => style?.copyWith(

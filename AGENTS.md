@@ -5,7 +5,7 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 ## Zweck & Links
 
 - Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle, Postgres, optional Flutter in `apps/mobile`. Neue Projekte: README.md, „Neues Projekt“.
-- Selbst nicht deployt. Im Projekt: Live-URL `https://<slug>.pleasance.org`, Coolify-Projekt `pleasance-<slug>` oder `privat-<slug>`, Ressource `<slug>`.
+- Selbst nicht deployt. Im Projekt: Live-URL `https://<slug>.pleasance.org`, ab 1.0 eine eigene Domain (README, „Live als 1.0“), Coolify-Projekt `pleasance-<slug>` oder `privat-<slug>`, Ressource `<slug>`.
 
 ## Checks
 

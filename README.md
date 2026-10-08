@@ -1,6 +1,6 @@
 # starter
 
-Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Magic Link (Web) oder Code (App), Feedback-Knopf mit Screenshot, Mail über SMTP, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
+Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Magic Link (Web) oder Code (App), Feedback-Knopf mit Screenshot, Link-Vorschau, Mail über SMTP, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 
@@ -27,7 +27,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 | `packages/shared` | App-Name, zod-Schemas und Typen für API und Web |
 | `apps/mobile` | Flutter-App, siehe unten. Reine Web-Projekte löschen den Ordner und `.github/workflows/mobile.yml` |
 
-Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“). `test` umfasst die API-Tests und Browser-Tests von Login und Feedback (Playwright, startet API und Web selbst oder nutzt die laufenden). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
+Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback und Link-Vorschau (Playwright, startet API und Web selbst oder nutzt die laufenden). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
 
 ## Feedback
 

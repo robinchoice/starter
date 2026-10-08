@@ -132,6 +132,10 @@ Im Starter liegen sie als `--needs`, `--new`, `--error` (deep) und `--needs-bg`,
 
 Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ (englisch „a tool by“) und dahinter die Pleasance-Wortmarke in Textfarbe. Fertig gebaut ist das als `PleasanceFooter`, im Web in `$lib/components`, in der App in `lib/core/brand.dart`. Im Web verlinkt der Absender auf https://pleasance.org. „ein Werkzeug von“ steht in der Display-Schrift, aber leise: wght 650, wdth 80 %, 14 px, Muted. Wortmarke und Farbband bilden zusammen die Signatur: Das Band liegt als 2-px-Linie direkt unter der Wortmarke, genau so breit wie sie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist dieselbe Linie in 4 px Höhe im Produktverlauf, ohne Pille und ohne Halo. Ganz rechts sitzt der Sprachumschalter, er nennt die andere Sprache: „English“ oder „Deutsch“.
 
+## Vorschaubild
+
+Geteilte Links zeigen in WhatsApp, Signal und Co. ein Vorschaubild, 1200 × 630 px, eines pro Sprache. Dunkler Grund (`#0E0D12`), links die Kachel, rechts der Produktname in der Display-Schrift, darunter eine 4-px-Linie im Produktverlauf und die Tagline in Muted. Unten links steht der Absender wie in der Fußzeile, mit Wortmarke und Farbband. `bun run og-image` in `apps/web` rendert die Bilder aus `APP_NAME`, `APP_BAND`, `tagline` und der Kachel in `static/favicon.svg`. Sie liegen als `static/og-image-<sprache>.png`. Bringt eine Seite eigene Bilder mit, etwa ein Cover, nimmt sie das eigene statt des Vorschaubilds.
+
 ## Pleasance als Dach
 
 Das Dach ist neutral und trägt alle Farben. Die 4-px-Linie unter dem Kopf zeigt das ganze Farbband. Bereiche mit eigener Farbe:

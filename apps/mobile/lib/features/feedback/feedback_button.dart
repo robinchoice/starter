@@ -6,11 +6,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../config.dart';
 import '../../core/auth.dart';
 import '../../core/brand.dart';
 import '../../core/locale.dart';
 import '../../core/router.dart';
 import 'feedback_sheet.dart';
+
+final testModeProvider = AsyncNotifierProvider<TestModeController, bool>(TestModeController.new);
+
+/// Shows the bug button. On until the project goes live as 1.0, then off until
+/// someone switches it on in the profile. The choice sits in the keychain.
+class TestModeController extends AsyncNotifier<bool> {
+  static const _key = 'test-mode';
+
+  @override
+  Future<bool> build() async {
+    final saved = await ref.read(secureStorageProvider).read(key: _key);
+    return saved == null ? !live : saved == 'true';
+  }
+
+  Future<void> set(bool on) async {
+    state = AsyncData(on);
+    await ref.read(secureStorageProvider).write(key: _key, value: '$on');
+  }
+}
 
 /// A bug button over every screen, sheets included. It takes a screenshot of
 /// what is below it and opens the feedback form with it. Drag it aside when
@@ -54,7 +74,7 @@ class _FeedbackButtonState extends ConsumerState<FeedbackButton> {
 
   @override
   Widget build(BuildContext context) {
-    final loggedIn = ref.watch(authProvider).value != null;
+    final visible = ref.watch(authProvider).value != null && (ref.watch(testModeProvider).value ?? false);
     final label = ref.watch(messagesProvider).reportBug;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -69,7 +89,7 @@ class _FeedbackButtonState extends ConsumerState<FeedbackButton> {
         return Stack(
           children: [
             RepaintBoundary(key: _screen, child: widget.child),
-            if (loggedIn && !_open)
+            if (visible && !_open)
               Positioned(
                 left: left,
                 top: top,

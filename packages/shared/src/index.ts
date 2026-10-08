@@ -11,6 +11,10 @@ export const APP_NAME = 'Starter';
 // starter shows the whole band until a project picks its own.
 export const APP_BAND: Band = { from: 1, to: 7 };
 
+// True once the project is live as 1.0 (README, "Live als 1.0"). From then on
+// the bug button waits for the test mode switch, see testMode in the web's feedback.svelte.ts.
+export const LIVE = false;
+
 export type User = {
   id: string;
   email: string;

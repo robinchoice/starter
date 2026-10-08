@@ -10,6 +10,7 @@
     type Rect,
     sendFeedback,
     takeScreenshot,
+    testMode,
   } from '$lib/feedback.svelte';
   import { t } from '$lib/i18n';
   import { toast } from '$lib/toast.svelte';
@@ -144,7 +145,7 @@
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} onkeydown={keydown} />
 
-{#if auth.user && !feedback.kind && !capturing && width}
+{#if auth.user && testMode.on && !feedback.kind && !capturing && width}
   <button
     type="button"
     class="bug"

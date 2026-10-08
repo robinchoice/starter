@@ -105,4 +105,20 @@ void main() {
     expect(sent.containsKey('screenshot'), isFalse);
     expect(sent['context'], containsPair('page', '/profile'));
   });
+
+  testWidgets('the test mode switch in the profile hides the bug button', (tester) async {
+    await logIn(tester);
+    expect(find.byIcon(Icons.bug_report_outlined), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.person_outline));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Testmodus'));
+    await tester.tap(find.text('Testmodus'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.bug_report_outlined), findsNothing);
+
+    await tester.tap(find.text('Testmodus'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.bug_report_outlined), findsOneWidget);
+  });
 }

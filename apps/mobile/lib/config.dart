@@ -7,6 +7,10 @@ const appId = 'org.pleasance.starter';
 // The starter shows the whole band until a project picks its own.
 const appBand = (from: 1.0, to: 7.0);
 
+// The same as LIVE in packages/shared: true once the project is live as 1.0.
+// From then on the bug button waits for the test mode switch in the profile.
+const live = false;
+
 // Origin of the web app, which forwards /api to the API. Release builds get it
 // from CI, debug builds talk to the local API from `bun run dev`.
 const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:3000');

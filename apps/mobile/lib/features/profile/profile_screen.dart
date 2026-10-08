@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/auth.dart';
 import '../../core/brand.dart';
 import '../../core/locale.dart';
+import '../feedback/feedback_button.dart';
 import '../feedback/feedback_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -60,6 +61,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: () => showFeedbackSheet(context, ref, FeedbackKind.idea),
             icon: const Icon(Icons.chat_bubble_outline),
             label: Text(t.giveFeedback),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(t.testMode),
+            subtitle: Text(t.testModeHint),
+            value: ref.watch(testModeProvider).value ?? false,
+            onChanged: (on) => ref.read(testModeProvider.notifier).set(on),
           ),
           const SizedBox(height: 8),
           OutlinedButton(

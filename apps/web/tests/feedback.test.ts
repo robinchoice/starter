@@ -70,3 +70,18 @@ test('the header takes ideas without a screenshot', async ({ page }) => {
   const [report] = await reports(email);
   expect(report).toMatchObject({ kind: 'idea', screenshot: null });
 });
+
+test('the test mode switch in the footer hides the bug button', async ({ page }) => {
+  await logIn(page);
+  const testMode = page.getByRole('checkbox', { name: 'Testmodus' });
+  await expect(testMode).toBeChecked();
+
+  await testMode.uncheck();
+  await expect(page.getByRole('button', { name: 'Fehler melden' })).toBeHidden();
+  await page.reload();
+  await expect(testMode).not.toBeChecked();
+  await expect(page.getByRole('button', { name: 'Fehler melden' })).toBeHidden();
+
+  await testMode.check();
+  await expect(page.getByRole('button', { name: 'Fehler melden' })).toBeVisible();
+});

@@ -35,6 +35,8 @@ abstract class Messages {
   String get logOut;
   String get reportBug;
   String get giveFeedback;
+  String get testMode;
+  String get testModeHint;
   String get bugPlaceholder;
   String get ideaPlaceholder;
   String get removeScreenshot;
@@ -98,6 +100,10 @@ class De extends Messages {
   String get reportBug => 'Fehler melden';
   @override
   String get giveFeedback => 'Feedback geben';
+  @override
+  String get testMode => 'Testmodus';
+  @override
+  String get testModeHint => 'Zeigt den Käfer-Knopf, mit dem du Fehler samt Screenshot meldest.';
   @override
   String get bugPlaceholder => 'Was ist passiert? Was hast du erwartet?';
   @override
@@ -177,6 +183,10 @@ class En extends Messages {
   String get reportBug => 'Report a bug';
   @override
   String get giveFeedback => 'Give feedback';
+  @override
+  String get testMode => 'Test mode';
+  @override
+  String get testModeHint => 'Shows the bug button for reporting bugs with a screenshot.';
   @override
   String get bugPlaceholder => 'What happened? What did you expect?';
   @override

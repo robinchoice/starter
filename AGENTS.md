@@ -13,7 +13,7 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 ## Deploy
 
-- Ein Push auf `main` baut nach grüner CI die Images und deployt sie über die Coolify-API. Ohne das Secret `COOLIFY_TOKEN` überspringt die CI den Deploy, so auch hier in der Vorlage.
+- Ein Push auf `main` baut nach grüner CI die Images und deployt sie über die Coolify-API. Danach fotografiert sie die Live-Seite nach `docs/screenshots/`, committet geänderte Bilder mit `[skip ci]` und meldet den Deploy an `robinchoice/pleasance` (README, „Screenshots“). Ohne das Secret `COOLIFY_TOKEN` überspringt die CI Deploy, Screenshots und Meldung, so auch hier in der Vorlage. Ohne `PLEASANCE_DISPATCH_TOKEN` entfällt nur die Meldung.
 - Prüfen: `gh run watch`, dann `curl -s https://<slug>.pleasance.org/api/health`.
 - Nur hier in der Vorlage: `.github/workflows/standards.yml` baut `standards/` als Image `starter-site` und deployt es über das Tailnet nach https://standards.pleasance.org (Coolify VPS 3, nur aus dem Tailnet). Aus der Vorlage erzeugte Repos überspringen den Workflow und können ihn mit `standards/` löschen.
 
@@ -39,5 +39,6 @@ Stack und Aufbau: siehe README.md. Gestaltung: siehe DESIGN.md.
 - Mobile (`apps/mobile`): API-Aufrufe über `apiProvider`, Login-Zustand aus `authProvider`, Seiten in `lib/features/<name>`, Routen in `lib/core/router.dart`. DTOs von Hand schreiben wie `User` in `core/auth.dart`. OpenAPI aus zod mit generiertem Client erst, wenn die API stabil ist.
 - Mobile-Karte: flutter_map mit OSM. Google Maps nur, wenn Google-Places-Daten nötig sind (wie doener).
 - Mobile bei Bedarf: sembast für Offline und Sync (Vorbild doener). Kein eigener Dart-Server, kein Supabase.
+- Screenshots für pleasance.org: Kernscreens als öffentliche Seiten in `PAGES` in `apps/web/screenshots.ts` eintragen, die CI fotografiert sie nach jedem Deploy (README, „Screenshots“). Seiten hinter dem Login nicht, die CI hat keinen Login und die Bilder zeigen keine echten Nutzerdaten. Der Bot committet die Bilder auf `main`, vor dem Push also holen.
 - Formatierung und Lint: Biome, Regeln in `biome.json`. `bun run format` behebt das meiste selbst.
 - Apple-Zugangsdaten der Prototype Factory stehen zentral in `~/.secrets`: `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (base64), dazu das CI-Signing-Zertifikat `APPLE_CI_DEV_CERTIFICATE_BASE64` (base64-PKCS12) und `APPLE_CI_DEV_CERTIFICATE_PASSWORD`. Ablage und Kopien: `~/dev/New AI Setup/infra.md`, Abschnitt „Zugangsdaten: wo liegt was“. Im selben Aufruf mit `set -a; . ~/.secrets; set +a` laden; Werte nie ausgeben oder ins Repo schreiben. Nach Freigabe richtet `~/dev/New AI Setup/apple-ci-secrets.sh robinchoice/<repo>` die GitHub-CI ein: ASC-IDs als Variablen, `ASC_KEY_P8`, `IOS_DEV_CERTIFICATE` und `IOS_DEV_CERTIFICATE_PASSWORD` als Secrets.

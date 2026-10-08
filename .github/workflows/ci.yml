@@ -83,12 +83,15 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      deployed: ${{ steps.deploy.outputs.deployed }}
     env:
       COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
       COOLIFY_UUID: ${{ secrets.COOLIFY_UUID }}
       COOLIFY_API: https://coolify.pleasance.org/api/v1
     steps:
       - name: Deploy images to Coolify
+        id: deploy
         run: |
           set -euo pipefail
           if [ -z "$COOLIFY_TOKEN" ]; then
@@ -126,10 +129,68 @@ jobs:
               "$COOLIFY_API/deployments/$deployment" | jq -er '.status')
             echo "Deployment $deployment: $status"
             case "$status" in
-              finished) exit 0 ;;
+              finished) echo deployed=true >> "$GITHUB_OUTPUT"; exit 0 ;;
               failed|cancelled-by-user) exit 1 ;;
             esac
             sleep 10
           done
           echo 'Deployment timed out.' >&2
           exit 1
+
+  # Photographs the live site (apps/web/screenshots.ts) and commits docs/screenshots
+  # to main when the pictures changed. [skip ci] keeps that commit from deploying again.
+  screenshots:
+    needs: deploy
+    if: needs.deploy.outputs.deployed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      # API_URL is the own domain from 1.0 on, see README, „Live als 1.0“
+      APP_URL: ${{ vars.API_URL || format('https://{0}.pleasance.org', github.event.repository.name) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+        working-directory: apps/web
+      - run: bun run screenshots "$APP_URL"
+        working-directory: apps/web
+      - name: Commit the screenshots to main
+        run: |
+          set -euo pipefail
+          mv docs/screenshots "$RUNNER_TEMP/screenshots"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # main may have moved on since this commit, a rejected push starts over from the new main
+          for _ in 1 2 3; do
+            git fetch --depth 1 origin main
+            git checkout -f -B main FETCH_HEAD
+            rm -rf docs/screenshots
+            cp -r "$RUNNER_TEMP/screenshots" docs/screenshots
+            git add -- docs/screenshots
+            git diff --cached --quiet && exit 0
+            git commit -m "docs: retake the screenshots for ${GITHUB_SHA::7} [skip ci]"
+            git push origin main && exit 0
+          done
+          exit 1
+
+  # Tells pleasance.org that the prototype is live with fresh screenshots
+  notify:
+    needs: screenshots
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PLEASANCE_DISPATCH_TOKEN }}
+    steps:
+      - name: Send prototype-deployed to robinchoice/pleasance
+        run: |
+          set -euo pipefail
+          if [ -z "$GH_TOKEN" ]; then
+            echo "No PLEASANCE_DISPATCH_TOKEN secret yet, skipping"
+            exit 0
+          fi
+          gh api repos/robinchoice/pleasance/dispatches \
+            -f event_type=prototype-deployed \
+            -f "client_payload[slug]=${GITHUB_REPOSITORY#*/}" \
+            -f "client_payload[sha]=$GITHUB_SHA"

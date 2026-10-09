@@ -34,6 +34,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # The default docker driver cannot use the GitHub Actions layer cache
+      - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -47,6 +49,8 @@ jobs:
           tags: |
             ghcr.io/robinchoice/starter-site:latest
             ghcr.io/robinchoice/starter-site:${{ github.sha }}
+          cache-from: type=gha,scope=starter-site
+          cache-to: type=gha,mode=max,scope=starter-site
 
   # Coolify on VPS 3 answers only in the tailnet. The job joins it as a
   # short-lived tag:ci node, which the ACL lets reach only vps3:8000.

@@ -1,14 +1,17 @@
 name: Mobile
 
-# Every change to the app gets analyze and test. On main: iOS → TestFlight,
-# Android → signed AAB as artifact. macOS minutes are free only for public repos.
+# Every change to the app gets analyze and test. On main: Android → signed AAB as artifact.
+# iOS → TestFlight only for release tags (v*) and manual runs: macOS minutes count tenfold
+# in private repos, one run costs about 60 minutes.
 
 on:
   workflow_dispatch:
   pull_request:
     paths: ['apps/mobile/**', '.github/workflows/mobile.yml']
+  # Path filters do not apply to tags, every v* tag runs the workflow
   push:
     branches: [main]
+    tags: ['v*']
     paths: ['apps/mobile/**', '.github/workflows/mobile.yml']
 
 env:
@@ -38,7 +41,7 @@ jobs:
     needs: check
     # Skipped until the variables API_URL and ASC_KEY_ID exist. Also needs ASC_ISSUER_ID and the
     # secrets ASC_KEY_P8, IOS_DEV_CERTIFICATE and IOS_DEV_CERTIFICATE_PASSWORD
-    if: github.event_name != 'pull_request' && vars.API_URL != '' && vars.ASC_KEY_ID != ''
+    if: (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') && vars.API_URL != '' && vars.ASC_KEY_ID != ''
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -125,6 +128,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}

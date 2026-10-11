@@ -9,7 +9,7 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 ## Checks
 
-`bun run check && bun run test && bun run build`, bei App-Änderungen zusätzlich `flutter analyze && flutter test` in `apps/mobile`.
+`bun run check && bun run test && bun run build`, bei App-Änderungen zusätzlich `flutter analyze && flutter test` in `apps/mobile`. Die Browser-Tests starten API und Web auf eigenen Ports (53100, 54100). Testet ein anderer Worktree gleichzeitig, mit anderen Ports aufrufen: `TEST_API_PORT=53101 TEST_WEB_PORT=54101 bun run test`.
 
 ## Deploy
 

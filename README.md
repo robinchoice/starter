@@ -27,7 +27,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 | `packages/shared` | App-Name, zod-Schemas und Typen für API und Web |
 | `apps/mobile` | Flutter-App, siehe unten. Reine Web-Projekte löschen den Ordner und `.github/workflows/mobile.yml` |
 
-Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback und Link-Vorschau (Playwright, startet API und Web selbst oder nutzt die laufenden). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
+Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback und Link-Vorschau (Playwright, startet API und Web selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
 
 ## Feedback
 

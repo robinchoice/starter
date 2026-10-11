@@ -68,6 +68,10 @@ Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-S
 - Lokal: `bun run screenshots [url]` in `apps/web`, ohne URL gegen `bun run dev`.
 - Nach einem Deploy liegt oft ein Bot-Commit auf `main`, also vor dem nächsten Push holen.
 
+## Login in der Savor-Vorschau
+
+Agenten zeigen Änderungen hinter dem Login in der Savor-Vorschau mit dem Testkonto admin@pleasance.org. `login-link <slug>` aus dem Kontor ruft dafür im API-Container `bun apps/api/src/login-link.ts <email>` auf. Das gibt einen einmaligen Login-Link aus, 15 Minuten gültig wie ein gemailter, den der Agent per `browser_navigate` öffnet. Die Vorschau hat pro Projekt ein festes Profil, und Sessions in Benutzung verlängern sich bei jedem Besuch auf 30 Tage. Also bleibt sie angemeldet.
+
 ## Live als 1.0
 
 Nur auf Robins ausdrücklichen Auftrag („X geht als 1.0 live“). Der Prototyp bekommt dann eine eigene Domain.

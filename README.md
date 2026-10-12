@@ -72,6 +72,15 @@ Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-S
 
 Agenten zeigen Änderungen hinter dem Login in der Savor-Vorschau mit dem Testkonto admin@pleasance.org. `login-link <slug>` aus dem Kontor ruft dafür im API-Container `bun apps/api/src/login-link.ts <email>` auf. Das gibt einen einmaligen Login-Link aus, 15 Minuten gültig wie ein gemailter, den der Agent per `browser_navigate` öffnet. Die Vorschau hat pro Projekt ein festes Profil, und Sessions in Benutzung verlängern sich bei jedem Besuch auf 30 Tage. Also bleibt sie angemeldet.
 
+## Nostr-Login
+
+Optional, nur wenn ein Prototyp ihn braucht. Vorbild ist findyourlogic (`~/dev/findyourlogic`): [nostr-login](https://github.com/nostrband/nostr-login) im Web, geprüft wird auf dem Server.
+
+- Server: Das Web signiert ein NIP-98-Event (Kind 27235) mit einer Challenge aus der API und `u` = `APP_URL/api/v1/auth/nostr`, die API prüft es mit `nostr-tools` (`apps/api/src/lib/nostr.ts`, Route in `routes/auth.ts`). Stimmt `APP_URL` nicht mit der Adresse im Browser überein, scheitert jeder Login. E-Mail und npub hängen an einem Konto, `users.email` wird nullable.
+- nsec.app und `relay.nsec.app` sind seit Mitte 2026 nicht erreichbar. nostr-login 1.7.12 wartet dann ohne Timeout und öffnet seinen Dialog nie. findyourlogic patcht es per `bun patch`: nsec.app aus der Liste, `wss://nos.lol/` als Pairing-Relay, `eval` im gebündelten tseep ersetzt. Neue Schlüssel entstehen im Browser („local signup“). Den Patch übernehmen, bis ein neues Release das selbst löst.
+- CSP: Relays, Profilbilder und NIP-05 brauchen `wss:` und `https:` in `connect-src` und `https:` in `img-src`. Der Dialog setzt Inline-Styles im Shadow-DOM, ihre Hashes kommen in `style-src`. Der Browser-Test des Nostr-Logins (NIP-07-Signer im Test, Vorbild `apps/web/tests/app.test.ts`) vergleicht sie mit `svelte.config.js`, weil der Dev-Server Inline-Styles sonst durchlässt.
+- In findyourlogic meldete die CSP außerdem das `eval`, mit dem zod prüft, ob es Parser kompilieren darf. Abhilfe: `z.config({ jitless: true })` in `packages/shared`.
+
 ## Live als 1.0
 
 Nur auf Robins ausdrücklichen Auftrag („X geht als 1.0 live“). Der Prototyp bekommt dann eine eigene Domain.

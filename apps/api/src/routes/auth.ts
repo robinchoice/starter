@@ -13,6 +13,7 @@ import { deleteCookie } from 'hono/cookie';
 import { t } from '../lib/i18n';
 import { sendLoginCodeEmail, sendMagicLinkEmail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
+import { mayLogIn } from '../lib/signup';
 import { validJson } from '../lib/validate';
 import {
   currentUser,
@@ -36,7 +37,8 @@ const codeChecksPerIp = rateLimit('code-checks-per-ip', 30, 15 * MINUTE);
 
 const userColumns = { id: users.id, email: users.email, name: users.name };
 
-// The first login creates the account. The no-op update lets RETURNING
+// The first login creates the account, /magic-link and /code only send one
+// to addresses that may sign up. The no-op update lets RETURNING
 // yield existing users too.
 async function startSession(db: Database, email: string, days: number) {
   const [user] = await db
@@ -58,6 +60,7 @@ export const authRoutes = new Hono<AppEnv>()
   .post('/magic-link', validJson(magicLinkSchema), async (c) => {
     const { email, next } = c.req.valid('json');
     if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
+    if (!(await mayLogIn(c.get('db'), email))) return c.json({ error: t(c).signupClosed }, 403);
 
     const token = generateToken();
     await c
@@ -99,6 +102,7 @@ export const authRoutes = new Hono<AppEnv>()
   .post('/code', validJson(loginCodeSchema), async (c) => {
     const { email } = c.req.valid('json');
     if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
+    if (!(await mayLogIn(c.get('db'), email))) return c.json({ error: t(c).signupClosed }, 403);
 
     const code = String(crypto.getRandomValues(new Uint32Array(1))[0]! % 1_000_000).padStart(6, '0');
     await c

@@ -23,11 +23,24 @@ async function openHydrated(page: Page, path: string) {
   await Promise.all([page.waitForResponse('**/api/v1/auth/me'), page.goto(path)]);
 }
 
-test('the login form sends a magic link', async ({ page }) => {
+test('the login form sends a magic link to an existing account', async ({ page }) => {
+  const email = freshEmail();
+  await sql`insert into users (email, name) values (${email}, 'Lena')`;
+  await openHydrated(page, '/login');
+  await page.getByLabel('E-Mail').fill(email);
+  await page.getByRole('button', { name: 'Login-Link senden' }).click();
+  await expect(page.getByText('Check deine E-Mails')).toBeVisible();
+});
+
+// The API runs without SIGNUP_OPEN, like a prototype before Robin opens it
+test('strangers learn that sign-up is still closed', async ({ page }) => {
   await openHydrated(page, '/login');
   await page.getByLabel('E-Mail').fill(freshEmail());
   await page.getByRole('button', { name: 'Login-Link senden' }).click();
-  await expect(page.getByText('Check deine E-Mails')).toBeVisible();
+  await expect(page.getByText('Die Registrierung ist noch geschlossen.', { exact: false })).toBeVisible();
+  await expect(page.getByText('Check deine E-Mails')).toBeHidden();
+  // The browser logs the expected 403 as an error
+  errors = errors.filter((error) => !error.includes('status of 403'));
 });
 
 test('the language button switches to English and keeps it', async ({ page }) => {

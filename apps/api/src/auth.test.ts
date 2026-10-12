@@ -13,6 +13,9 @@ const log = spyOn(console, 'log');
 beforeAll(() => migrateDb(process.env.DATABASE_URL!));
 afterAll(() => db.$client.end());
 
+// Most tests sign up fresh addresses, the closed case has its own test
+process.env.SIGNUP_OPEN = 'true';
+
 const freshEmail = () => `test-${crypto.randomUUID()}@example.com`;
 
 // Rate limits live in the database, so each run counts against its own address
@@ -35,6 +38,8 @@ async function body(res: Response | Promise<Response>): Promise<any> {
 function lastMail() {
   return log.mock.calls.map((args) => String(args[0])).findLast((line) => line.startsWith('[mail]'));
 }
+
+const mailCount = () => log.mock.calls.filter((args) => String(args[0]).startsWith('[mail]')).length;
 
 function lastMailedToken() {
   return lastMail()?.match(/token=([0-9a-f]+)/)?.[1];
@@ -145,6 +150,38 @@ test('a code stops working after five wrong tries', async () => {
   const code = lastMailedCode()!;
   for (let i = 0; i < 5; i++) await post('/auth/code/verify', { email, code: otherCode(code) });
   expect((await post('/auth/code/verify', { email, code })).status).toBe(400);
+});
+
+test('closed sign-up mails only existing accounts and the allowlist', async () => {
+  const allowed = freshEmail();
+  const [existing] = await db.insert(users).values({ email: freshEmail(), name: 'Lena' }).returning();
+  delete process.env.SIGNUP_OPEN;
+  process.env.SIGNUP_ALLOWLIST = ` ${allowed.toUpperCase()} , someone@example.com`;
+  try {
+    const mails = mailCount();
+    const stranger = freshEmail();
+    const link = await post('/auth/magic-link', { email: stranger });
+    expect(link.status).toBe(403);
+    expect((await body(link)).error).toBe(
+      'Die Registrierung ist noch geschlossen. Für diese Adresse gibt es noch kein Konto.',
+    );
+    expect((await post('/auth/code', { email: stranger })).status).toBe(403);
+    expect(mailCount()).toBe(mails);
+
+    expect((await post('/auth/code', { email: existing!.email })).status).toBe(200);
+    expect((await post('/auth/magic-link', { email: allowed })).status).toBe(200);
+    expect((await body(post('/auth/verify', { token: lastMailedToken() }))).user.email).toBe(allowed);
+
+    // login-link still works, Savor's test account needs no allowlist entry
+    const run = Bun.spawnSync(['bun', 'src/login-link.ts', stranger], {
+      env: { ...process.env, APP_URL: 'https://app.test' },
+    });
+    const token = new URL(run.stdout.toString().trim()).searchParams.get('token');
+    expect((await body(post('/auth/verify', { token }))).user.email).toBe(stranger);
+  } finally {
+    process.env.SIGNUP_OPEN = 'true';
+    delete process.env.SIGNUP_ALLOWLIST;
+  }
 });
 
 test('login-link prints a magic link that logs in', async () => {

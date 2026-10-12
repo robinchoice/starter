@@ -72,3 +72,36 @@ test('a magic link opens the dashboard until logout', async ({ page }) => {
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
 });
+
+async function logInAs(page: Page, email: string) {
+  const token = randomBytes(32).toString('hex');
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  await sql`insert into magic_links (email, token_hash, expires_at)
+    values (${email}, ${tokenHash}, ${new Date(Date.now() + 15 * 60_000)})`;
+  await page.goto(`/auth/verify?token=${token}`);
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+// The API runs with ADMIN_EMAILS=e2e-admin@example.com, see playwright.config.ts
+test('the admin invites a tester, who can log in afterwards', async ({ page }) => {
+  const tester = freshEmail();
+  await logInAs(page, 'e2e-admin@example.com');
+  await page.getByRole('link', { name: 'Tester einladen' }).click();
+  await page.getByLabel('E-Mail').fill(tester);
+  await page.getByRole('button', { name: 'Einladen' }).click();
+  await expect(page.getByText(`Einladung an ${tester} verschickt`)).toBeVisible();
+  expect(await sql`select 1 from users where email = ${tester}`).toHaveLength(1);
+
+  await page.getByRole('button', { name: 'Abmelden' }).click();
+  await openHydrated(page, '/login');
+  await page.getByLabel('E-Mail').fill(tester);
+  await page.getByRole('button', { name: 'Login-Link senden' }).click();
+  await expect(page.getByText('Check deine E-Mails')).toBeVisible();
+});
+
+test('others see no invite and get 403 from the API', async ({ page }) => {
+  await logInAs(page, freshEmail());
+  await expect(page.getByRole('link', { name: 'Tester einladen' })).toBeHidden();
+  const res = await page.request.post('/api/v1/auth/invite', { data: { email: freshEmail() } });
+  expect(res.status()).toBe(403);
+});

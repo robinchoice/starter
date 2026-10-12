@@ -1,5 +1,6 @@
 import { type Database, loginCodes, magicLinks, sessions, users } from '@app/db';
 import {
+  inviteSchema,
   loginCodeSchema,
   magicLinkSchema,
   safeNextPath,
@@ -8,17 +9,18 @@ import {
   verifySchema,
 } from '@app/shared';
 import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { deleteCookie } from 'hono/cookie';
 import { t } from '../lib/i18n';
 import { sendLoginCodeEmail, sendMagicLinkEmail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
-import { mayLogIn } from '../lib/signup';
+import { isAdmin, mayLogIn } from '../lib/signup';
 import { validJson } from '../lib/validate';
 import {
   currentUser,
   generateToken,
   hashToken,
+  requireAdmin,
   requireAuth,
   SESSION_COOKIE,
   SESSION_DAYS,
@@ -36,6 +38,7 @@ const mailsPerIp = rateLimit('mails-per-ip', 20, 60 * MINUTE);
 const codeChecksPerIp = rateLimit('code-checks-per-ip', 30, 15 * MINUTE);
 
 const userColumns = { id: users.id, email: users.email, name: users.name };
+const withAdmin = (user: { id: string; email: string; name: string }) => ({ ...user, admin: isAdmin(user.email) });
 
 // The first login creates the account, /magic-link and /code only send one
 // to addresses that may sign up. The no-op update lets RETURNING
@@ -53,7 +56,20 @@ async function startSession(db: Database, email: string, days: number) {
     tokenHash: hashToken(token),
     expiresAt: new Date(Date.now() + days * 24 * 60 * MINUTE),
   });
-  return { user: user!, token };
+  return { user: withAdmin(user!), token };
+}
+
+async function mailMagicLink(c: Context<AppEnv>, email: string, next: string | null) {
+  const token = generateToken();
+  await c
+    .get('db')
+    .insert(magicLinks)
+    .values({
+      email,
+      tokenHash: hashToken(token),
+      expiresAt: new Date(Date.now() + 15 * MINUTE),
+    });
+  await sendMagicLinkEmail(email, token, next, t(c));
 }
 
 export const authRoutes = new Hono<AppEnv>()
@@ -61,17 +77,21 @@ export const authRoutes = new Hono<AppEnv>()
     const { email, next } = c.req.valid('json');
     if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
     if (!(await mayLogIn(c.get('db'), email))) return c.json({ error: t(c).signupClosed }, 403);
+    await mailMagicLink(c, email, safeNextPath(next));
+    return c.json({ ok: true });
+  })
 
-    const token = generateToken();
+  // While sign-up is closed, admins invite single testers: the account exists
+  // first, then the tester logs in like any other. SIGNUP_OPEN stays untouched.
+  .post('/invite', requireAuth, requireAdmin, validJson(inviteSchema), async (c) => {
+    const { email } = c.req.valid('json');
+    if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
     await c
       .get('db')
-      .insert(magicLinks)
-      .values({
-        email,
-        tokenHash: hashToken(token),
-        expiresAt: new Date(Date.now() + 15 * MINUTE),
-      });
-    await sendMagicLinkEmail(email, token, safeNextPath(next), t(c));
+      .insert(users)
+      .values({ email, name: email.split('@')[0]! })
+      .onConflictDoNothing();
+    await mailMagicLink(c, email, null);
     return c.json({ ok: true });
   })
 
@@ -170,5 +190,5 @@ export const authRoutes = new Hono<AppEnv>()
       .set({ name: c.req.valid('json').name, updatedAt: new Date() })
       .where(eq(users.id, c.get('user').id))
       .returning(userColumns);
-    return c.json({ user });
+    return c.json({ user: withAdmin(user!) });
   });

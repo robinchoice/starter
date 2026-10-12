@@ -184,6 +184,46 @@ test('closed sign-up mails only existing accounts and the allowlist', async () =
   }
 });
 
+async function sessionFor(email: string) {
+  const [user] = await db.insert(users).values({ email, name: 'Robin' }).returning({ id: users.id });
+  const token = generateToken();
+  await db
+    .insert(sessions)
+    .values({ userId: user!.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + 60_000) });
+  return { cookie: `session=${token}` };
+}
+
+test('admins invite testers past the closed sign-up, others get 403', async () => {
+  const admin = freshEmail();
+  const asAdmin = await sessionFor(admin);
+  const asUser = await sessionFor(freshEmail());
+  delete process.env.SIGNUP_OPEN;
+  process.env.ADMIN_EMAILS = `someone@example.com, ${admin.toUpperCase()}`;
+  try {
+    const me = await app.request('/api/v1/auth/me', { headers: asAdmin });
+    expect((await body(me)).user.admin).toBe(true);
+
+    const tester = freshEmail();
+    expect((await post('/auth/invite', { email: tester })).status).toBe(401);
+    const denied = await post('/auth/invite', { email: tester }, asUser);
+    expect(denied.status).toBe(403);
+    expect((await body(denied)).error).toBe('Nur für Admins');
+    expect(await db.select().from(users).where(eq(users.email, tester))).toEqual([]);
+
+    expect((await post('/auth/invite', { email: tester }, asAdmin)).status).toBe(200);
+    expect(lastMail()).toStartWith(`[mail] To ${tester}:`);
+    const verify = await body(post('/auth/verify', { token: lastMailedToken() }));
+    expect(verify.user).toMatchObject({ email: tester, admin: false });
+
+    // From now on the tester logs in like any existing account
+    expect((await post('/auth/magic-link', { email: tester })).status).toBe(200);
+    expect(process.env.SIGNUP_OPEN).toBeUndefined();
+  } finally {
+    process.env.SIGNUP_OPEN = 'true';
+    delete process.env.ADMIN_EMAILS;
+  }
+});
+
 test('login-link prints a magic link that logs in', async () => {
   const email = freshEmail();
   const run = Bun.spawnSync(['bun', 'src/login-link.ts', email], {

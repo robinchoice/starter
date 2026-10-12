@@ -70,14 +70,14 @@ Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-S
 
 ## Login in der Savor-Vorschau
 
-Agenten zeigen Änderungen hinter dem Login in der Savor-Vorschau mit dem Testkonto admin@pleasance.org. `login-link <slug>` aus dem Kontor ruft dafür im API-Container `bun apps/api/src/login-link.ts <email>` auf. Das gibt einen einmaligen Login-Link aus, 15 Minuten gültig wie ein gemailter, den der Agent per `browser_navigate` öffnet. Die Vorschau hat pro Projekt ein festes Profil, und Sessions in Benutzung verlängern sich bei jedem Besuch auf 30 Tage. Also bleibt sie angemeldet.
+Agenten zeigen Änderungen hinter dem Login in der Savor-Vorschau mit dem Testkonto admin@pleasance.org, dem agentischen Admin. Admin-Rechte in der App hat es nicht (siehe „Registrierung öffnen“). `login-link <slug>` aus dem Kontor ruft dafür im API-Container `bun apps/api/src/login-link.ts <email>` auf. Das gibt einen einmaligen Login-Link aus, 15 Minuten gültig wie ein gemailter, den der Agent per `browser_navigate` öffnet. Die Vorschau hat pro Projekt ein festes Profil, und Sessions in Benutzung verlängern sich bei jedem Besuch auf 30 Tage. Also bleibt sie angemeldet.
 
 ## Registrierung öffnen
 
 Prototypen sind von außen erreichbar, aber geschlossen, bis Robin ausdrücklich das Go gibt, externe Nutzer aufzunehmen. Bis dahin legen Magic Link und App-Code neue Konten nur für die Adressen in `SIGNUP_ALLOWLIST` an (kommagetrennt, dauerhafte Adressen wie Robins). Bestehende Konten melden sich immer an. Fremde bekommen bei `/auth/magic-link` und `/auth/code` die Meldung „Die Registrierung ist noch geschlossen“, es geht keine Mail raus. Seiten ohne Login bleiben offen.
 
-- Tester aufnehmen: Ein Admin klickt in der App oben auf „Tester einladen“ (`/invite`) und gibt die Adresse ein. Das legt das Konto an und schickt einen Login-Link, ohne Coolify und Redeploy. Danach meldet sich der Tester wie jedes bestehende Konto an, auch wenn der Link abläuft. Admins sind die Adressen in `ADMIN_EMAILS` (kommagetrennt), die API prüft das. Einladen öffnet nichts, `SIGNUP_OPEN` bleibt, wie es ist.
-- Das Testkonto admin@pleasance.org kommt nie in `ADMIN_EMAILS`: Agenten melden sich damit in der Vorschau an und dürfen weder Konten an der Registrierung vorbei anlegen noch Dritte anmailen.
+- Tester aufnehmen: Ein Admin klickt in der App oben auf „Tester einladen“ (`/invite`) und gibt die Adresse ein. Das legt das Konto an und schickt einen Login-Link, ohne Coolify und Redeploy. Danach meldet sich der Tester wie jedes bestehende Konto an, auch wenn der Link abläuft. Admins sind die Adressen in `ADMIN_EMAILS` (kommagetrennt, Standard robin@pleasance.org, der menschliche Admin), die API prüft das. Einladen öffnet nichts, `SIGNUP_OPEN` bleibt, wie es ist.
+- admin@pleasance.org, der agentische Admin, kommt nie in `ADMIN_EMAILS`: Agenten melden sich damit in der Vorschau an und dürfen weder Konten an der Registrierung vorbei anlegen noch Dritte anmailen.
 - Öffnen, erst nach Robins Go: `SIGNUP_OPEN=true` in Coolify setzen und neu deployen. Prüfen: Login-Link an eine neue Adresse anfordern.
 - `login-link` legt Konten selbst an, das Testkonto der Savor-Vorschau braucht keinen Eintrag.
 

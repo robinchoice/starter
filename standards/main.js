@@ -34,6 +34,8 @@ const SIGNS = {
   Spieß: '<path d="M50 22 V78"/><path d="M36 32 H64 L57 66 H43 Z"/>',
   'Blitz im Rahmen': '<rect x="24" y="24" width="52" height="52" rx="12"/><path d="M54 33 L43 51 H57 L46 68"/>',
   'zwei Ringe': '<path d="M39 34 a16 16 0 1 0 0.01 0 M61 34 a16 16 0 1 0 0.01 0"/>',
+  'zwei Punkte mit Brücke':
+    '<path d="M28 52 Q50 16 72 52"/><circle cx="29" cy="70" r="7"/><circle cx="71" cy="70" r="7"/>',
   Blatt: '<path d="M34 24 H55 L68 37 V76 H34 Z"/><path d="M55 24 V37 H68"/>',
   'Ring mit Kern': '<path d="M50 25 a25 25 0 1 0 0.01 0"/><circle cx="50" cy="50" r="7.5"/>',
   Leuchtturm:

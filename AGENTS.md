@@ -9,7 +9,7 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 ## Checks
 
-`bun run check && bun run test && bun run build`, bei App-Änderungen zusätzlich `flutter analyze && flutter test` in `apps/mobile`. Die Browser-Tests starten API und Web auf eigenen Ports (53100, 54100). Testet ein anderer Worktree gleichzeitig, mit anderen Ports aufrufen: `TEST_API_PORT=53101 TEST_WEB_PORT=54101 bun run test`.
+`bun run check && bun run test` (`test` baut das Web und testet den Build), bei App-Änderungen zusätzlich `flutter analyze && flutter test` in `apps/mobile`. Die Browser-Tests starten API und Web auf eigenen Ports (53100, 54100). Testet ein anderer Worktree gleichzeitig, mit anderen Ports aufrufen: `TEST_API_PORT=53101 TEST_WEB_PORT=54101 bun run test`.
 
 ## Deploy
 
@@ -41,7 +41,7 @@ Stack und Aufbau: siehe README.md. Gestaltung: siehe DESIGN.md.
 - Der Feedback-Knopf bleibt in jedem Prototyp, auch ab 1.0: Dann ist der Käfer nur im Testmodus sichtbar, „Feedback geben“ immer (README, „Feedback“). Eigene Overlays, die nicht auf den Screenshot sollen, bekommen im Web `data-feedback-ignore`. Neue API-Aufrufe laufen über `api` bzw. `apiProvider`, sonst fehlen ihre Fehler in den Meldungen. Offene Meldungen eines Repos: `gh issue list --label feedback`.
 - `users.name` ist ein freier Anzeigename ohne Filter. Bekommt ein Prototyp eindeutige öffentliche Handles (z. B. `/@name`): NFKC-normalisiert und kleingeschrieben speichern und eindeutig machen, reservierte Namen sperren (`admin`, `root`, `api`, `support`, `www`, `login`, `settings`, dazu alle eigenen Routen). Einen Wortfilter für Vulgäres gibt es nur bei öffentlichen Community-Apps, dann mit `obscenity`. Eigene Wortlisten erzeugen Fehltreffer.
 - Web: API-Aufrufe über `api` aus `$lib/api`, Login-Zustand aus `$lib/auth.svelte`. Seiten hinter dem Login unter `routes/(app)`.
-- Externe Quellen im Browser (Skripte, Fonts, Bilder, APIs) in die CSP in `apps/web/svelte.config.js` eintragen, sonst blockt der Browser sie. Der Browser-Test in `apps/web/tests` scheitert an jedem Konsolenfehler, also auch an CSP-Verstößen. Er läuft aber gegen den Dev-Server, und nur der erlaubt Inline-`<style>`: Setzt eine Bibliothek eigene Styles (etwa Web Components im Shadow-DOM), kommen deren Hashes in `style-src`, und ein Browser-Test prüft sie (README, „Nostr-Login“).
+- Externe Quellen im Browser (Skripte, Fonts, Bilder, APIs) in die CSP in `apps/web/svelte.config.js` eintragen, sonst blockt der Browser sie. Der Browser-Test in `apps/web/tests` läuft gegen den Produktions-Build und scheitert an jedem Konsolenfehler, also auch an CSP-Verstößen. Inline-`<style>` erlaubt die CSP nur im Dev-Modus: Setzt eine Bibliothek eigene Styles (etwa Web Components im Shadow-DOM), kommen deren Hashes in `style-src`.
 - Eine Abhängigkeit patchen: `bun patch <paket>`, die Datei landet in `patches/` und in `patchedDependencies`. Beide Dockerfiles brauchen dann `COPY patches patches` vor `bun install --frozen-lockfile`, sonst scheitert der Build.
 - Mobile (`apps/mobile`): API-Aufrufe über `apiProvider`, Login-Zustand aus `authProvider`, Seiten in `lib/features/<name>`, Routen in `lib/core/router.dart`. DTOs von Hand schreiben wie `User` in `core/auth.dart`. OpenAPI aus zod mit generiertem Client erst, wenn die API stabil ist.
 - Mobile-Karte: flutter_map mit OSM. Google Maps nur, wenn Google-Places-Daten nötig sind (wie doener).

@@ -27,7 +27,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 | `packages/shared` | App-Name, zod-Schemas und Typen für API und Web |
 | `apps/mobile` | Flutter-App, siehe unten. Reine Web-Projekte löschen den Ordner und `.github/workflows/mobile.yml` |
 
-Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback und Link-Vorschau (Playwright, startet API und Web selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
+Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback und Link-Vorschau (Playwright, baut das Web und startet API und Web-Build selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server, so greift die CSP wie in Produktion; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
 
 ## Feedback
 
@@ -78,7 +78,7 @@ Optional, nur wenn ein Prototyp ihn braucht. Vorbild ist findyourlogic (`~/dev/f
 
 - Server: Das Web signiert ein NIP-98-Event (Kind 27235) mit einer Challenge aus der API und `u` = `APP_URL/api/v1/auth/nostr`, die API prüft es mit `nostr-tools` (`apps/api/src/lib/nostr.ts`, Route in `routes/auth.ts`). Stimmt `APP_URL` nicht mit der Adresse im Browser überein, scheitert jeder Login. E-Mail und npub hängen an einem Konto, `users.email` wird nullable.
 - nsec.app und `relay.nsec.app` sind seit Mitte 2026 nicht erreichbar. nostr-login 1.7.12 wartet dann ohne Timeout und öffnet seinen Dialog nie. findyourlogic patcht es per `bun patch`: nsec.app aus der Liste, `wss://nos.lol/` als Pairing-Relay, `eval` im gebündelten tseep ersetzt. Neue Schlüssel entstehen im Browser („local signup“). Den Patch übernehmen, bis ein neues Release das selbst löst.
-- CSP: Relays, Profilbilder und NIP-05 brauchen `wss:` und `https:` in `connect-src` und `https:` in `img-src`. Der Dialog setzt Inline-Styles im Shadow-DOM, ihre Hashes kommen in `style-src`. Der Browser-Test des Nostr-Logins (NIP-07-Signer im Test, Vorbild `apps/web/tests/app.test.ts`) vergleicht sie mit `svelte.config.js`, weil der Dev-Server Inline-Styles sonst durchlässt.
+- CSP: Relays, Profilbilder und NIP-05 brauchen `wss:` und `https:` in `connect-src` und `https:` in `img-src`. Der Dialog setzt Inline-Styles im Shadow-DOM, ihre Hashes kommen in `style-src`. Fehlt einer, scheitert der Browser-Test des Nostr-Logins an der CSP-Meldung (NIP-07-Signer im Test, Vorbild `apps/web/tests/app.test.ts`).
 - In findyourlogic meldete die CSP außerdem das `eval`, mit dem zod prüft, ob es Parser kompilieren darf. Abhilfe: `z.config({ jitless: true })` in `packages/shared`.
 
 ## Live als 1.0

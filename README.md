@@ -1,6 +1,6 @@
 # starter
 
-Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Magic Link (Web) oder Code (App), Feedback-Knopf mit Screenshot, Link-Vorschau, Mail über SMTP, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
+Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Magic Link (Web) oder Code (App), Feedback-Knopf mit Screenshot, Update-Mails mit Opt-in, Link-Vorschau, Mail über SMTP im Design der App, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 
@@ -27,7 +27,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 | `packages/shared` | App-Name, zod-Schemas und Typen für API und Web |
 | `apps/mobile` | Flutter-App, siehe unten. Reine Web-Projekte löschen den Ordner und `.github/workflows/mobile.yml` |
 
-Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback und Link-Vorschau (Playwright, baut das Web und startet API und Web-Build selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server, so greift die CSP wie in Produktion; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
+Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback, Update-Mails und Link-Vorschau (Playwright, baut das Web und startet API und Web-Build selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server, so greift die CSP wie in Produktion; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
 
 ## Feedback
 
@@ -42,6 +42,17 @@ Die API speichert jede Meldung in `feedback` und legt dann ein Issue im Repo des
 - Alle offenen Meldungen: `gh search issues --owner robinchoice --label feedback --state open`
 - Den Screenshot liefert `/api/v1/feedback/<id>/screenshot` ohne Login, damit GitHub ihn im Issue anzeigen kann. Die zufällige ID ist der Schlüssel.
 - Das Repo backt die CI als `GITHUB_REPOSITORY` ins API-Image. Ohne `FEEDBACK_GITHUB_TOKEN` entsteht kein Issue, ohne `FEEDBACK_EMAIL` keine Mail.
+
+## Update-Mails
+
+Nutzer bekommen neue Funktionen per Mail, wenn sie es wollen. Gespeichert wird alles in der Datenbank der App, verschickt über das SMTP aus `lib/mail.ts`.
+
+- Opt-in: Standard ist aus, denn die Prototypen sind kostenlos und die Bestandskunden-Ausnahme aus § 7 Abs. 3 UWG greift nicht. Unter dem Login-Formular steht eine nicht vorausgewählte Checkbox, sie gilt erst, wenn der Login-Link oder Code eingelöst wird. Das ist zugleich das Double-Opt-in. Geschaltet wird jederzeit unter `/settings` (Web) bzw. im Profil (App). `users.updates_consent_at` hält den Zeitpunkt der Einwilligung als Nachweis, `users.locale` die Sprache der Mails.
+- Abmelden: Jede Update-Mail hat einen Link auf `/unsubscribe?token=…`, der ohne Login abbestellt, dazu `List-Unsubscribe` und `List-Unsubscribe-Post` für One-Click im Mail-Programm. Der Token steht pro Konto in `users.unsubscribe_token`.
+- Entwürfe schreiben Agenten als `updates/<datum>-<thema>.md`, etwa aus den Commits seit der letzten Datei dort. Je Sprache eine Überschrift `# de: Titel` bzw. `# en: Titel`, darunter die Features als Liste `- …`, optional ein Bild `![](bild.png)` neben der Datei (PNG oder JPEG). Die API legt jede Datei beim Start einmal als Entwurf an und überschreibt ihn danach nie. `bun run test` prüft alle Dateien.
+- Senden: `/admin/updates`, nur für `ADMIN_EMAILS`, also nie für admin@pleasance.org. Dort Entwürfe bearbeiten oder neu anlegen, Vorschau je Sprache, „Testmail an mich“ in beiden Sprachen, dann „An … Abonnenten senden“. Den Versand löst nur Robin aus, denn das ist eine Mail in seinem Namen an Dritte. Versendete Updates bleiben mit Datum und Zahlen stehen und lassen sich nicht mehr ändern.
+- Versand: Pro Empfänger entsteht eine Zeile in `update_deliveries`. Der Service `worker` (`apps/api/src/worker.ts`, gleiches Image wie die API) schickt sie gedrosselt, alle `UPDATE_MAIL_INTERVAL_MS` (Standard 6 s) eine Mail, mit drei Versuchen und einer Minute Pause nach einem Fehler. Wer zwischendurch abbestellt, wird übersprungen. Fehler stehen mit Update- und Zustell-ID im Log, ohne Adresse. Lokal: `bun run worker` in `apps/api`.
+- Design: Die Vorlage in `lib/mail.ts` gilt für alle Mails der App, auch Login-Link und Code (DESIGN.md, „Mails“).
 
 ## Deploy auf Coolify
 

@@ -10,7 +10,7 @@ class FakeApi {
   final requests = <http.Request>[];
   bool online = true;
   String? validToken;
-  var user = {'id': 'u1', 'email': 'robin@example.com', 'name': 'robin'};
+  var user = <String, Object?>{'id': 'u1', 'email': 'robin@example.com', 'name': 'robin', 'updatesSince': null};
 
   late final client = MockClient((request) async {
     if (!online) throw http.ClientException('offline');
@@ -29,7 +29,12 @@ class FakeApi {
         return _json({'user': loggedIn ? user : null});
       case ('PATCH', '/api/v1/auth/me'):
         if (!loggedIn) return _json({'error': 'Nicht angemeldet'}, 401);
-        user = {...user, 'name': jsonDecode(request.body)['name'] as String};
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        user = {
+          ...user,
+          if (body.containsKey('name')) 'name': body['name'],
+          if (body.containsKey('updates')) 'updatesSince': body['updates'] == true ? '2026-10-13T10:00:00.000Z' : null,
+        };
         return _json({'user': user});
       case ('POST', '/api/v1/feedback'):
         if (!loggedIn) return _json({'error': 'Nicht angemeldet'}, 401);

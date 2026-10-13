@@ -13,12 +13,19 @@ class User {
   final String id;
   final String email;
   final String name;
-  const User({required this.id, required this.email, required this.name});
 
-  factory User.fromJson(Map<String, dynamic> json) =>
-      User(id: json['id'] as String, email: json['email'] as String, name: json['name'] as String);
+  /// Since when the account gets update mails, null = off
+  final String? updatesSince;
+  const User({required this.id, required this.email, required this.name, this.updatesSince});
 
-  Map<String, dynamic> toJson() => {'id': id, 'email': email, 'name': name};
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json['id'] as String,
+    email: json['email'] as String,
+    name: json['name'] as String,
+    updatesSince: json['updatesSince'] as String?,
+  );
+
+  Map<String, dynamic> toJson() => {'id': id, 'email': email, 'name': name, 'updatesSince': updatesSince};
 }
 
 /// The logged-in user, or null. Token and profile live in the platform
@@ -53,8 +60,10 @@ class AuthController extends AsyncNotifier<User?> {
   }
 
   /// Mails a 6-digit code. A magic link can't open the app without
-  /// universal links, a code can be typed in anywhere.
-  Future<void> requestCode(String email) => _api.post('/auth/code', {'email': email});
+  /// universal links, a code can be typed in anywhere. [updates] is the
+  /// unticked opt-in for update mails, it counts once the code is accepted.
+  Future<void> requestCode(String email, {bool updates = false}) =>
+      _api.post('/auth/code', {'email': email, 'updates': updates});
 
   Future<void> verifyCode(String email, String code) async {
     final json = await _api.post('/auth/code/verify', {'email': email, 'code': code}) as Map<String, dynamic>;
@@ -66,6 +75,11 @@ class AuthController extends AsyncNotifier<User?> {
 
   Future<void> updateName(String name) async {
     final json = await _api.patch('/auth/me', {'name': name}) as Map<String, dynamic>;
+    await _save(User.fromJson(json['user'] as Map<String, dynamic>));
+  }
+
+  Future<void> setUpdates(bool on) async {
+    final json = await _api.patch('/auth/me', {'updates': on}) as Map<String, dynamic>;
     await _save(User.fromJson(json['user'] as Map<String, dynamic>));
   }
 

@@ -53,6 +53,9 @@ abstract class Messages {
   String repliesTo(String email);
   String get send;
   String get feedbackThanks;
+  String get updatesOptIn;
+  String get updatesByMail;
+  String updatesHint(String app);
 }
 
 class De extends Messages {
@@ -104,6 +107,12 @@ class De extends Messages {
   String get testMode => 'Testmodus';
   @override
   String get testModeHint => 'Zeigt den Käfer-Knopf, mit dem du Fehler samt Screenshot meldest.';
+  @override
+  String get updatesOptIn => 'Schick mir Updates zu neuen Funktionen per Mail. Abbestellen geht jederzeit.';
+  @override
+  String get updatesByMail => 'Updates per Mail';
+  @override
+  String updatesHint(String app) => 'Neue Funktionen in $app, höchstens ein paar Mal im Monat.';
   @override
   String get bugPlaceholder => 'Was ist passiert? Was hast du erwartet?';
   @override
@@ -187,6 +196,12 @@ class En extends Messages {
   String get testMode => 'Test mode';
   @override
   String get testModeHint => 'Shows the bug button for reporting bugs with a screenshot.';
+  @override
+  String get updatesOptIn => 'Send me updates about new features by email. Unsubscribe any time.';
+  @override
+  String get updatesByMail => 'Updates by email';
+  @override
+  String updatesHint(String app) => 'New features in $app, a few times a month at most.';
   @override
   String get bugPlaceholder => 'What happened? What did you expect?';
   @override

@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { createIssue } from '../lib/github';
 import { t } from '../lib/i18n';
+import { imageType, UUID } from '../lib/image';
 import { sendMail } from '../lib/mail';
 import { rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { validJson } from '../lib/validate';
@@ -12,14 +13,6 @@ import { captureException } from '../monitoring';
 import type { AppEnv } from '../types';
 
 const reportsPerUser = rateLimit('feedback-per-user', 10, 60 * 60 * 1000);
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
-function imageType(bytes: Buffer) {
-  if (bytes.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47]))) return 'image/png';
-  if (bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))) return 'image/jpeg';
-  return null;
-}
 
 type Report = {
   id: string;

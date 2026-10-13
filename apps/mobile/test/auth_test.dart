@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +36,21 @@ void main() {
     await auth.updateName('Robin');
     expect(api.requests.last.headers['authorization'], 'Bearer token-1');
     expect(container.read(authProvider).value?.name, 'Robin');
+  });
+
+  test('update mails are opt-in at login and switch in the profile', () async {
+    final api = FakeApi();
+    final container = await start(api);
+    final auth = container.read(authProvider.notifier);
+    await auth.requestCode('robin@example.com', updates: true);
+    expect(jsonDecode(api.requests.last.body), {'email': 'robin@example.com', 'updates': true});
+    await logIn(container);
+    expect(container.read(authProvider).value?.updatesSince, isNull);
+
+    await auth.setUpdates(true);
+    expect(container.read(authProvider).value?.updatesSince, isNotNull);
+    await auth.setUpdates(false);
+    expect(container.read(authProvider).value?.updatesSince, isNull);
   });
 
   test('a restart keeps the login, also offline', () async {

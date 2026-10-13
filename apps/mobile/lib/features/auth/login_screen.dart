@@ -20,6 +20,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _email = TextEditingController();
   final _code = TextEditingController();
   bool _codeSent = false;
+  // Unticked: update mails are opt-in
+  bool _updates = false;
   bool _busy = false;
   String? _error;
 
@@ -47,7 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _sendCode() => _run(() async {
-        await ref.read(authProvider.notifier).requestCode(_email.text.trim());
+        await ref.read(authProvider.notifier).requestCode(_email.text.trim(), updates: _updates);
         setState(() => _codeSent = true);
       });
 
@@ -84,6 +86,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: InputDecoration(labelText: t.email, prefixIcon: const Icon(Icons.mail_outline)),
                   onSubmitted: (_) => _sendCode(),
                 ),
+                if (!_codeSent)
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    value: _updates,
+                    onChanged: _busy ? null : (on) => setState(() => _updates = on ?? false),
+                    title: Text(t.updatesOptIn, style: theme.textTheme.bodyMedium),
+                  ),
                 if (_codeSent) ...[
                   const SizedBox(height: 12),
                   TextField(

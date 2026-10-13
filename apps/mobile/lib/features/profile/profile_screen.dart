@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../config.dart';
 import '../../core/auth.dart';
 import '../../core/brand.dart';
 import '../../core/locale.dart';
@@ -37,6 +38,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _setUpdates(bool on) async {
+    try {
+      await ref.read(authProvider.notifier).setUpdates(on);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).value;
@@ -56,7 +65,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onSubmitted: (_) => _save(),
           ),
           FilledButton(onPressed: _busy ? null : _save, child: Text(t.save)),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(t.updatesByMail),
+            subtitle: Text(t.updatesHint(appName)),
+            value: user?.updatesSince != null,
+            onChanged: (on) => _setUpdates(on),
+          ),
+          const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () => showFeedbackSheet(context, ref, FeedbackKind.idea),
             icon: const Icon(Icons.chat_bubble_outline),

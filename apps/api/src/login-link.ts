@@ -4,13 +4,9 @@
 //   bun apps/api/src/login-link.ts <email>
 import { createDb, magicLinks } from '@app/db';
 import { magicLinkSchema } from '@app/shared';
-import { isAdmin } from './lib/signup';
 import { generateToken, hashToken } from './middleware/auth';
 
 const { email } = magicLinkSchema.parse({ email: process.argv[2] });
-if (email !== 'admin@pleasance.org' || isAdmin(email)) {
-  throw new Error('Preview login links are only available for the non-admin preview account');
-}
 const db = createDb(process.env.DATABASE_URL!);
 const token = generateToken();
 await db

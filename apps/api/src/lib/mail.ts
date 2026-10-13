@@ -25,7 +25,7 @@ type Mail = {
   subject: string;
   text: string;
   html?: string;
-  replyTo?: { name: string; address: string };
+  replyTo?: string;
   attachments?: { filename: string; content: Buffer }[];
 };
 

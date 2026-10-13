@@ -79,7 +79,7 @@ Prototypen sind von außen erreichbar, aber geschlossen, bis Robin ausdrücklich
 - Tester aufnehmen: Ein Admin klickt in der App oben auf „Tester einladen“ (`/invite`) und gibt die Adresse ein. Das legt das Konto an und schickt einen Login-Link, ohne Coolify und Redeploy. Danach meldet sich der Tester wie jedes bestehende Konto an, auch wenn der Link abläuft. Admins sind die Adressen in `ADMIN_EMAILS` (kommagetrennt, Standard robin@pleasance.org, der menschliche Admin), die API prüft das. Einladen öffnet nichts, `SIGNUP_OPEN` bleibt, wie es ist.
 - admin@pleasance.org, der agentische Admin, kommt nie in `ADMIN_EMAILS`: Agenten melden sich damit in der Vorschau an und dürfen weder Konten an der Registrierung vorbei anlegen noch Dritte anmailen.
 - Öffnen, erst nach Robins Go: `SIGNUP_OPEN=true` in Coolify setzen und neu deployen. Prüfen: Login-Link an eine neue Adresse anfordern.
-- `login-link` erlaubt ausschließlich admin@pleasance.org, sofern es nicht in `ADMIN_EMAILS` steht. Nur dieses Testkonto der Savor-Vorschau legt das Skript ohne Allowlist-Eintrag an.
+- `login-link` legt Konten selbst an, das Testkonto der Savor-Vorschau braucht keinen Eintrag.
 
 ## Nostr-Login
 

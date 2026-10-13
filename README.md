@@ -27,7 +27,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 | `packages/shared` | App-Name, zod-Schemas und Typen für API und Web |
 | `apps/mobile` | Flutter-App, siehe unten. Reine Web-Projekte löschen den Ordner und `.github/workflows/mobile.yml` |
 
-Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback, Update-Mails und Link-Vorschau (Playwright, baut das Web und startet API und Web-Build selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server, so greift die CSP wie in Produktion; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
+Befehle: `bun run dev`, `check` (Biome und Typen), `format`, `test`, `build`, `db:generate`, `standards` (Übersicht der Standards auf http://localhost:4300), in `apps/web` außerdem `screenshots` (siehe „Screenshots“) und `og-image` (Vorschaubild für geteilte Links, DESIGN.md). `test` umfasst die API-Tests und Browser-Tests von Login, Feedback, Update-Mails, Link-Vorschau und Agenten-Zugang (Playwright, baut das Web und startet API und Web-Build selbst auf eigenen Ports 53100 und 54100, nie die laufenden Dev-Server, so greift die CSP wie in Produktion; testen zwei Worktrees gleichzeitig, bekommt einer andere per `TEST_API_PORT` und `TEST_WEB_PORT`). Beide laufen gegen `DATABASE_URL` und legen nur Testkonten mit frischen Adressen an.
 
 ## Feedback
 
@@ -78,6 +78,17 @@ Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-S
 - Fotografiert wird die GitHub-Variable `API_URL` (ab 1.0 die eigene Domain), ohne sie `https://<repo>.pleasance.org`. Aufrufe an `/ingest` blockt das Skript, PostHog zählt sie nicht.
 - Lokal: `bun run screenshots [url]` in `apps/web`, ohne URL gegen `bun run dev`.
 - Nach einem Deploy liegt oft ein Bot-Commit auf `main`, also vor dem nächsten Push holen.
+
+## Für Agenten
+
+Fremde Agenten lesen die öffentlichen Inhalte ohne HTML, nach [llms.txt](https://llmstxt.org) (Vorbild: bipexplorer.com). Quelle ist `publicPages` in `apps/api/src/lib/public-pages.ts`, die Routen stehen in `apps/api/src/routes/agents.ts`. Der Web-Server leitet die Pfade an die API weiter.
+
+- `/llms.txt`: Einstieg mit Name, Tagline und allen öffentlichen Seiten als Links auf ihr Markdown.
+- `/llms-full.txt`: alle Seiten in einer Datei.
+- `<seite>.md`: jede Seite als Markdown, die Startseite als `/index.md`. Fragt ein Agent mit `Accept: text/markdown` nach einer Seite, die es als Markdown gibt, bekommt er unter derselben URL gleich das Markdown, alle anderen das HTML.
+- Sprache: `?lang=de|en`, sonst `Accept-Language`, sonst Deutsch. Links behalten ein `?lang=`.
+- Nur öffentliche Inhalte, die Registrierung bleibt unberührt. Was hineindarf: AGENTS.md, „Konventionen“.
+- Ausprobieren: `curl localhost:5173/llms.txt` bei laufendem `bun run dev`.
 
 ## Login in der Savor-Vorschau
 

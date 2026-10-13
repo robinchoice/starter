@@ -14,7 +14,7 @@ import { deleteCookie } from 'hono/cookie';
 import { t } from '../lib/i18n';
 import { sendLoginCodeEmail, sendMagicLinkEmail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
-import { mayLogIn } from '../lib/signup';
+import { isAdmin, mayLogIn } from '../lib/signup';
 import { validJson } from '../lib/validate';
 import {
   currentUser,
@@ -26,8 +26,6 @@ import {
   SESSION_DAYS,
   sessionToken,
   setSessionCookie,
-  toUser,
-  userColumns,
 } from '../middleware/auth';
 import type { AppEnv } from '../types';
 
@@ -38,6 +36,9 @@ const CODE_ATTEMPTS = 5;
 const mailsPerAddress = rateLimit('mails-per-address', 5, 60 * MINUTE);
 const mailsPerIp = rateLimit('mails-per-ip', 20, 60 * MINUTE);
 const codeChecksPerIp = rateLimit('code-checks-per-ip', 30, 15 * MINUTE);
+
+const userColumns = { id: users.id, email: users.email, name: users.name };
+const withAdmin = (user: { id: string; email: string; name: string }) => ({ ...user, admin: isAdmin(user.email) });
 
 // The first login creates the account, /magic-link and /code only send one
 // to addresses that may sign up. The no-op update lets RETURNING
@@ -55,7 +56,7 @@ async function startSession(db: Database, email: string, days: number) {
     tokenHash: hashToken(token),
     expiresAt: new Date(Date.now() + days * 24 * 60 * MINUTE),
   });
-  return { user: toUser(user!), token };
+  return { user: withAdmin(user!), token };
 }
 
 async function mailMagicLink(c: Context<AppEnv>, email: string, next: string | null) {
@@ -189,5 +190,5 @@ export const authRoutes = new Hono<AppEnv>()
       .set({ name: c.req.valid('json').name, updatedAt: new Date() })
       .where(eq(users.id, c.get('user').id))
       .returning(userColumns);
-    return c.json({ user: toUser(user!) });
+    return c.json({ user: withAdmin(user!) });
   });

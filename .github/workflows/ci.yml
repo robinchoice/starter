@@ -1,29 +1,19 @@
 name: CI
 
 # Docs and the mobile app (own workflow mobile.yml) do not change the web images,
-# so they skip the run: private repos pay every minute from the monthly quota.
+# so they skip push runs: private repos pay every minute from the monthly quota.
 on:
   push:
     branches: [main]
     paths-ignore:
-      - '**/README.md'
+      - README.md
       - AGENTS.md
       - CLAUDE.md
       - DESIGN.md
-      - standards/**
       - apps/mobile/**
       - .github/workflows/mobile.yml
       - .github/workflows/standards.yml
   pull_request:
-    paths-ignore:
-      - '**/README.md'
-      - AGENTS.md
-      - CLAUDE.md
-      - DESIGN.md
-      - standards/**
-      - apps/mobile/**
-      - .github/workflows/mobile.yml
-      - .github/workflows/standards.yml
 
 permissions:
   contents: read

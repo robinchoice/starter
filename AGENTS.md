@@ -13,9 +13,9 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 ## Deploy
 
-- Ein Push auf `main` baut nach grüner CI die Images (nicht bei Änderungen nur an Doku, `standards/` oder `apps/mobile`, siehe `paths-ignore` in `ci.yml`) und deployt sie über die Coolify-API. Danach fotografiert sie die Live-Seite nach `docs/screenshots/`, committet geänderte Bilder mit `[skip ci]` und meldet den Deploy an `robinchoice/pleasance` (README, „Screenshots“). Ohne das Secret `COOLIFY_TOKEN` überspringt die CI Deploy, Screenshots und Meldung, so auch hier in der Vorlage. Ohne `PLEASANCE_DISPATCH_TOKEN` entfällt nur die Meldung.
+- Ein Push auf `main` baut nach grüner CI die Images (nicht bei Änderungen ausschließlich an den unter `paths-ignore` in `ci.yml` aufgeführten Pfaden) und deployt sie über die Coolify-API. Danach fotografiert sie die Live-Seite nach `docs/screenshots/`, committet geänderte Bilder mit `[skip ci]` und meldet den Deploy an `robinchoice/pleasance` (README, „Screenshots“). Ohne das Secret `COOLIFY_TOKEN` überspringt die CI Deploy, Screenshots und Meldung, so auch hier in der Vorlage. Ohne `PLEASANCE_DISPATCH_TOKEN` entfällt nur die Meldung. Pull Requests durchlaufen die CI unabhängig von den geänderten Pfaden.
 - App (`apps/mobile`): Ein Push auf `main` baut das Android-AAB, iOS geht nur bei einem Tag `v*` oder mit `gh workflow run mobile.yml` zu TestFlight (macOS-Minuten zählen zehnfach).
-- Prüfen: `gh run watch`. Der Deploy-Job ist erst grün, wenn `https://<slug>.pleasance.org/api/health` den Commit als `revision` meldet.
+- Prüfen: Bei einem deployrelevanten Push `gh run watch`. Der Deploy-Job ist erst grün, wenn `https://<slug>.pleasance.org/api/health` den Commit als `revision` meldet. Wird der CI-Lauf durch `paths-ignore` übersprungen, gibt es für diesen Commit keinen CI-Lauf und die Live-Revision bleibt unverändert.
 - Nur hier in der Vorlage: `.github/workflows/standards.yml` baut `standards/` als Image `starter-site` und deployt es über das Tailnet nach https://standards.pleasance.org (Coolify VPS 3, nur aus dem Tailnet). Aus der Vorlage erzeugte Repos überspringen den Workflow und können ihn mit `standards/` löschen.
 
 ## Fallen

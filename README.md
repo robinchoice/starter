@@ -156,3 +156,9 @@ Flutter mit Riverpod und go_router, Karte mit flutter_map und OSM, Token in `flu
 - **GitHub-Secrets:** `ASC_KEY_P8` (App-Store-Connect-API-Key, base64), `IOS_DEV_CERTIFICATE` (festes „Apple Development“-Zertifikat als base64-PKCS12, läuft am 04.10.2027 ab), `IOS_DEV_CERTIFICATE_PASSWORD`, `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
 - Ohne `ASC_KEY_ID` wird der iOS-Job übersprungen, ohne `IOS_DEV_CERTIFICATE` bricht er ab. Ohne festes Zertifikat legt Xcode pro Lauf ein neues an, bis die Zertifikatsgrenze des Teams erreicht ist. Ohne Keystore signiert Android mit Debug-Keys (nur zum Testen).
 - Die App vorher in App Store Connect mit der Bundle-ID anlegen. Team-ID steht in `ios/ExportOptions.plist` und im Xcode-Projekt.
+- Release-Builds sind mit `--obfuscate` gebaut, Stacktraces aus der App (auch in GlitchTip) zeigen nur verschleierte Namen. Die Symbole liegen 90 Tage als Artefakt `symbols-android` bzw. `symbols-ios` am CI-Lauf, die Build-Nummer der App ist dessen Run-Nummer (`gh run list -w mobile.yml --json number,databaseId` liefert die Run-ID dazu). Lesbar machen:
+  ```sh
+  gh run download <run-id> -n symbols-android -D /tmp/symbols
+  flutter symbolize -i trace.txt -d /tmp/symbols/app.android-arm64.symbols   # iOS: app.ios-arm64.symbols
+  ```
+  `trace.txt` ist der rohe Stacktrace mit `build_id` und `abs …/virt …`-Zeilen (z. B. aus `adb logcat`). Builds, die älter als 90 Tage sind, lassen sich nicht mehr symbolisieren.

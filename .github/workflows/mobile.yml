@@ -3,6 +3,8 @@ name: Mobile
 # Every change to the app gets analyze and test. On main: Android → signed AAB as artifact.
 # iOS → TestFlight only for release tags (v*) and manual runs: macOS minutes count tenfold
 # in private repos, one run costs about 60 minutes.
+# Release builds are obfuscated, the symbols for `flutter symbolize` are kept as an artifact for
+# 90 days (README, "Release"). They never go into the bundle or the repo.
 
 on:
   workflow_dispatch:
@@ -87,7 +89,7 @@ jobs:
 
       # Eindeutige, steigende Build-Nummer pro Lauf, TestFlight lehnt Duplikate ab.
       - name: Flutter-Build vorbereiten
-        run: flutter build ios --config-only --release --no-codesign --dart-define=API_URL=$API_URL --dart-define=SENTRY_DSN=$SENTRY_DSN --build-number=$GITHUB_RUN_NUMBER --dart-define=APP_VERSION=$GITHUB_SHA
+        run: flutter build ios --config-only --release --no-codesign --obfuscate --split-debug-info=$RUNNER_TEMP/symbols --dart-define=API_URL=$API_URL --dart-define=SENTRY_DSN=$SENTRY_DSN --build-number=$GITHUB_RUN_NUMBER --dart-define=APP_VERSION=$GITHUB_SHA
 
       - name: Archive bauen
         working-directory: apps/mobile/ios
@@ -114,6 +116,13 @@ jobs:
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ vars.ASC_KEY_ID }}.p8 \
             -authenticationKeyID ${{ vars.ASC_KEY_ID }} \
             -authenticationKeyIssuerID ${{ vars.ASC_ISSUER_ID }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: symbols-ios
+          path: ${{ runner.temp }}/symbols
+          retention-days: 90
+          if-no-files-found: error
 
   android:
     needs: check
@@ -149,9 +158,16 @@ jobs:
           EOT
 
       - name: App Bundle bauen
-        run: flutter build appbundle --release --dart-define=API_URL=$API_URL --dart-define=SENTRY_DSN=$SENTRY_DSN --build-number=$GITHUB_RUN_NUMBER --dart-define=APP_VERSION=$GITHUB_SHA
+        run: flutter build appbundle --release --obfuscate --split-debug-info=$RUNNER_TEMP/symbols --dart-define=API_URL=$API_URL --dart-define=SENTRY_DSN=$SENTRY_DSN --build-number=$GITHUB_RUN_NUMBER --dart-define=APP_VERSION=$GITHUB_SHA
 
       - uses: actions/upload-artifact@v4
         with:
           name: android-aab
           path: apps/mobile/build/app/outputs/bundle/release/app-release.aab
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: symbols-android
+          path: ${{ runner.temp }}/symbols
+          retention-days: 90
+          if-no-files-found: error

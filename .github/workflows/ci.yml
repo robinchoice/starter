@@ -13,6 +13,8 @@ on:
       - apps/mobile/**
       - .github/workflows/mobile.yml
       - .github/workflows/standards.yml
+      - .github/workflows/secrets.yml
+      - .gitleaks.toml
   pull_request:
 
 permissions:

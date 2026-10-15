@@ -96,6 +96,7 @@ const BUILTIN = [
   'GlitchTip',
   'Healthcheck mit DB-Prüfung',
   'CI mit Browser-Test',
+  'Secret-Scan mit gitleaks',
   'Dependabot',
   'Coolify-Deploy',
   'PleasanceFooter mit Signatur',
@@ -105,13 +106,13 @@ const BUILTIN = [
 const FLOW = [
   ['Slug', 'Robin + Agent', 'Ein Wort, gilt für Repo, Ressourcen, DB und Bundle-ID', false],
   ['Mockups', 'Robin gibt frei', '2–3 statische Richtungen in /tmp, Desktop und Handy, mit Empfehlung', true],
-  ['Repo', 'Agent', 'gh repo create --template robinchoice/starter, AGENTS.md ausfüllen', false],
+  ['Repo', 'Agent', 'gh repo create --template robinchoice/starter --public, AGENTS.md ausfüllen', false],
   ['Farbe & Zeichen', 'Agent', 'Stufe, Ausschnitt in APP_BAND, Zeile in DESIGN.md', false],
   ['Bauen', 'Agent', 'Freigegebenes Mockup als Vorlage, Texte DE und EN', false],
   ['Prüfen', 'Agent', 'bun run check && bun run test && bun run build', false],
   ['Commit', 'Agent', 'Mit Pfaden, signiert, nur eigene Änderungen', false],
   ['Push', 'Agent', 'Fertig heißt gepusht. Vorher git fetch und Neues einarbeiten', false],
-  ['CI', 'GitHub Actions', 'Prüft und baut arm64-Images nach GHCR', false],
+  ['CI', 'GitHub Actions', 'Prüft, scannt nach Secrets und baut arm64-Images nach GHCR', false],
   ['Deploy', 'Coolify', 'Zieht die Images. Agent wartet mit gh run watch, prüft /api/health', false],
   ['Aufsicht', 'automatisch', 'GlitchTip, Uptime Kuma, advisory-alarm, infra.md nachziehen', false],
 ];

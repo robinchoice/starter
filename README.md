@@ -4,7 +4,7 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 
 ## Neues Projekt
 
-1. Einen Slug aus ASCII-Kleinbuchstaben und Ziffern wählen, beginnend mit einem Buchstaben, ohne Bindestrich (z. B. `savor`). Repo und lokaler Ordner heißen gleich: `~/dev/<slug>`. Repo aus der Vorlage anlegen: `gh repo create robinchoice/<slug> --template robinchoice/starter --public --clone`. Repos sind öffentlich, siehe „Secret-Scan“.
+1. Einen Slug aus ASCII-Kleinbuchstaben und Ziffern wählen, beginnend mit einem Buchstaben, ohne Bindestrich (z. B. `savor`). Repo und lokaler Ordner heißen gleich: `~/dev/<slug>`. Repo aus der Vorlage anlegen: `gh repo create robinchoice/<slug> --template robinchoice/starter --public --clone`. Repos sind öffentlich, danach Push Protection einschalten (siehe „Secret-Scan“), die Vorlage vererbt sie nicht: `gh api -X PATCH repos/robinchoice/<slug> --input - <<<'{"security_and_analysis":{"secret_scanning":{"status":"enabled"},"secret_scanning_push_protection":{"status":"enabled"}}}'`
 2. `APP_NAME` und `APP_BAND` in `packages/shared/src/index.ts` setzen. Welcher Ausschnitt aus dem Farbband passt, steht in DESIGN.md.
 3. In `AGENTS.md` Titel, „Zweck & Links“, die Prüf-URL unter „Deploy“ und „Fallen“ für das Projekt ausfüllen und den einleitenden Absatz zur Vorlage löschen.
 4. Lokal starten:
@@ -35,7 +35,8 @@ Prototyp-Repos sind öffentlich, Code, Historie und CI-Logs. Privat bleiben nur 
 
 - Regeln: die Standardregeln von gitleaks, dazu `.gitleaks.toml`. Die nimmt nur `generic-api-key` in `patches/*.patch`, `bun.lock` und `pubspec.lock` aus, dort schlägt gebündelter Fremdcode an. Echte Token-Formate (`ghp_…`, `sk_live_…`) fallen dort weiter auf.
 - Fehlalarm: den `Fingerprint` aus dem Log als Zeile in `.gitleaksignore` eintragen.
-- Echter Fund: Der Scan läuft erst nach dem Push, das Secret ist also schon öffentlich. Sofort rotieren, Entfernen aus dem Code oder der Historie reicht nicht.
+- Davor sitzt GitHubs Push Protection: Sie lehnt Pushes mit bekannten Token-Formaten ab, bevor sie öffentlich werden, Secret Scanning meldet Funde als Alert im Repo. Beides ist für öffentliche Repos kostenlos und wird pro Repo eingeschaltet (Schritt 1 unter „Neues Projekt“). Eine Sperre nur nach Prüfung umgehen, nie für einen echten Wert.
+- Echter Fund: gitleaks läuft erst nach dem Push, das Secret ist also schon öffentlich. Sofort rotieren, Entfernen aus dem Code oder der Historie reicht nicht.
 
 ## Feedback
 

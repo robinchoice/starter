@@ -1,7 +1,7 @@
 name: CI
 
 # Docs and the mobile app (own workflow mobile.yml) do not change the web images,
-# so they skip push runs: private repos pay every minute from the monthly quota.
+# so they skip push runs.
 on:
   push:
     branches: [main]
@@ -27,9 +27,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: false
 
+# Private repos run on our own runners on vps4 (ARM64, one fresh container per job, free),
+# public ones on GitHub's runners, which cost public repos nothing and keep strangers' pull requests off vps4.
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "ARM64"]') || 'ubuntu-latest' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -72,7 +74,7 @@ jobs:
   build-and-push:
     needs: check
     if: github.event_name == 'push'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "ARM64"]') || 'ubuntu-24.04-arm' }}
     permissions:
       contents: read
       packages: write
@@ -126,7 +128,7 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "ARM64"]') || 'ubuntu-latest' }}
     timeout-minutes: 15
     outputs:
       deployed: ${{ steps.deploy.outputs.deployed }}
@@ -202,7 +204,7 @@ jobs:
   screenshots:
     needs: deploy
     if: needs.deploy.outputs.deployed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "ARM64"]') || 'ubuntu-latest' }}
     timeout-minutes: 10
     permissions:
       contents: write

@@ -20,10 +20,12 @@ concurrency:
   group: standards
   cancel-in-progress: false
 
+# Private repos run on our own runners on vps4 (ARM64, one fresh container per job, free),
+# public ones on GitHub's runners, which cost public repos nothing and keep strangers' pull requests off vps4.
 jobs:
   build-and-push:
     if: github.repository == 'robinchoice/starter'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "ARM64"]') || 'ubuntu-24.04-arm' }}
     permissions:
       contents: read
       packages: write
@@ -57,7 +59,7 @@ jobs:
   deploy:
     needs: build-and-push
     if: vars.COOLIFY_URL != ''
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.repository.private && fromJSON('["self-hosted", "linux", "ARM64"]') || 'ubuntu-latest' }}
     timeout-minutes: 15
     env:
       COOLIFY_TOKEN: ${{ secrets.COOLIFY_SITE_TOKEN }}

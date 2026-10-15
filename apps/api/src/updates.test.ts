@@ -3,6 +3,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createDb, migrateDb, sessions, updateDeliveries, users } from '@app/db';
+import { APP_NAME } from '@app/shared';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
 import { updateMail } from './lib/mail';
@@ -77,7 +78,7 @@ test('the ticked checkbox opts in once the link is opened, the unticked one chan
   await request('POST', '/auth/magic-link', { email, updates: true }, { 'accept-language': 'en' });
   // The login mail says what opening the link confirms
   const mailed = log.mock.calls.map((args) => String(args[0])).findLast((line) => line.startsWith('[mail]'));
-  expect(mailed).toContain('Logging in with this also turns on email updates from Starter.');
+  expect(mailed).toContain(`Logging in with this also turns on email updates from ${APP_NAME}.`);
   expect((await userRow(email).catch(() => null))?.updatesConsentAt ?? null).toBeNull();
   const { user } = await body(
     request('POST', '/auth/verify', { token: lastMailedToken() }, { 'accept-language': 'en' }),
@@ -161,8 +162,8 @@ test('the admin drafts, previews, tests and sends; the worker delivers to opted-
   expect((await request('POST', `/updates/${id}/test`, undefined, admin)).status).toBe(200);
   const tests = log.mock.calls.slice(before).filter((args) => String(args[0]).startsWith(`[mail] To ${ADMIN}`));
   expect(tests.map((args) => String(args[0]).split('\n')[0])).toEqual([
-    `[mail] To ${ADMIN}: Neu in Starter: Karte mit <Familien>`,
-    `[mail] To ${ADMIN}: New in Starter: Map with families`,
+    `[mail] To ${ADMIN}: Neu in ${APP_NAME}: Karte mit <Familien>`,
+    `[mail] To ${ADMIN}: New in ${APP_NAME}: Map with families`,
   ]);
 
   const sent = await body(request('POST', `/updates/${id}/send`, undefined, admin));
@@ -197,7 +198,7 @@ test('the admin drafts, previews, tests and sends; the worker delivers to opted-
   );
   expect(statuses[subscriber]).toBe('sent');
   expect(statuses[leaving]).toBe('skipped');
-  expect(log.mock.calls.some((args) => String(args[0]).startsWith(`[mail] To ${subscriber}: New in Starter`))).toBe(
+  expect(log.mock.calls.some((args) => String(args[0]).startsWith(`[mail] To ${subscriber}: New in ${APP_NAME}`))).toBe(
     true,
   );
 

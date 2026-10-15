@@ -37,6 +37,7 @@ const SIGNS = {
   'zwei Punkte mit Brücke':
     '<path d="M28 52 Q50 16 72 52"/><circle cx="29" cy="70" r="7"/><circle cx="71" cy="70" r="7"/>',
   Blatt: '<path d="M34 24 H55 L68 37 V76 H34 Z"/><path d="M55 24 V37 H68"/>',
+  'R mit Bein': '<path d="M30 74 V26 H52 Q72 26 72 43 Q72 60 52 60 H30 M52 60 L72 74"/>',
   'Ring mit Kern': '<path d="M50 25 a25 25 0 1 0 0.01 0"/><circle cx="50" cy="50" r="7.5"/>',
   Leuchtturm:
     '<path d="M40 77 L45 44 H55 L60 77"/><path d="M42 44 H58"/><path d="M24 26 L33 29 M76 26 L67 29"/><circle cx="50" cy="31" r="6.5"/>',

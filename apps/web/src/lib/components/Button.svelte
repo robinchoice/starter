@@ -50,7 +50,7 @@
   }
   .primary {
     background: var(--gradient);
-    color: var(--text);
+    color: #17171a;
   }
   .secondary {
     background: var(--surface);

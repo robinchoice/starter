@@ -3,10 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:passkeys/authenticator.dart';
+import 'package:passkeys/types.dart';
 
 import 'api.dart';
 
 final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
+final passkeyAuthenticatorProvider = Provider<PasskeyAuthenticatorInterface>((ref) => PasskeyAuthenticator());
 final authProvider = AsyncNotifierProvider<AuthController, User?>(AuthController.new);
 
 class User {
@@ -36,6 +39,7 @@ class AuthController extends AsyncNotifier<User?> {
 
   Api get _api => ref.read(apiProvider);
   FlutterSecureStorage get _storage => ref.read(secureStorageProvider);
+  PasskeyAuthenticatorInterface get _passkeys => ref.read(passkeyAuthenticatorProvider);
 
   @override
   Future<User?> build() async {
@@ -65,8 +69,29 @@ class AuthController extends AsyncNotifier<User?> {
   Future<void> requestCode(String email, {bool updates = false}) =>
       _api.post('/auth/code', {'email': email, 'updates': updates});
 
-  Future<void> verifyCode(String email, String code) async {
-    final json = await _api.post('/auth/code/verify', {'email': email, 'code': code}) as Map<String, dynamic>;
+  Future<void> verifyCode(String email, String code) async =>
+      _startSession(await _api.post('/auth/code/verify', {'email': email, 'code': code}) as Map<String, dynamic>);
+
+  /// Passkeys of this domain, see the README, „Passkeys“. Throws
+  /// [PasskeyAuthCancelledException] when the user closes the system sheet.
+  Future<void> logInWithPasskey() async {
+    final options = await _api.post('/auth/passkeys/login/options') as Map<String, dynamic>;
+    // Not only passkeys on this phone: also security keys and the QR code for another device
+    final request = AuthenticateRequestType.fromJson(options, preferImmediatelyAvailableCredentials: false);
+    final response = await _passkeys.authenticate(request);
+    await _startSession(
+      await _api.post('/auth/passkeys/login', {'response': response.toJson()}) as Map<String, dynamic>,
+    );
+  }
+
+  /// Needs a session: passkeys only exist for accounts that logged in by mail.
+  Future<void> addPasskey() async {
+    final options = await _api.post('/auth/passkeys/register/options') as Map<String, dynamic>;
+    final response = await _passkeys.register(RegisterRequestType.fromJson(options));
+    await _api.post('/auth/passkeys/register', {'response': response.toJson()});
+  }
+
+  Future<void> _startSession(Map<String, dynamic> json) async {
     final token = json['token'] as String;
     await _storage.write(key: _tokenKey, value: token);
     _api.token = token;

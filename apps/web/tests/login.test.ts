@@ -173,3 +173,10 @@ test('a passkey added in the settings logs in without mail until it is removed',
   // The browser logs the expected 400 as an error
   errors = errors.filter((error) => !error.includes('status of 400'));
 });
+
+// Without APPLE_TEAM_ID and ANDROID_CERT_SHA256 the API answers 404, but as JSON, not the web's 404 page
+test('the web server hands the app links to the API', async ({ request }) => {
+  const res = await request.get('/.well-known/assetlinks.json');
+  expect(res.status()).toBe(404);
+  expect(res.headers()['content-type']).toContain('application/json');
+});

@@ -38,6 +38,28 @@ void main() {
     expect(container.read(authProvider).value?.name, 'Robin');
   });
 
+  test('a passkey added after the mail login logs in without mail', () async {
+    final api = FakeApi();
+    final container = await start(api);
+    final auth = container.read(authProvider.notifier);
+    await expectLater(auth.addPasskey(), throwsA(isA<ApiException>()));
+
+    await logIn(container);
+    await auth.addPasskey();
+    expect(api.passkeys.relyingParty, 'example.org');
+    expect(jsonDecode(api.requests.last.body)['response']['id'], 'passkey-1');
+
+    await auth.logout();
+    await auth.logInWithPasskey();
+    expect(container.read(authProvider).value?.email, 'robin@example.com');
+    expect(jsonDecode(api.requests.last.body)['response']['response']['signature'], 'e30');
+
+    await auth.logout();
+    api.passkeys.id = 'removed';
+    await expectLater(auth.logInWithPasskey(), throwsA(isA<ApiException>()));
+    expect(container.read(authProvider).value, isNull);
+  });
+
   test('update mails are opt-in at login and switch in the profile', () async {
     final api = FakeApi();
     final container = await start(api);

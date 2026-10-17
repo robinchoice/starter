@@ -16,10 +16,13 @@ const API_ORIGIN = process.env.API_INTERNAL_URL || (dev ? 'http://localhost:3000
 // Public content for agents comes from the API, see apps/api/src/routes/agents.ts
 const AGENT_PATH = /^\/llms(-full)?\.txt$|\.md$/;
 
+// Files that let the mobile app use this domain's passkeys, see apps/api/src/routes/passkeys.ts
+const APP_LINKS = /^\/\.well-known\/(apple-app-site-association|assetlinks\.json)$/;
+
 // PostHog's browser SDK sends to /ingest (see hooks.client.ts). Going through
 // this server keeps the CSP at 'self' and gets past ad blockers.
 function upstream(url: URL) {
-  if (url.pathname.startsWith('/api/') || AGENT_PATH.test(url.pathname))
+  if (url.pathname.startsWith('/api/') || AGENT_PATH.test(url.pathname) || APP_LINKS.test(url.pathname))
     return `${API_ORIGIN}${url.pathname}${url.search}`;
   if (url.pathname.startsWith('/ingest/static/') || url.pathname.startsWith('/ingest/array/'))
     return `https://eu-assets.i.posthog.com${url.pathname.slice(7)}${url.search}`;

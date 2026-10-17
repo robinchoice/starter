@@ -121,6 +121,7 @@ Im Web meldet man sich neben der Login-Mail (Link und Code) auch mit einem Passk
 - Ein entfernter Passkey bleibt auf dem Gerät. Beim nächsten Versuch antwortet die API „Diesen Passkey kennen wir nicht“, und das Web bittet den Browser per Signal-API, ihn zu vergessen.
 - Lokal gehen Passkeys auf `localhost` ohne HTTPS, über eine LAN-Adresse nicht.
 - Der Browser-Test (`apps/web/tests/login.test.ts`) legt sie mit dem virtuellen Authenticator von Chromium an (CDP `WebAuthn.addVirtualAuthenticator`).
+- App: Das Paket [`passkeys`](https://pub.dev/packages/passkeys) meldet an („Mit Passkey anmelden“) und legt im Profil an, Entfernen geht im Web. Die App darf die Passkeys der Domain nur nutzen, wenn die Domain sie nennt: Die API liefert `/.well-known/apple-app-site-association` aus `APPLE_TEAM_ID` und `/.well-known/assetlinks.json` aus `ANDROID_CERT_SHA256` (SHA-256 der Signaturzertifikate, kommagetrennt), jeweils mit `APP_ID` aus `packages/shared`. Ohne die Variablen antworten beide mit 404. Android meldet sich mit dem Zertifikat statt der Domain an, die API akzeptiert dafür `android:apk-key-hash:…` aus denselben Fingerprints. In `ANDROID_CERT_SHA256` gehören der App-Signaturschlüssel aus der Play Console und der Upload-Key (`keytool -list -v -keystore <keystore>`), zum Testen mit `flutter run` auch der Debug-Key. iOS braucht die Associated Domain `webcredentials:<domain>` in `ios/Runner/Runner.entitlements`, mit automatischer Signierung (`-allowProvisioningUpdates` in `mobile.yml`) trägt Xcode die Fähigkeit selbst in die App-ID ein. Scheitert der TestFlight-Build daran, „Associated Domains“ bei der App-ID im Developer-Portal einschalten.
 
 ## Nostr-Login
 
@@ -142,20 +143,20 @@ Nur auf Robins ausdrücklichen Auftrag („X geht als 1.0 live“). Der Prototyp
 5. Coolify: Die neue Domain kommt beim Service `web` als erste dazu (`https://<domain>:3000,https://<slug>.pleasance.org:3000`). `APP_URL` auf die neue Domain setzen und neu deployen.
 6. Umleitung: `/data/coolify/proxy/dynamic/<slug>-redirect.yaml` auf VPS 1. Ein Router mit höherer Priorität und `tls.certResolver: letsencrypt` leitet `<slug>.pleasance.org` und `www.<domain>` per `redirectRegex` (`permanent: true`) auf `https://<domain>` um. Gibt es eine App, bleibt `/api` unter der alten Adresse vom Redirect ausgenommen, bis keine Builds mit alter `API_URL` mehr im Umlauf sind: Apps folgen Redirects bei POST nicht.
 7. Registrierung: Ist sie noch geschlossen, Robin fragen, ob sie mit 1.0 öffnet (siehe „Registrierung öffnen“). 1.0 allein ist noch kein Go dafür.
-8. Nachziehen: `LIVE` in `packages/shared` und `live` in `apps/mobile/lib/config.dart` auf `true` (Testmodus, siehe „Feedback“), GitHub-Variable `API_URL`, Monitor in Uptime Kuma, Referrer von API-Keys, `AGENTS.md` des Projekts (Live-URL, Prüf-URL) und die Zeile in `infra.md`.
+8. Nachziehen: `LIVE` in `packages/shared` und `live` in `apps/mobile/lib/config.dart` auf `true` (Testmodus, siehe „Feedback“), die Domain in `apps/mobile/ios/Runner/Runner.entitlements` (siehe „Passkeys“), GitHub-Variable `API_URL`, Monitor in Uptime Kuma, Referrer von API-Keys, `AGENTS.md` des Projekts (Live-URL, Prüf-URL) und die Zeile in `infra.md`.
 9. Prüfen: `curl -sI` auf alte Adresse und `www.` (301 auf die neue Domain), `curl -s https://<domain>/api/health`, Login per Mail über die neue Domain. Passkeys der alten Domain gelten dort nicht mehr (siehe „Passkeys“).
 10. Tag `v1.0.0` setzen, wenn `main` gleich `origin/main` ist und die CI auf genau diesem Commit grün ist. Vorher den CI-Status dieses Commits zeigen, dann `git push origin v1.0.0`. Gepushte Tags sind fest: nie löschen oder verschieben, geht etwas schief, folgt `v1.0.1`.
 
 ## Mobile-App
 
-Flutter mit Riverpod und go_router, Karte mit flutter_map und OSM, Token in `flutter_secure_storage`, GlitchTip über `sentry_flutter`. Die App spricht dieselbe API wie das Web: Code per Mail anfordern (`POST /api/v1/auth/code`), Code gegen Session-Token tauschen (`/auth/code/verify`), danach Bearer-Token. Einen eigenen Server braucht sie nicht.
+Flutter mit Riverpod und go_router, Karte mit flutter_map und OSM, Token in `flutter_secure_storage`, GlitchTip über `sentry_flutter`. Die App spricht dieselbe API wie das Web: Code per Mail anfordern (`POST /api/v1/auth/code`), Code gegen Session-Token tauschen (`/auth/code/verify`) oder per Passkey anmelden (`/auth/passkeys/login`), danach Bearer-Token. Einen eigenen Server braucht sie nicht.
 
 ### Neues Projekt
 
 1. Umbenennen, `<slug>` ohne Bindestrich:
    ```sh
    cd apps/mobile
-   grep -rl org.pleasance.starter lib android ios | xargs sed -i 's/org\.pleasance\.starter/org.pleasance.<slug>/g'
+   grep -rlE 'org\.pleasance\.starter|starter\.pleasance\.org' lib android ios ../../packages/shared/src | xargs sed -i 's/org\.pleasance\.starter/org.pleasance.<slug>/g; s/starter\.pleasance\.org/<slug>.pleasance.org/g'
    mv android/app/src/main/kotlin/org/pleasance/starter android/app/src/main/kotlin/org/pleasance/<slug>
    ```
    Anzeigename in `lib/config.dart` (`appName`), `android/app/src/main/AndroidManifest.xml` (`android:label`) und `ios/Runner/Info.plist` (`CFBundleDisplayName`). Den Farbband-Ausschnitt wie im Web in `lib/config.dart` (`appBand`).

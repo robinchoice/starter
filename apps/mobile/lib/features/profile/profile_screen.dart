@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passkeys/exceptions.dart';
 
 import '../../config.dart';
 import '../../core/auth.dart';
@@ -46,6 +47,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _addPasskey() async {
+    final t = ref.read(messagesProvider);
+    String? message;
+    try {
+      await ref.read(authProvider.notifier).addPasskey();
+      message = t.passkeyAdded;
+    } on PasskeyAuthCancelledException {
+      // closed the system sheet
+    } on AuthenticatorException {
+      message = t.passkeyFailed;
+    } catch (e) {
+      message = e.toString();
+    }
+    if (mounted && message != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).value;
@@ -72,6 +91,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             subtitle: Text(t.updatesHint(appName)),
             value: user?.updatesSince != null,
             onChanged: (on) => _setUpdates(on),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.fingerprint),
+            title: Text(t.addPasskey),
+            subtitle: Text(t.passkeyHint),
+            onTap: _addPasskey,
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(

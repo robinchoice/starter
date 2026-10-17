@@ -27,6 +27,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('robin@example.com'), findsOneWidget);
 
+    await tester.dragUntilVisible(find.text('Abmelden'), find.byType(ListView), const Offset(0, -200));
     await tester.tap(find.text('Abmelden'));
     await tester.pumpAndSettle();
     expect(find.text('Code schicken'), findsOneWidget);

@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, expect, spyOn, test } from 'bun:test';
 import { createDb, migrateDb, passkeys, sessions, users } from '@app/db';
+import { APP_ID } from '@app/shared';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
+import { relyingParty } from './lib/passkeys';
 import { generateToken, hashToken } from './middleware/auth';
 
 // Runs against DATABASE_URL. Only adds rows with fresh addresses, so the
@@ -302,4 +304,28 @@ test('passkeys belong to logged-in accounts and fail closed', async () => {
   expect((await body(app.request('/api/v1/auth/passkeys', { headers: asOwner }))).passkeys).toHaveLength(1);
   expect((await del(asOwner)).status).toBe(200);
   expect((await body(app.request('/api/v1/auth/passkeys', { headers: asOwner }))).passkeys).toEqual([]);
+});
+
+test('the app links name the app only once it is configured', async () => {
+  const aasa = '/.well-known/apple-app-site-association';
+  const assetlinks = '/.well-known/assetlinks.json';
+  expect((await app.request(aasa)).status).toBe(404);
+  expect((await app.request(assetlinks)).status).toBe(404);
+
+  process.env.APPLE_TEAM_ID = 'TEAM123';
+  process.env.ANDROID_CERT_SHA256 = 'ab:cd, 01:02';
+  try {
+    expect(await body(app.request(aasa))).toEqual({ webcredentials: { apps: [`TEAM123.${APP_ID}`] } });
+    const [link] = await body(app.request(assetlinks));
+    expect(link.target).toEqual({
+      namespace: 'android_app',
+      package_name: APP_ID,
+      sha256_cert_fingerprints: ['AB:CD', '01:02'],
+    });
+    // The Android app signs in as its certificate
+    expect(relyingParty().origins).toContain('android:apk-key-hash:q80');
+  } finally {
+    delete process.env.APPLE_TEAM_ID;
+    delete process.env.ANDROID_CERT_SHA256;
+  }
 });

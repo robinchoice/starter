@@ -30,6 +30,8 @@ services:
       - ADMIN_EMAILS=${ADMIN_EMAILS:-}
       - FEEDBACK_EMAIL=${FEEDBACK_EMAIL:-}
       - FEEDBACK_GITHUB_TOKEN=${FEEDBACK_GITHUB_TOKEN:-}
+      - APPLE_TEAM_ID=${APPLE_TEAM_ID:-}
+      - ANDROID_CERT_SHA256=${ANDROID_CERT_SHA256:-}
       - SENTRY_DSN=${SENTRY_DSN:-}
     depends_on:
       postgres:

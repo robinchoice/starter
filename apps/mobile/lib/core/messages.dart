@@ -25,6 +25,11 @@ abstract class Messages {
   String get sendCode;
   String get logIn;
   String get otherEmail;
+  String get passkeyLogIn;
+  String get addPasskey;
+  String get passkeyAdded;
+  String get passkeyHint;
+  String get passkeyFailed;
   String get locationDenied;
   String get locationUnavailable;
   String get myLocation;
@@ -83,6 +88,16 @@ class De extends Messages {
   String get logIn => 'Anmelden';
   @override
   String get otherEmail => 'Andere E-Mail / neuen Code';
+  @override
+  String get passkeyLogIn => 'Mit Passkey anmelden';
+  @override
+  String get addPasskey => 'Passkey hinzufügen';
+  @override
+  String get passkeyAdded => 'Passkey hinzugefügt';
+  @override
+  String get passkeyHint => 'Anmelden per Fingerabdruck oder Gesicht, ohne Mail. Entfernen im Web unter Einstellungen.';
+  @override
+  String get passkeyFailed => 'Der Passkey hat nicht geklappt. Melde dich per Mail an.';
   @override
   String get locationDenied => 'Standort nicht freigegeben';
   @override
@@ -172,6 +187,16 @@ class En extends Messages {
   String get logIn => 'Log in';
   @override
   String get otherEmail => 'Other email / new code';
+  @override
+  String get passkeyLogIn => 'Log in with a passkey';
+  @override
+  String get addPasskey => 'Add passkey';
+  @override
+  String get passkeyAdded => 'Passkey added';
+  @override
+  String get passkeyHint => 'Log in with your fingerprint or face, no email. Remove them on the web under Settings.';
+  @override
+  String get passkeyFailed => "The passkey didn't work. Log in by email.";
   @override
   String get locationDenied => 'Location access not granted';
   @override

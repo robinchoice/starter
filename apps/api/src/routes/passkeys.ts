@@ -1,5 +1,5 @@
 import { passkeyChallenges, passkeys, users } from '@app/db';
-import { APP_NAME, type Passkey, passkeyLoginSchema, passkeyRegisterSchema } from '@app/shared';
+import { APP_ID, APP_NAME, type Passkey, passkeyLoginSchema, passkeyRegisterSchema } from '@app/shared';
 import {
   type AuthenticationResponseJSON,
   generateAuthenticationOptions,
@@ -11,7 +11,7 @@ import {
 import { and, eq, gt, isNull, lt } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { t } from '../lib/i18n';
-import { relyingParty } from '../lib/passkeys';
+import { androidCertificates, relyingParty } from '../lib/passkeys';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { validJson } from '../lib/validate';
 import { requireAuth, setSessionCookie } from '../middleware/auth';
@@ -189,4 +189,22 @@ export const passkeyRoutes = new Hono<AppEnv>()
     if (!cookie) return c.json({ user, token });
     setSessionCookie(c, token);
     return c.json({ user });
+  });
+
+// The app may use the passkeys of this domain once the domain names it. The
+// web server forwards both paths. Without the variables there is no app to name.
+export const wellKnownRoutes = new Hono<AppEnv>()
+  .get('/.well-known/apple-app-site-association', (c) => {
+    if (!process.env.APPLE_TEAM_ID) return c.json({ error: t(c).notFound }, 404);
+    return c.json({ webcredentials: { apps: [`${process.env.APPLE_TEAM_ID}.${APP_ID}`] } });
+  })
+  .get('/.well-known/assetlinks.json', (c) => {
+    const fingerprints = androidCertificates();
+    if (!fingerprints.length) return c.json({ error: t(c).notFound }, 404);
+    return c.json([
+      {
+        relation: ['delegate_permission/common.get_login_creds'],
+        target: { namespace: 'android_app', package_name: APP_ID, sha256_cert_fingerprints: fingerprints },
+      },
+    ]);
   });

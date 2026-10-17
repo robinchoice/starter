@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passkeys/exceptions.dart';
 
 import '../../config.dart';
 import '../../core/api.dart';
@@ -51,6 +53,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _sendCode() => _run(() async {
         await ref.read(authProvider.notifier).requestCode(_email.text.trim(), updates: _updates);
         setState(() => _codeSent = true);
+      });
+
+  // Closing the system sheet is no error. Anything else on the device ends in
+  // one hint, the mail always works.
+  Future<void> _passkey() => _run(() async {
+        try {
+          await ref.read(authProvider.notifier).logInWithPasskey();
+        } on PasskeyAuthCancelledException {
+          // nothing to say
+        } on AuthenticatorException {
+          if (mounted) setState(() => _error = ref.read(messagesProvider).passkeyFailed);
+        } on PlatformException {
+          if (mounted) setState(() => _error = ref.read(messagesProvider).passkeyFailed);
+        }
       });
 
   Future<void> _verify() => _run(() => ref.read(authProvider.notifier).verifyCode(_email.text.trim(), _code.text.trim()));
@@ -118,6 +134,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : Text(_codeSent ? t.logIn : t.sendCode),
                 ),
+                if (!_codeSent) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : _passkey,
+                    icon: const Icon(Icons.fingerprint),
+                    label: Text(t.passkeyLogIn),
+                  ),
+                ],
                 if (_codeSent)
                   TextButton(
                     onPressed: _busy ? null : () => setState(() => _codeSent = false),

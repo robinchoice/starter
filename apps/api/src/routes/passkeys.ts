@@ -14,9 +14,9 @@ import { t } from '../lib/i18n';
 import { androidCertificates, relyingParty } from '../lib/passkeys';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { validJson } from '../lib/validate';
-import { requireAuth, setSessionCookie } from '../middleware/auth';
+import { requireAuth } from '../middleware/auth';
 import type { AppEnv } from '../types';
-import { startSession } from './auth';
+import { respondWithSession } from './auth';
 
 const MINUTE = 60 * 1000;
 // The login page asks for options on every visit, for the autofill
@@ -187,10 +187,7 @@ export const passkeyRoutes = new Hono<AppEnv>()
         lastUsedAt: new Date(),
       })
       .where(eq(passkeys.id, passkey.id));
-    const { user, token } = await startSession(c, passkey.email, false);
-    if (!cookie) return c.json({ user, token });
-    setSessionCookie(c, token);
-    return c.json({ user });
+    return respondWithSession(c, passkey.email, false, cookie);
   });
 
 // The app may use the passkeys of this domain once the domain names it. The

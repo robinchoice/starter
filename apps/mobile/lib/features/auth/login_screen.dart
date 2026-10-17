@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:passkeys/exceptions.dart';
 
 import '../../config.dart';
 import '../../core/api.dart';
@@ -55,19 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() => _codeSent = true);
       });
 
-  // Closing the system sheet is no error. Anything else on the device ends in
-  // one hint, the mail always works.
-  Future<void> _passkey() => _run(() async {
-        try {
-          await ref.read(authProvider.notifier).logInWithPasskey();
-        } on PasskeyAuthCancelledException {
-          // nothing to say
-        } on AuthenticatorException {
-          if (mounted) setState(() => _error = ref.read(messagesProvider).passkeyFailed);
-        } on PlatformException {
-          if (mounted) setState(() => _error = ref.read(messagesProvider).passkeyFailed);
-        }
-      });
+  Future<void> _passkey() => _run(() => ref.read(authProvider.notifier).logInWithPasskey());
 
   Future<void> _verify() => _run(() => ref.read(authProvider.notifier).verifyCode(_email.text.trim(), _code.text.trim()));
 

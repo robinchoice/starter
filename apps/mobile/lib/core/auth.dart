@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:passkeys/authenticator.dart';
@@ -72,23 +73,37 @@ class AuthController extends AsyncNotifier<User?> {
   Future<void> verifyCode(String email, String code) async =>
       _startSession(await _api.post('/auth/code/verify', {'email': email, 'code': code}) as Map<String, dynamic>);
 
-  /// Passkeys of this domain, see the README, „Passkeys“. Throws
-  /// [PasskeyAuthCancelledException] when the user closes the system sheet.
+  /// Passkeys of this domain, see the README, „Passkeys“.
   Future<void> logInWithPasskey() async {
     final options = await _api.post('/auth/passkeys/login/options') as Map<String, dynamic>;
     // Not only passkeys on this phone: also security keys and the QR code for another device
     final request = AuthenticateRequestType.fromJson(options, preferImmediatelyAvailableCredentials: false);
-    final response = await _passkeys.authenticate(request);
+    final response = await _passkeyResult(() => _passkeys.authenticate(request));
+    if (response == null) return;
     await _startSession(
       await _api.post('/auth/passkeys/login', {'response': response.toJson()}) as Map<String, dynamic>,
     );
   }
 
   /// Needs a session: passkeys only exist for accounts that logged in by mail.
-  Future<void> addPasskey() async {
+  Future<bool> addPasskey() async {
     final options = await _api.post('/auth/passkeys/register/options') as Map<String, dynamic>;
-    final response = await _passkeys.register(RegisterRequestType.fromJson(options));
+    final response = await _passkeyResult(() => _passkeys.register(RegisterRequestType.fromJson(options)));
+    if (response == null) return false;
     await _api.post('/auth/passkeys/register', {'response': response.toJson()});
+    return true;
+  }
+
+  Future<T?> _passkeyResult<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on PasskeyAuthCancelledException {
+      return null;
+    } on AuthenticatorException {
+      throw ApiException(0, _api.locale.messages.passkeyFailed);
+    } on PlatformException {
+      throw ApiException(0, _api.locale.messages.passkeyFailed);
+    }
   }
 
   Future<void> _startSession(Map<String, dynamic> json) async {

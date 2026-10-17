@@ -23,7 +23,7 @@ import {
   requireAdmin,
   requireAuth,
   SESSION_COOKIE,
-  SESSION_DAYS,
+  sessionExpiry,
   sessionToken,
   setSessionCookie,
   toUser,
@@ -44,7 +44,7 @@ export const consentNow = sql`coalesce(${users.updatesConsentAt}, now())`;
 // to addresses that may sign up. Every login refreshes the language of the
 // update mails. A ticked opt-in switches them on, an unticked one leaves them.
 // Passkeys log in through it as well, they only exist for existing accounts.
-export async function startSession(c: Context<AppEnv>, email: string, updates: boolean) {
+export async function respondWithSession(c: Context<AppEnv>, email: string, updates: boolean, cookie = false) {
   const db = c.get('db');
   const [user] = await db
     .insert(users)
@@ -59,9 +59,11 @@ export async function startSession(c: Context<AppEnv>, email: string, updates: b
   await db.insert(sessions).values({
     userId: user!.id,
     tokenHash: hashToken(token),
-    expiresAt: new Date(Date.now() + SESSION_DAYS * 24 * 60 * MINUTE),
+    expiresAt: sessionExpiry(),
   });
-  return { user: toUser(user!), token };
+  if (!cookie) return c.json({ user: toUser(user!), token });
+  setSessionCookie(c, token);
+  return c.json({ user: toUser(user!) });
 }
 
 async function createCode(c: Context<AppEnv>, email: string, updatesOptIn: boolean) {
@@ -131,9 +133,7 @@ export const authRoutes = new Hono<AppEnv>()
       .returning({ email: magicLinks.email, updatesOptIn: magicLinks.updatesOptIn });
     if (!link) return c.json({ error: t(c).linkExpired }, 400);
 
-    const { user, token } = await startSession(c, link.email, link.updatesOptIn);
-    setSessionCookie(c, token);
-    return c.json({ user });
+    return respondWithSession(c, link.email, link.updatesOptIn, true);
   })
 
   // Mobile apps: a 6-digit code by mail instead of a link
@@ -178,10 +178,7 @@ export const authRoutes = new Hono<AppEnv>()
       .returning({ id: loginCodes.id });
     if (!used) return c.json({ error: t(c).codeWrong }, 400);
 
-    const { user, token } = await startSession(c, email, match.updatesOptIn);
-    if (!cookie) return c.json({ user, token });
-    setSessionCookie(c, token);
-    return c.json({ user });
+    return respondWithSession(c, email, match.updatesOptIn, cookie);
   })
 
   .post('/logout', async (c) => {

@@ -24,8 +24,16 @@
   let loading = $state(false);
   let passkeys = $state(false);
   let autofillAvailable = $state(false);
+  let visible = $state(false);
   let passkeyLoading = $state(false);
   const lifetime = new AbortController();
+
+  onMount(() => {
+    const updateVisibility = () => (visible = document.visibilityState === 'visible');
+    updateVisibility();
+    document.addEventListener('visibilitychange', updateVisibility);
+    return () => document.removeEventListener('visibilitychange', updateVisibility);
+  });
 
   onMount(async () => {
     await checkAuth();
@@ -36,7 +44,7 @@
   });
 
   $effect(() => {
-    if (!autofillAvailable || sent || passkeyLoading) return;
+    if (!autofillAvailable || !visible || sent || passkeyLoading) return;
     // Offers saved passkeys in the address field's autofill. Its challenge
     // expires after five minutes, so a fresh request replaces it before.
     let request: AbortController;

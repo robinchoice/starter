@@ -56,6 +56,10 @@ export function setSessionCookie(c: Context, token: string) {
   });
 }
 
+export function sessionExpiry() {
+  return new Date(Date.now() + SESSION_DAYS * DAY);
+}
+
 export async function currentUser(c: Context<AppEnv>) {
   const token = sessionToken(c);
   if (!token) return null;
@@ -75,10 +79,7 @@ export async function currentUser(c: Context<AppEnv>) {
   // Sessions in use don't expire: at most once a day they run SESSION_DAYS
   // from now again, the cookie with them.
   if (row.expiresAt.getTime() < Date.now() + (SESSION_DAYS - 1) * DAY) {
-    await db
-      .update(sessions)
-      .set({ expiresAt: new Date(Date.now() + SESSION_DAYS * DAY) })
-      .where(eq(sessions.id, row.sessionId));
+    await db.update(sessions).set({ expiresAt: sessionExpiry() }).where(eq(sessions.id, row.sessionId));
     if (getCookie(c, SESSION_COOKIE)) setSessionCookie(c, token);
   }
   return toUser(row);

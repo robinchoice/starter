@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:passkeys/exceptions.dart';
 
 import '../../config.dart';
 import '../../core/auth.dart';
@@ -51,12 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final t = ref.read(messagesProvider);
     String? message;
     try {
-      await ref.read(authProvider.notifier).addPasskey();
-      message = t.passkeyAdded;
-    } on PasskeyAuthCancelledException {
-      // closed the system sheet
-    } on AuthenticatorException {
-      message = t.passkeyFailed;
+      if (await ref.read(authProvider.notifier).addPasskey()) message = t.passkeyAdded;
     } catch (e) {
       message = e.toString();
     }

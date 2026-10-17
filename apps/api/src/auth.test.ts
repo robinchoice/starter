@@ -46,7 +46,7 @@ function lastMailedToken() {
 }
 
 function lastMailedCode() {
-  return lastMail()?.match(/Dein Code: (\d{6})/)?.[1];
+  return lastMail()?.match(/(?:Dein Code:|diesen Code ein:) (\d{6})/)?.[1];
 }
 
 const otherCode = (code: string) => (code === '000000' ? '000001' : '000000');
@@ -142,6 +142,22 @@ test('apps log in with a code and get a bearer token', async () => {
   expect((await body(me)).user.id).toBe(user.id);
 
   expect((await post('/auth/code/verify', { email, code })).status).toBe(400);
+});
+
+test('the login mail of the web also carries a code, which logs in with a cookie', async () => {
+  const email = freshEmail();
+  await post('/auth/magic-link', { email });
+  expect(lastMailedToken()).toBeDefined();
+  const code = lastMailedCode()!;
+
+  const verify = await post('/auth/code/verify', { email, code, cookie: true });
+  expect(verify.status).toBe(200);
+  const json = await body(verify);
+  expect(json.user.email).toBe(email);
+  expect(json.token).toBeUndefined();
+  const session = verify.headers.get('set-cookie')!.match(/session=([0-9a-f]+)/)![1]!;
+  const me = await app.request('/api/v1/auth/me', { headers: { cookie: `session=${session}` } });
+  expect((await body(me)).user.email).toBe(email);
 });
 
 test('a code stops working after five wrong tries', async () => {

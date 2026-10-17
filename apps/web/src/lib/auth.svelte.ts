@@ -19,6 +19,11 @@ export async function verify(token: string) {
   auth.user = (await api.post<{ user: User }>('/auth/verify', { token }, true)).user;
 }
 
+// The code from the same mail, for when the link opens in another browser
+export async function verifyCode(email: string, code: string) {
+  auth.user = (await api.post<{ user: User }>('/auth/code/verify', { email, code, cookie: true })).user;
+}
+
 export async function logout() {
   await api.post('/auth/logout');
   auth.user = null;

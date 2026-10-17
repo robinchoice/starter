@@ -51,6 +51,8 @@ export const verifyCodeSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{6}$/, 'codeDigits'),
+  // The web logs in with a cookie, the app takes the token from the answer
+  cookie: z.boolean().optional(),
 });
 
 export const updateMeSchema = z.object({

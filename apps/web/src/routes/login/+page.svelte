@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { auth, checkAuth, sendMagicLink } from '$lib/auth.svelte';
+  import { auth, checkAuth, sendMagicLink, verifyCode } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
   import { t } from '$lib/i18n';
@@ -12,6 +12,7 @@
   const next = safeNextPath(page.url.searchParams.get('next'));
 
   let email = $state('');
+  let code = $state('');
   // Unticked: update mails are opt-in, see README „Update-Mails“
   let updates = $state(false);
   let sent = $state(false);
@@ -28,6 +29,20 @@
     try {
       await sendMagicLink(email, next, updates);
       sent = true;
+      code = '';
+    } catch {
+      // The API client already shows the error as a toast
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function submitCode(e: SubmitEvent) {
+    e.preventDefault();
+    loading = true;
+    try {
+      await verifyCode(email, code);
+      goto(next ?? '/dashboard', { replaceState: true });
     } catch {
       // The API client already shows the error as a toast
     } finally {
@@ -40,8 +55,19 @@
   <p class="brand">{APP_NAME}</p>
   <h1>{t().logIn}</h1>
   {#if sent}
-    <p>{t().linkSent}</p>
-    <Button variant="secondary" onclick={() => (sent = false)}>{t().otherAddress}</Button>
+    <form onsubmit={submitCode}>
+      <p>{t().linkSent}</p>
+      <Input
+        label={t().code}
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength={6}
+        bind:value={code}
+        required
+      />
+      <Button type="submit" {loading}>{t().logIn}</Button>
+      <Button variant="secondary" onclick={() => (sent = false)}>{t().otherAddress}</Button>
+    </form>
   {:else}
     <form onsubmit={submit}>
       <p>{t().linkIntro}</p>

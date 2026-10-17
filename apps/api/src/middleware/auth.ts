@@ -9,7 +9,9 @@ import { isAdmin } from '../lib/signup';
 import type { AppEnv } from '../types';
 
 export const SESSION_COOKIE = 'session';
-export const SESSION_DAYS = 30;
+// Web and app alike, and sessions in use slide on (see currentUser): only a
+// year without a visit logs out. Logout deletes the session right away.
+export const SESSION_DAYS = 365;
 const DAY = 24 * 60 * 60 * 1000;
 
 export const userColumns = {

@@ -32,8 +32,6 @@ import {
 import type { AppEnv } from '../types';
 
 const MINUTE = 60 * 1000;
-// Apps would otherwise ask for a new code every month
-const APP_SESSION_DAYS = 365;
 const CODE_ATTEMPTS = 5;
 const mailsPerAddress = rateLimit('mails-per-address', 5, 60 * MINUTE);
 const mailsPerIp = rateLimit('mails-per-ip', 20, 60 * MINUTE);
@@ -45,7 +43,7 @@ export const consentNow = sql`coalesce(${users.updatesConsentAt}, now())`;
 // The first login creates the account, /magic-link and /code only send one
 // to addresses that may sign up. Every login refreshes the language of the
 // update mails. A ticked opt-in switches them on, an unticked one leaves them.
-async function startSession(c: Context<AppEnv>, email: string, days: number, updates: boolean) {
+async function startSession(c: Context<AppEnv>, email: string, updates: boolean) {
   const db = c.get('db');
   const [user] = await db
     .insert(users)
@@ -60,7 +58,7 @@ async function startSession(c: Context<AppEnv>, email: string, days: number, upd
   await db.insert(sessions).values({
     userId: user!.id,
     tokenHash: hashToken(token),
-    expiresAt: new Date(Date.now() + days * 24 * 60 * MINUTE),
+    expiresAt: new Date(Date.now() + SESSION_DAYS * 24 * 60 * MINUTE),
   });
   return { user: toUser(user!), token };
 }
@@ -132,7 +130,7 @@ export const authRoutes = new Hono<AppEnv>()
       .returning({ email: magicLinks.email, updatesOptIn: magicLinks.updatesOptIn });
     if (!link) return c.json({ error: t(c).linkExpired }, 400);
 
-    const { user, token } = await startSession(c, link.email, SESSION_DAYS, link.updatesOptIn);
+    const { user, token } = await startSession(c, link.email, link.updatesOptIn);
     setSessionCookie(c, token);
     return c.json({ user });
   })
@@ -179,8 +177,8 @@ export const authRoutes = new Hono<AppEnv>()
       .returning({ id: loginCodes.id });
     if (!used) return c.json({ error: t(c).codeWrong }, 400);
 
-    if (!cookie) return c.json(await startSession(c, email, APP_SESSION_DAYS, match.updatesOptIn));
-    const { user, token } = await startSession(c, email, SESSION_DAYS, match.updatesOptIn);
+    const { user, token } = await startSession(c, email, match.updatesOptIn);
+    if (!cookie) return c.json({ user, token });
     setSessionCookie(c, token);
     return c.json({ user });
   })

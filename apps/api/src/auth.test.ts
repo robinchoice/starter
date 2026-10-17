@@ -263,7 +263,7 @@ test('a session in use is renewed', async () => {
   const me = await app.request('/api/v1/auth/me', { headers: { cookie: `session=${token}` } });
   expect(me.headers.get('set-cookie')).toContain(`session=${token}`);
   const [renewed] = await db.select().from(sessions).where(eq(sessions.id, session!.id));
-  expect(renewed!.expiresAt.getTime()).toBeGreaterThan(Date.now() + 29 * 24 * 60 * 60 * 1000);
+  expect(renewed!.expiresAt.getTime()).toBeGreaterThan(Date.now() + 364 * 24 * 60 * 60 * 1000);
 
   // Renewed sessions are left alone for a day
   const again = await app.request('/api/v1/auth/me', { headers: { cookie: `session=${token}` } });

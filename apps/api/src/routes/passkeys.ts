@@ -121,8 +121,10 @@ export const passkeyRoutes = new Hono<AppEnv>()
         transports: credential.transports ?? null,
         backedUp: credentialBackedUp,
       })
+      .onConflictDoNothing({ target: passkeys.id })
       .returning(passkeyColumns);
-    return c.json({ passkey: toPasskey(row!) });
+    if (!row) return c.json({ error: t(c).passkeyFailed }, 409);
+    return c.json({ passkey: toPasskey(row) });
   })
 
   .delete('/:id', requireAuth, async (c) => {
@@ -159,7 +161,7 @@ export const passkeyRoutes = new Hono<AppEnv>()
       .innerJoin(users, eq(users.id, passkeys.userId))
       .where(eq(passkeys.id, response.id));
     // Removed here, still on the device. The web asks the browser to forget it.
-    if (!passkey) return c.json({ error: t(c).passkeyUnknown }, 400);
+    if (!passkey) return c.json({ error: t(c).passkeyUnknown, code: 'passkeyUnknown' }, 400);
 
     const { rpID, origins } = relyingParty();
     const result = await verifyAuthenticationResponse({

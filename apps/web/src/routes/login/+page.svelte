@@ -5,7 +5,7 @@
     browserSupportsWebAuthnAutofill,
     WebAuthnAbortService,
   } from '@simplewebauthn/browser';
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { auth, checkAuth, passkeyLogin, sendMagicLink, verifyCode } from '$lib/auth.svelte';
@@ -23,32 +23,56 @@
   let sent = $state(false);
   let loading = $state(false);
   let passkeys = $state(false);
-  let renewAutofill: ReturnType<typeof setInterval> | undefined;
+  let autofillAvailable = $state(false);
+  let passkeyLoading = $state(false);
+  const lifetime = new AbortController();
 
   onMount(async () => {
     await checkAuth();
+    if (lifetime.signal.aborted) return;
     if (auth.user) return goto(next ?? '/dashboard', { replaceState: true });
     passkeys = browserSupportsWebAuthn();
+    autofillAvailable = await browserSupportsWebAuthnAutofill();
+  });
+
+  $effect(() => {
+    if (!autofillAvailable || sent || passkeyLoading) return;
     // Offers saved passkeys in the address field's autofill. Its challenge
     // expires after five minutes, so a fresh request replaces it before.
-    if (await browserSupportsWebAuthnAutofill()) {
-      logInWithPasskey(true);
-      renewAutofill = setInterval(() => logInWithPasskey(true), 4 * 60 * 1000);
+    let request: AbortController;
+    function renew() {
+      request?.abort();
+      request = new AbortController();
+      logInWithPasskey(true, request.signal);
     }
+    renew();
+    const interval = setInterval(renew, 4 * 60 * 1000);
+    return () => {
+      clearInterval(interval);
+      request.abort();
+      WebAuthnAbortService.cancelCeremony();
+    };
   });
 
   // The autofill request would otherwise outlive the page
   onDestroy(() => {
-    clearInterval(renewAutofill);
+    lifetime.abort();
     WebAuthnAbortService.cancelCeremony();
   });
 
-  async function logInWithPasskey(autofill: boolean) {
+  async function logInWithPasskey(autofill: boolean, signal = lifetime.signal) {
+    if (!autofill) {
+      if (passkeyLoading) return;
+      passkeyLoading = true;
+      await tick();
+    }
     try {
-      await passkeyLogin(autofill);
-      goto(next ?? '/dashboard', { replaceState: true });
+      await passkeyLogin(autofill, signal);
+      await goto(next ?? '/dashboard', { replaceState: true });
     } catch {
       // Cancelled, replaced by the button's request, or the API client showed the error
+    } finally {
+      if (!autofill) passkeyLoading = false;
     }
   }
 
@@ -117,7 +141,9 @@
     {#if passkeys}
       <div class="passkey">
         <p>{t().or}</p>
-        <Button variant="secondary" onclick={() => logInWithPasskey(false)}>{t().passkeyLogIn}</Button>
+        <Button variant="secondary" loading={passkeyLoading} onclick={() => logInWithPasskey(false)}>
+          {t().passkeyLogIn}
+        </Button>
       </div>
     {/if}
   {/if}

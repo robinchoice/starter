@@ -1,9 +1,14 @@
 <script lang="ts">
   import { APP_NAME, safeNextPath } from '@app/shared';
-  import { onMount } from 'svelte';
+  import {
+    browserSupportsWebAuthn,
+    browserSupportsWebAuthnAutofill,
+    WebAuthnAbortService,
+  } from '@simplewebauthn/browser';
+  import { onDestroy, onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { auth, checkAuth, sendMagicLink, verifyCode } from '$lib/auth.svelte';
+  import { auth, checkAuth, passkeyLogin, sendMagicLink, verifyCode } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
   import { t } from '$lib/i18n';
@@ -17,11 +22,35 @@
   let updates = $state(false);
   let sent = $state(false);
   let loading = $state(false);
+  let passkeys = $state(false);
+  let renewAutofill: ReturnType<typeof setInterval> | undefined;
 
   onMount(async () => {
     await checkAuth();
-    if (auth.user) goto(next ?? '/dashboard', { replaceState: true });
+    if (auth.user) return goto(next ?? '/dashboard', { replaceState: true });
+    passkeys = browserSupportsWebAuthn();
+    // Offers saved passkeys in the address field's autofill. Its challenge
+    // expires after five minutes, so a fresh request replaces it before.
+    if (await browserSupportsWebAuthnAutofill()) {
+      logInWithPasskey(true);
+      renewAutofill = setInterval(() => logInWithPasskey(true), 4 * 60 * 1000);
+    }
   });
+
+  // The autofill request would otherwise outlive the page
+  onDestroy(() => {
+    clearInterval(renewAutofill);
+    WebAuthnAbortService.cancelCeremony();
+  });
+
+  async function logInWithPasskey(autofill: boolean) {
+    try {
+      await passkeyLogin(autofill);
+      goto(next ?? '/dashboard', { replaceState: true });
+    } catch {
+      // Cancelled, replaced by the button's request, or the API client showed the error
+    }
+  }
 
   async function submit(e: SubmitEvent) {
     e.preventDefault();
@@ -71,13 +100,26 @@
   {:else}
     <form onsubmit={submit}>
       <p>{t().linkIntro}</p>
-      <Input type="email" label={t().email} placeholder={t().emailPlaceholder} bind:value={email} required />
+      <Input
+        type="email"
+        label={t().email}
+        placeholder={t().emailPlaceholder}
+        autocomplete="email webauthn"
+        bind:value={email}
+        required
+      />
       <label class="check">
         <input type="checkbox" bind:checked={updates} />
         <span>{t().updatesOptIn}</span>
       </label>
       <Button type="submit" {loading}>{t().sendLink}</Button>
     </form>
+    {#if passkeys}
+      <div class="passkey">
+        <p>{t().or}</p>
+        <Button variant="secondary" onclick={() => logInWithPasskey(false)}>{t().passkeyLogIn}</Button>
+      </div>
+    {/if}
   {/if}
 </main>
 
@@ -109,6 +151,15 @@
   form p {
     margin: 0;
     color: var(--muted);
+  }
+  .passkey {
+    display: flex;
+    flex-direction: column;
+  }
+  .passkey p {
+    margin: 1rem 0;
+    color: var(--muted);
+    text-align: center;
   }
   .check {
     display: flex;

@@ -43,7 +43,8 @@ export const consentNow = sql`coalesce(${users.updatesConsentAt}, now())`;
 // The first login creates the account, /magic-link and /code only send one
 // to addresses that may sign up. Every login refreshes the language of the
 // update mails. A ticked opt-in switches them on, an unticked one leaves them.
-async function startSession(c: Context<AppEnv>, email: string, updates: boolean) {
+// Passkeys log in through it as well, they only exist for existing accounts.
+export async function startSession(c: Context<AppEnv>, email: string, updates: boolean) {
   const db = c.get('db');
   const [user] = await db
     .insert(users)

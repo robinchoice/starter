@@ -8,6 +8,7 @@ import { captureException } from './monitoring';
 import { agentRoutes } from './routes/agents';
 import { authRoutes } from './routes/auth';
 import { feedbackRoutes } from './routes/feedback';
+import { passkeyRoutes } from './routes/passkeys';
 import { updateRoutes } from './routes/updates';
 import type { AppEnv } from './types';
 
@@ -36,6 +37,7 @@ export function createApp(db: Database) {
       .route('/', agentRoutes)
       .basePath('/api/v1')
       .route('/auth', authRoutes)
+      .route('/auth/passkeys', passkeyRoutes)
       .route('/feedback', feedbackRoutes)
       .route('/updates', updateRoutes)
   );

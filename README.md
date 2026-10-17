@@ -1,6 +1,6 @@
 # starter
 
-Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Mail mit Link und Code (Web) oder Code (App), Feedback-Knopf mit Screenshot, Update-Mails mit Opt-in, Link-Vorschau, Mail über SMTP im Design der App, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Secret-Scan, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
+Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Mail mit Link und Code (Web) oder Code (App) und per Passkey, Feedback-Knopf mit Screenshot, Update-Mails mit Opt-in, Link-Vorschau, Mail über SMTP im Design der App, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Secret-Scan, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 
@@ -105,12 +105,22 @@ Agenten zeigen Änderungen hinter dem Login in der Savor-Vorschau mit dem Testko
 
 ## Registrierung öffnen
 
-Prototypen sind von außen erreichbar, aber geschlossen, bis Robin ausdrücklich das Go gibt, externe Nutzer aufzunehmen. Bis dahin legen Magic Link und App-Code neue Konten nur für die Adressen in `SIGNUP_ALLOWLIST` an (kommagetrennt, dauerhafte Adressen wie Robins). Bestehende Konten melden sich immer an. Fremde bekommen bei `/auth/magic-link` und `/auth/code` die Meldung „Die Registrierung ist noch geschlossen“, es geht keine Mail raus. Seiten ohne Login bleiben offen.
+Prototypen sind von außen erreichbar, aber geschlossen, bis Robin ausdrücklich das Go gibt, externe Nutzer aufzunehmen. Bis dahin legen Magic Link und App-Code neue Konten nur für die Adressen in `SIGNUP_ALLOWLIST` an (kommagetrennt, dauerhafte Adressen wie Robins). Bestehende Konten melden sich immer an, Passkeys gibt es nur für sie. Fremde bekommen bei `/auth/magic-link` und `/auth/code` die Meldung „Die Registrierung ist noch geschlossen“, es geht keine Mail raus. Seiten ohne Login bleiben offen.
 
 - Tester aufnehmen: Ein Admin klickt in der App oben auf „Tester einladen“ (`/invite`) und gibt die Adresse ein. Das legt das Konto an und schickt einen Login-Link, ohne Coolify und Redeploy. Danach meldet sich der Tester wie jedes bestehende Konto an, auch wenn der Link abläuft. Admins sind die Adressen in `ADMIN_EMAILS` (kommagetrennt, Standard robin@pleasance.org, der menschliche Admin), die API prüft das. Einladen öffnet nichts, `SIGNUP_OPEN` bleibt, wie es ist.
 - admin@pleasance.org, der agentische Admin, kommt nie in `ADMIN_EMAILS`: Agenten melden sich damit in der Vorschau an und dürfen weder Konten an der Registrierung vorbei anlegen noch Dritte anmailen.
 - Öffnen, erst nach Robins Go: `SIGNUP_OPEN=true` in Coolify setzen und neu deployen. Prüfen: Login-Link an eine neue Adresse anfordern.
 - `login-link` legt Konten selbst an, das Testkonto der Savor-Vorschau braucht keinen Eintrag. Das Skript nimmt jede Adresse, die Grenze sitzt auf dem Server: Agenten kommen nicht in den Container, sondern nur über das root-eigene `login-link` aus dem Kontor, und das übergibt fest admin@pleasance.org. Wer selbst in den Container kommt, hat ohnehin die Datenbank.
+
+## Passkeys
+
+Im Web meldet man sich neben der Login-Mail (Link und Code) auch mit einem Passkey an: `@simplewebauthn/server` und `@simplewebauthn/browser`, Routen in `apps/api/src/routes/passkeys.ts`. Eingeloggte legen Passkeys in den Einstellungen an und entfernen sie dort. Die Login-Seite bietet sie als Autofill im Adressfeld an (Conditional UI) und per Knopf „Mit Passkey anmelden“. Danach gilt dieselbe Session wie nach der Mail.
+
+- Nur für bestehende Konten: Anlegen braucht eine Session, die Registrierung bleibt bei der Mail samt `SIGNUP_ALLOWLIST`. Ein neues Gerät ohne synchronisierten Passkey und die Wiederherstellung gehen ebenfalls über die Mail.
+- Falle: Passkeys hängen an der Domain aus `APP_URL` (rpID = Hostname). Zieht ein Prototyp zu 1.0 auf eine eigene Domain, gelten die alten Passkeys dort nicht mehr: Nutzer melden sich einmal per Mail an und legen einen neuen an. Stimmt `APP_URL` nicht mit der Adresse im Browser überein, scheitert jeder Passkey.
+- Ein entfernter Passkey bleibt auf dem Gerät. Beim nächsten Versuch antwortet die API „Diesen Passkey kennen wir nicht“, und das Web bittet den Browser per Signal-API, ihn zu vergessen.
+- Lokal gehen Passkeys auf `localhost` ohne HTTPS, über eine LAN-Adresse nicht.
+- Der Browser-Test (`apps/web/tests/login.test.ts`) legt sie mit dem virtuellen Authenticator von Chromium an (CDP `WebAuthn.addVirtualAuthenticator`).
 
 ## Nostr-Login
 
@@ -133,7 +143,7 @@ Nur auf Robins ausdrücklichen Auftrag („X geht als 1.0 live“). Der Prototyp
 6. Umleitung: `/data/coolify/proxy/dynamic/<slug>-redirect.yaml` auf VPS 1. Ein Router mit höherer Priorität und `tls.certResolver: letsencrypt` leitet `<slug>.pleasance.org` und `www.<domain>` per `redirectRegex` (`permanent: true`) auf `https://<domain>` um. Gibt es eine App, bleibt `/api` unter der alten Adresse vom Redirect ausgenommen, bis keine Builds mit alter `API_URL` mehr im Umlauf sind: Apps folgen Redirects bei POST nicht.
 7. Registrierung: Ist sie noch geschlossen, Robin fragen, ob sie mit 1.0 öffnet (siehe „Registrierung öffnen“). 1.0 allein ist noch kein Go dafür.
 8. Nachziehen: `LIVE` in `packages/shared` und `live` in `apps/mobile/lib/config.dart` auf `true` (Testmodus, siehe „Feedback“), GitHub-Variable `API_URL`, Monitor in Uptime Kuma, Referrer von API-Keys, `AGENTS.md` des Projekts (Live-URL, Prüf-URL) und die Zeile in `infra.md`.
-9. Prüfen: `curl -sI` auf alte Adresse und `www.` (301 auf die neue Domain), `curl -s https://<domain>/api/health`, Login per Magic Link über die neue Domain.
+9. Prüfen: `curl -sI` auf alte Adresse und `www.` (301 auf die neue Domain), `curl -s https://<domain>/api/health`, Login per Mail über die neue Domain. Passkeys der alten Domain gelten dort nicht mehr (siehe „Passkeys“).
 10. Tag `v1.0.0` setzen, wenn `main` gleich `origin/main` ist und die CI auf genau diesem Commit grün ist. Vorher den CI-Status dieses Commits zeigen, dann `git push origin v1.0.0`. Gepushte Tags sind fest: nie löschen oder verschieben, geht etwas schief, folgt `v1.0.1`.
 
 ## Mobile-App

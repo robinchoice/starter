@@ -55,6 +55,22 @@ export const verifyCodeSchema = z.object({
   cookie: z.boolean().optional(),
 });
 
+// What @simplewebauthn/browser hands over, @simplewebauthn/server checks the rest
+const passkeyResponse = z.looseObject({ id: z.string().min(1).max(1400), type: z.literal('public-key') });
+
+export const passkeyRegisterSchema = z.object({ response: passkeyResponse });
+
+// cookie as in verifyCodeSchema
+export const passkeyLoginSchema = z.object({ response: passkeyResponse, cookie: z.boolean().optional() });
+
+export type Passkey = {
+  id: string;
+  // Synced by a password manager, else bound to one device
+  backedUp: boolean;
+  createdAt: string;
+  lastUsedAt: string | null;
+};
+
 export const updateMeSchema = z.object({
   name: z.string().trim().min(1).max(255).optional(),
   // Update mails on or off, see the settings page

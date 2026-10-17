@@ -142,6 +142,7 @@ const RULES = {
       'Fehler als { error } in der Sprache des Clients',
       'rateLimit für alles, was Mails schickt oder Geheimnisse prüft',
       'Externe Quellen in die CSP eintragen',
+      'LLM mit Fremdtext: ohne Tools, Text abgegrenzt, Antwort mit Schema',
       'Erkenntnisse, die für alle gelten, im Starter nachziehen',
       'AGENTS.md mit Zweck & Links, Checks, Deploy, Fallen',
     ],
@@ -151,6 +152,7 @@ const RULES = {
       'Feature-Flags oder Kompatibilitäts-Shims',
       'Ungefragte READMEs, Kommentare oder Typ-Annotationen',
       'Vom Stack abweichen ohne Rückfrage',
+      'Geld, Rechte, Mails oder Löschungen allein auf ein Modellurteil',
     ],
   ],
   Git: [

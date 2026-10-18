@@ -151,9 +151,15 @@ test('a passkey added in the settings logs in without mail until it is removed',
   await page.getByRole('button', { name: 'Passkey hinzufügen' }).click();
   await expect(page.getByText('Passkey hinzugefügt')).toBeVisible();
   await expect(page.getByText(/^Hinzugefügt am/)).toBeVisible();
+  // The authenticator holds it already, the browser refuses a second one
+  await page.getByRole('button', { name: 'Passkey hinzufügen' }).click();
+  await expect(page.getByText('Auf diesem Gerät gibt es schon einen Passkey für dein Konto.')).toBeVisible();
+  await expect(page.getByText(/^Hinzugefügt am/)).toHaveCount(1);
 
+  // Logout has to finish before the next page loads, or that page still sees the session.
   // The virtual authenticator picks the passkey the login page offers as autofill
   await page.getByRole('button', { name: 'Abmelden' }).click();
+  await expect(page).toHaveURL(/\/$/);
   await page.goto('/login?next=%2Fsettings');
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByText(/zuletzt benutzt am/)).toBeVisible();
@@ -163,6 +169,7 @@ test('a passkey added in the settings logs in without mail until it is removed',
     PublicKeyCredential.isConditionalMediationAvailable = async () => false;
   });
   await page.getByRole('button', { name: 'Abmelden' }).click();
+  await expect(page).toHaveURL(/\/$/);
   await openHydrated(page, '/login');
   await page.getByRole('button', { name: 'Mit Passkey anmelden' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
@@ -171,6 +178,7 @@ test('a passkey added in the settings logs in without mail until it is removed',
   await page.getByRole('button', { name: 'Entfernen' }).click();
   await expect(page.getByText('Noch kein Passkey.')).toBeVisible();
   await page.getByRole('button', { name: 'Abmelden' }).click();
+  await expect(page).toHaveURL(/\/$/);
   await openHydrated(page, '/login');
   await page.getByRole('button', { name: 'Mit Passkey anmelden' }).click();
   await expect(page.getByText('Diesen Passkey kennen wir nicht.', { exact: false })).toBeVisible();

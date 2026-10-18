@@ -73,17 +73,8 @@ test('the language button switches to English and keeps it', async ({ page }) =>
 });
 
 test('a magic link opens the dashboard until logout', async ({ page }) => {
-  // Stored like the API does it: only the hash of the token
   const email = freshEmail();
-  const token = randomBytes(32).toString('hex');
-  const tokenHash = createHash('sha256').update(token).digest('hex');
-  // Sign-up is closed, so the account comes first, as with login-link
-  await sql`insert into users (email, name) values (${email}, ${email.split('@')[0]!}) on conflict do nothing`;
-  await sql`insert into magic_links (email, token_hash, expires_at)
-    values (${email}, ${tokenHash}, ${new Date(Date.now() + 15 * 60_000)})`;
-
-  await page.goto(`/auth/verify?token=${token}`);
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await logInAs(page, email);
   await expect(page.getByRole('heading', { name: `Hallo ${email.split('@')[0]}` })).toBeVisible();
 
   await page.getByRole('button', { name: 'Abmelden' }).click();

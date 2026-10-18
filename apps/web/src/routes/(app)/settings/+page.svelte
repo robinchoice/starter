@@ -33,10 +33,9 @@
       toast(t().passkeyAdded);
     } catch (err) {
       // Closing the browser's dialog is no error, API errors are already toasts
-      if (err instanceof WebAuthnError && err.code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED')
-        toastError(t().passkeyExists);
-      else if (err instanceof WebAuthnError && err.name !== 'NotAllowedError' && err.name !== 'AbortError')
-        toastError(t().passkeyNotAdded);
+      if (!(err instanceof WebAuthnError)) return;
+      if (err.code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED') toastError(t().passkeyExists);
+      else if (err.name !== 'NotAllowedError' && err.name !== 'AbortError') toastError(t().passkeyNotAdded);
     } finally {
       adding = false;
     }

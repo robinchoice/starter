@@ -10,6 +10,7 @@ updates:
     groups:
       all: { patterns: ['*'] }
 
+  # Web-only projects: remove this entire block when deleting apps/mobile.
   - package-ecosystem: pub
     directory: /apps/mobile
     schedule: { interval: weekly }

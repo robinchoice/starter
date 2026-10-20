@@ -105,6 +105,7 @@ test('the admin invites a tester, who can log in afterwards', async ({ page }) =
   expect(await sql`select 1 from users where email = ${tester}`).toHaveLength(1);
 
   await page.getByRole('button', { name: 'Abmelden' }).click();
+  await expect(page).toHaveURL(/\/$/);
   await openHydrated(page, '/login');
   await page.getByLabel('E-Mail').fill(tester);
   await page.getByRole('button', { name: 'Login-Mail senden' }).click();

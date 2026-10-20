@@ -8,7 +8,7 @@ import { sendMail, updateMail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { redact } from '../lib/updates';
 import { validJson } from '../lib/validate';
-import { requireAdmin, requireAuth } from '../middleware/auth';
+import { requireAdmin } from '../middleware/auth';
 import type { AppEnv } from '../types';
 
 const HOUR = 60 * 60 * 1000;
@@ -116,7 +116,7 @@ export const updateRoutes = new Hono<AppEnv>()
 
   // Only admins from ADMIN_EMAILS. admin@pleasance.org is not among them, so
   // agents write drafts as files and never send.
-  .get('/', requireAuth, requireAdmin, async (c) => {
+  .get('/', requireAdmin, async (c) => {
     const [subscribers] = await c
       .get('db')
       .select({ count: count() })
@@ -125,7 +125,7 @@ export const updateRoutes = new Hono<AppEnv>()
     return c.json({ updates: await summaries(c), subscribers: subscribers!.count });
   })
 
-  .post('/', requireAuth, requireAdmin, validJson(saveUpdateSchema), async (c) => {
+  .post('/', requireAdmin, validJson(saveUpdateSchema), async (c) => {
     const { content, image } = c.req.valid('json');
     const bytes = image ? Buffer.from(image, 'base64') : null;
     if (bytes && !imageType(bytes)) return c.json({ error: t(c).invalidUpdateImage }, 400);
@@ -134,7 +134,7 @@ export const updateRoutes = new Hono<AppEnv>()
   })
 
   // Drafts only, a sent update stays as it went out
-  .put('/:id', requireAuth, requireAdmin, validJson(saveUpdateSchema), async (c) => {
+  .put('/:id', requireAdmin, validJson(saveUpdateSchema), async (c) => {
     const id = c.req.param('id');
     const { content, image } = c.req.valid('json');
     const bytes = image == null ? image : Buffer.from(image, 'base64');
@@ -151,7 +151,7 @@ export const updateRoutes = new Hono<AppEnv>()
     return c.json({ update: (await summaries(c, id))[0] });
   })
 
-  .delete('/:id', requireAuth, requireAdmin, async (c) => {
+  .delete('/:id', requireAdmin, async (c) => {
     const id = c.req.param('id');
     const [row] = UUID.test(id)
       ? await c
@@ -165,7 +165,7 @@ export const updateRoutes = new Hono<AppEnv>()
   })
 
   // The mail as recipients see it, for the iframe on the admin page
-  .get('/:id/preview', requireAuth, requireAdmin, async (c) => {
+  .get('/:id/preview', requireAdmin, async (c) => {
     const found = await forAdmin(c);
     if (!found) return c.json({ error: t(c).notFound }, 404);
     const locale: Locale = c.req.query('locale') === 'en' ? 'en' : 'de';
@@ -175,7 +175,7 @@ export const updateRoutes = new Hono<AppEnv>()
   })
 
   // Both languages to the admin, before and after sending
-  .post('/:id/test', requireAuth, requireAdmin, async (c) => {
+  .post('/:id/test', requireAdmin, async (c) => {
     if (!(await testMailsPerUser.hit(c, c.get('user').id))) return tooManyRequests(c);
     const found = await forAdmin(c);
     if (!found) return c.json({ error: t(c).notFound }, 404);
@@ -192,7 +192,7 @@ export const updateRoutes = new Hono<AppEnv>()
 
   // Queues one delivery per opted-in account, the worker sends them throttled
   // (worker.ts). Marking it sent first makes a double click harmless.
-  .post('/:id/send', requireAuth, requireAdmin, async (c) => {
+  .post('/:id/send', requireAdmin, async (c) => {
     if (!(await sendsPerUser.hit(c, c.get('user').id))) return tooManyRequests(c);
     const found = await forAdmin(c);
     if (!found) return c.json({ error: t(c).notFound }, 404);

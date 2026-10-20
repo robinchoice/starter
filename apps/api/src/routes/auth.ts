@@ -104,7 +104,7 @@ export const authRoutes = new Hono<AppEnv>()
 
   // While sign-up is closed, admins invite single testers: the account exists
   // first, then the tester logs in like any other. SIGNUP_OPEN stays untouched.
-  .post('/invite', requireAuth, requireAdmin, validJson(inviteSchema), async (c) => {
+  .post('/invite', requireAdmin, validJson(inviteSchema), async (c) => {
     const { email } = c.req.valid('json');
     if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
     await c

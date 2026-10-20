@@ -92,7 +92,11 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   await next();
 });
 
+// Logs in like requireAuth, then asks for ADMIN_EMAILS: 401 without a session, 403 for everyone else
 export const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
-  if (!c.get('user').admin) return c.json({ error: t(c).adminOnly }, 403);
+  const user = await currentUser(c);
+  if (!user) return c.json({ error: t(c).notLoggedIn }, 401);
+  if (!user.admin) return c.json({ error: t(c).adminOnly }, 403);
+  c.set('user', user);
   await next();
 });

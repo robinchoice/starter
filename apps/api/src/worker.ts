@@ -11,8 +11,18 @@ import { captureException } from './monitoring';
 const db = createDb(process.env.DATABASE_URL!);
 const interval = Number(process.env.UPDATE_MAIL_INTERVAL_MS || 6000);
 const port = Number(process.env.WORKER_PORT || 3001);
+let stopping = false;
+let wake = () => {};
 
-Bun.serve({
+function shutdown() {
+  stopping = true;
+  wake();
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+const server = Bun.serve({
   port,
   async fetch(req) {
     if (new URL(req.url).pathname !== '/health') return new Response('Not found', { status: 404 });
@@ -22,7 +32,7 @@ Bun.serve({
 });
 console.log(`[worker] Sending update mails every ${interval} ms, health on port ${port}`);
 
-while (true) {
+while (!stopping) {
   const result = await deliverNext(db, interval).catch((err) => {
     console.error('[worker] Delivery crashed:', err);
     captureException(err);
@@ -30,5 +40,16 @@ while (true) {
   });
   // Nothing due: look again soon. The pace and retries are kept in deliverNext.
   const pause = { idle: 10_000, wait: interval, sent: interval, skipped: 0, failed: interval }[result];
-  await Bun.sleep(pause);
+  if (stopping) break;
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, pause);
+    wake = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+  });
 }
+
+await server.stop();
+await db.$client.end();
+process.exit(0);

@@ -7,3 +7,4 @@ build
 !.env.production.example
 .DS_Store
 test-results
+compose.replica.yml

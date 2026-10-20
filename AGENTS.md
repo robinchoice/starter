@@ -20,6 +20,7 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 ## Fallen
 
+- Secret-Scan: Gitleaks 8.30.1 liest zusätzlich zu `--gitleaks-ignore-path` auch `.gitleaksignore` aus dem Checkout. Der Workflow ersetzt diese Datei deshalb ebenfalls durch die Fassung aus `CONFIG_REF`, bei Fork-PRs also aus dem Base-Commit.
 - Was hier geändert wird, landet in jedem neuen Projekt und über das Nacht-Review als Befund in allen bestehenden. Konventionen nur ändern, wenn sie für alle Prototypen gelten.
 - `standards/` liest die Tabellen „Farbband“ und „Produktfarbe“ aus DESIGN.md: Spaltenreihenfolge und Ausschnitte im Format `1,00–1,35` beibehalten. Zeichnungen der Zeichen stehen in `SIGNS` in `standards/main.js`, ein neues Produkt bekommt dort bis dahin einen Punkt.
 

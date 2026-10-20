@@ -12,20 +12,19 @@ import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { deleteCookie } from 'hono/cookie';
 import { locale, t } from '../lib/i18n';
+import { createAccount, issueLoginCode, issueMagicLink, respondWithSession } from '../lib/login';
 import { sendLoginCodeEmail, sendMagicLinkEmail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { mayLogIn } from '../lib/signup';
+import { consentNow } from '../lib/updates';
 import { validJson } from '../lib/validate';
 import {
   currentUser,
-  generateToken,
   hashToken,
   requireAdmin,
   requireAuth,
   SESSION_COOKIE,
-  sessionExpiry,
   sessionToken,
-  setSessionCookie,
   toUser,
   userColumns,
 } from '../middleware/auth';
@@ -37,59 +36,12 @@ const mailsPerAddress = rateLimit('mails-per-address', 5, 60 * MINUTE);
 const mailsPerIp = rateLimit('mails-per-ip', 20, 60 * MINUTE);
 const codeChecksPerIp = rateLimit('code-checks-per-ip', 30, 15 * MINUTE);
 
-// Switching update mails on keeps the time of the first consent as proof
-export const consentNow = sql`coalesce(${users.updatesConsentAt}, now())`;
-
-// Check access again when redeeming a link, code or passkey before creating
-// an account or session. Every login refreshes the language of the
-// update mails. A ticked opt-in switches them on, an unticked one leaves them.
-// Passkeys log in through it as well, they only exist for existing accounts.
-export async function respondWithSession(c: Context<AppEnv>, email: string, updates: boolean, cookie = false) {
-  const db = c.get('db');
-  if (!(await mayLogIn(db, email))) return c.json({ error: t(c).signupClosed }, 403);
-  const [user] = await db
-    .insert(users)
-    .values({ email, name: email.split('@')[0]!, locale: locale(c), updatesConsentAt: updates ? new Date() : null })
-    .onConflictDoUpdate({
-      target: users.email,
-      set: { locale: locale(c), ...(updates && { updatesConsentAt: consentNow }) },
-    })
-    .returning(userColumns);
-
-  const token = generateToken();
-  await db.insert(sessions).values({
-    userId: user!.id,
-    tokenHash: hashToken(token),
-    expiresAt: sessionExpiry(),
-  });
-  if (!cookie) return c.json({ user: toUser(user!), token });
-  setSessionCookie(c, token);
-  return c.json({ user: toUser(user!) });
-}
-
-async function createCode(c: Context<AppEnv>, email: string, updatesOptIn: boolean) {
-  const code = String(crypto.getRandomValues(new Uint32Array(1))[0]! % 1_000_000).padStart(6, '0');
-  await c
-    .get('db')
-    .insert(loginCodes)
-    .values({ email, codeHash: hashToken(code), updatesOptIn, expiresAt: new Date(Date.now() + 15 * MINUTE) });
-  return code;
-}
-
 // The mail carries a link and a code: the link for this browser, the code for
 // when the link opens elsewhere (another device, the mail app's own browser).
 async function mailMagicLink(c: Context<AppEnv>, email: string, next: string | null, updatesOptIn = false) {
-  const token = generateToken();
-  await c
-    .get('db')
-    .insert(magicLinks)
-    .values({
-      email,
-      tokenHash: hashToken(token),
-      updatesOptIn,
-      expiresAt: new Date(Date.now() + 15 * MINUTE),
-    });
-  const code = await createCode(c, email, updatesOptIn);
+  const db = c.get('db');
+  const token = await issueMagicLink(db, email, updatesOptIn);
+  const code = await issueLoginCode(db, email, updatesOptIn);
   await sendMagicLinkEmail(email, token, code, next, { texts: t(c), locale: locale(c), updates: updatesOptIn });
 }
 
@@ -107,11 +59,7 @@ export const authRoutes = new Hono<AppEnv>()
   .post('/invite', requireAdmin, validJson(inviteSchema), async (c) => {
     const { email } = c.req.valid('json');
     if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
-    await c
-      .get('db')
-      .insert(users)
-      .values({ email, name: email.split('@')[0]! })
-      .onConflictDoNothing();
+    await createAccount(c.get('db'), email);
     await mailMagicLink(c, email, null);
     return c.json({ ok: true });
   })
@@ -143,7 +91,7 @@ export const authRoutes = new Hono<AppEnv>()
     if (!(await mailsPerIp.hit(c, clientIp(c))) || !(await mailsPerAddress.hit(c, email))) return tooManyRequests(c);
     if (!(await mayLogIn(c.get('db'), email))) return c.json({ error: t(c).signupClosed }, 403);
 
-    const code = await createCode(c, email, updates ?? false);
+    const code = await issueLoginCode(c.get('db'), email, updates ?? false);
     await sendLoginCodeEmail(email, code, { texts: t(c), locale: locale(c), updates: updates ?? false });
     return c.json({ ok: true });
   })

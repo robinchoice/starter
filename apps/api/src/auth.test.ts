@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, expect, spyOn, test } from 'bun:test';
+import { afterAll, beforeAll, beforeEach, expect, spyOn, test } from 'bun:test';
 import { createDb, migrateDb, passkeys, sessions, users } from '@app/db';
 import { APP_ID } from '@app/shared';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
+import { issueSession } from './lib/login';
 import { relyingParty } from './lib/passkeys';
 import { generateToken, hashToken } from './middleware/auth';
 
@@ -20,8 +21,11 @@ process.env.SIGNUP_OPEN = 'true';
 
 const freshEmail = () => `test-${crypto.randomUUID()}@example.com`;
 
-// Rate limits live in the database, so each run counts against its own address
-const ip = crypto.randomUUID();
+// Rate limits live in the database, so every test counts against its own address
+let ip = '';
+beforeEach(() => {
+  ip = crypto.randomUUID();
+});
 
 function post(path: string, body: unknown, headers: Record<string, string> = {}) {
   return app.request(`/api/v1${path}`, {
@@ -251,11 +255,7 @@ test('closed sign-up rechecks links and codes at redemption, while existing acco
 
 async function sessionFor(email: string) {
   const [user] = await db.insert(users).values({ email, name: 'Robin' }).returning({ id: users.id });
-  const token = generateToken();
-  await db
-    .insert(sessions)
-    .values({ userId: user!.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + 60_000) });
-  return { cookie: `session=${token}` };
+  return { cookie: `session=${await issueSession(db, user!.id)}` };
 }
 
 test('admins invite testers past the closed sign-up, others get 403', async () => {

@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, expect, spyOn, test } from 'bun:test';
-import { createDb, feedback, migrateDb, sessions, users } from '@app/db';
+import { createDb, feedback, migrateDb, users } from '@app/db';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
-import { generateToken, hashToken } from './middleware/auth';
+import { issueSession } from './lib/login';
 
 // Runs against DATABASE_URL like auth.test.ts, with fresh accounts only
 const db = createDb(process.env.DATABASE_URL!);
@@ -31,11 +31,7 @@ const context = {
 async function logIn() {
   const email = `test-${crypto.randomUUID()}@example.com`;
   const [user] = await db.insert(users).values({ email, name: 'Lena' }).returning({ id: users.id });
-  const token = generateToken();
-  await db
-    .insert(sessions)
-    .values({ userId: user!.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + 60_000) });
-  return { id: user!.id, email, token };
+  return { id: user!.id, email, token: await issueSession(db, user!.id) };
 }
 
 function send(token: string | null, body: unknown) {

@@ -2,13 +2,13 @@ import { afterAll, beforeAll, expect, spyOn, test } from 'bun:test';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { createDb, migrateDb, sessions, updateDeliveries, users } from '@app/db';
+import { createDb, migrateDb, updateDeliveries, users } from '@app/db';
 import { APP_NAME } from '@app/shared';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
+import { issueSession } from './lib/login';
 import { updateMail } from './lib/mail';
 import { deliverNext, parseDraft, readDrafts, redact } from './lib/updates';
-import { generateToken, hashToken } from './middleware/auth';
 
 // Runs against DATABASE_URL like auth.test.ts, with fresh accounts only
 const db = createDb(process.env.DATABASE_URL!);
@@ -64,11 +64,7 @@ async function session(email: string) {
     .values({ email, name: 'Robin' })
     .onConflictDoUpdate({ target: users.email, set: { email } })
     .returning({ id: users.id });
-  const token = generateToken();
-  await db
-    .insert(sessions)
-    .values({ userId: user!.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + 60_000) });
-  return { cookie: `session=${token}` };
+  return { cookie: `session=${await issueSession(db, user!.id)}` };
 }
 
 const userRow = async (email: string) => (await db.select().from(users).where(eq(users.email, email)))[0]!;

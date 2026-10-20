@@ -11,12 +11,12 @@ import {
 import { and, eq, gt, isNull, lt } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { t } from '../lib/i18n';
+import { respondWithSession } from '../lib/login';
 import { androidCertificates, relyingParty } from '../lib/passkeys';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
 import { validJson } from '../lib/validate';
 import { requireAuth } from '../middleware/auth';
 import type { AppEnv } from '../types';
-import { respondWithSession } from './auth';
 
 const MINUTE = 60 * 1000;
 // The login page asks for options on every visit, for the autofill

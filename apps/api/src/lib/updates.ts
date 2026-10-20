@@ -6,6 +6,9 @@ import { and, asc, eq, gt, isNull, lt, or, sql } from 'drizzle-orm';
 import { imageType } from './image';
 import { sendMail, updateMail } from './mail';
 
+// Switching update mails on keeps the time of the first consent as proof
+export const consentNow = sql`coalesce(${users.updatesConsentAt}, now())`;
+
 // Agents write drafts as updates/<slug>.md in the repo, Robin sends them in
 // /admin/updates (README, „Update-Mails“). Format:
 //

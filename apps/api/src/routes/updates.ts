@@ -6,7 +6,7 @@ import { t } from '../lib/i18n';
 import { imageType, UUID } from '../lib/image';
 import { sendMail, updateMail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
-import { redact } from '../lib/updates';
+import { consentNow, redact } from '../lib/updates';
 import { validJson } from '../lib/validate';
 import { requireAdmin } from '../middleware/auth';
 import type { AppEnv } from '../types';
@@ -85,7 +85,7 @@ async function setConsent(c: Context<AppEnv>, on: boolean) {
   const [user] = await c
     .get('db')
     .update(users)
-    .set({ updatesConsentAt: on ? sql`coalesce(${users.updatesConsentAt}, now())` : null, updatedAt: new Date() })
+    .set({ updatesConsentAt: on ? consentNow : null, updatedAt: new Date() })
     .where(eq(users.unsubscribeToken, token))
     .returning({ id: users.id });
   if (!user) return c.json({ error: t(c).unsubscribeInvalid }, 400);

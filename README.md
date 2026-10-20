@@ -78,6 +78,27 @@ VPS 1 baut nichts. Die CI baut bei jedem grünen Push auf `main` die Images `ghc
 9. Uptime Kuma: HTTP-Monitor auf `https://<domain>/api/health`.
 10. Neue Software in `vps1/advisory-alarm` aufnehmen, siehe `infra.md`.
 
+### Stoppen und weitere Instanzen
+
+API und Worker behandeln `SIGTERM` und `SIGINT`: Die API nimmt keine neuen Verbindungen an und wartet auf laufende Antworten, der Worker holt keine weiteren Aufträge und beendet die laufende Zustellung samt Transaktion. Danach schließen sie den Postgres-Pool. Auch während des API-Starts wartet der Shutdown auf Migration und Import. Compose lässt dafür 30 Sekunden Zeit (`stop_grace_period`), erst danach erzwingt Docker den Abbruch. SMTP hat dafür begrenzte DNS-, Verbindungs- und Begrüßungswartezeiten (je 5 s) sowie 10 s für einen inaktiven Socket. Das ist keine Obergrenze für die gesamte Zustellung; ein langsamer, weiter antwortender Server oder eine lange Datenbankabfrage kann das Shutdown-Budget weiterhin überschreiten.
+
+Zuerst Apps auf mehrere Server verteilen, erst bei Bedarf eine einzelne App replizieren (`infra.md`, „Skalierung“). Der Compose-Standard bleibt eine App mit lokalem Postgres. Eine weitere Instanz verwendet dieselbe Datenbank über das private Netz. Dafür neben `docker-compose.prod.yml` eine lokale, nicht eingecheckte Datei `compose.replica.yml` anlegen (Compose mit Unterstützung für `!reset`):
+
+```yaml
+services:
+  api:
+    environment:
+      - DATABASE_URL=${DATABASE_URL:?Shared database URL is required}
+    depends_on: !reset {}
+  worker:
+    environment:
+      - DATABASE_URL=${DATABASE_URL:?Shared database URL is required}
+```
+
+`DATABASE_URL` in der Env dieser Instanz auf die gemeinsame Datenbank setzen und mit `docker compose -f docker-compose.prod.yml -f compose.replica.yml up -d web api worker` starten. Damit startet dort kein Postgres; der Worker wartet weiterhin auf die gesunde API. Alle Instanzen brauchen dieselbe App-Konfiguration und denselben Stand. Datenbankzugriff nur aus dem privaten Netz der App-Server erlauben, nicht öffentlich freigeben. Den Override auch bei späteren Deploys verwenden; die Standard-CI richtet diese Topologie nicht automatisch ein.
+
+Die Client-IP für Rate-Limits ist der letzte Eintrag in `X-Forwarded-For`. Hinter einem einzelnen Proxy ist das dessen Gegenstelle. Bei Hetzner-LB → Traefik → Web reicht [`forwardedHeaders.trustedIPs`](https://doc.traefik.io/traefik/reference/install-configuration/entrypoints/#forwarded-headers) allein nicht: Ohne Vertrauen verwirft Traefik den vom LB gesetzten Header; mit Vertrauen bleibt er erhalten, aber Traefik hängt standardmäßig die LB-IP an. Dann teilen sich alle Clients die IP-Limits. Vor dieser Topologie die ganze Header-Kette mit zwei verschiedenen Client-IPs und einem gefälschten Header prüfen. Am API-Eingang muss der letzte Eintrag die echte Client-IP sein. Bei Traefik-Versionen mit `forwardedHeaders.notAppendXForwardedFor` kann ein eigener, nur vom LB erreichbarer EntryPoint den Header unverändert weitergeben; `trustedIPs` dabei auf die tatsächlichen LB-Adressen begrenzen. Niemals pauschal dem ersten Header-Eintrag oder allen Absendern vertrauen. Der Lasttest vom 20.10.2026 hat nur den direkten Hetzner-LB geprüft, ohne Traefik und TLS.
+
 ## Screenshots
 
 Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-Seite mit headless Chromium: jede Seite aus `PAGES` in `apps/web/screenshots.ts` als Desktop (1440×900) und Handy (390×844, doppelte Dichte), als WebP in `docs/screenshots/<seite>-<gerät>-<sprache>.webp`. Haben sich Bilder geändert, committet der Bot sie mit `[skip ci]` auf `main`, das löst keinen neuen Deploy aus. Danach schickt derselbe Job ein `repository_dispatch` an `robinchoice/pleasance` (`event_type: prototype-deployed`, `client_payload: {slug, sha}`), damit pleasance.org die neuen Bilder übernimmt.

@@ -18,9 +18,18 @@
   const SIZE = 44;
   const STORAGE_KEY = 'feedback-button';
 
+  function savedPosition() {
+    try {
+      const position = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
+      return position && Number.isFinite(position.x) && Number.isFinite(position.y) ? position : null;
+    } catch {
+      return null;
+    }
+  }
+
   let width = $state(0);
   let height = $state(0);
-  let saved = $state<{ x: number; y: number } | null>(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null'));
+  let saved = $state<{ x: number; y: number } | null>(savedPosition());
   let capturing = $state(false);
   let flash = $state(false);
   let message = $state('');

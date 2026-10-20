@@ -1,5 +1,8 @@
 import { expect, test } from 'bun:test';
 
+const appModule = JSON.stringify(`${import.meta.dir}/app.ts`);
+const updatesModule = JSON.stringify(`${import.meta.dir}/lib/updates.ts`);
+
 // Isolated processes keep module mocks and OS signals out of the other tests.
 function start(entry: 'index' | 'worker', setup: string, env: Record<string, string> = {}) {
   const child = Bun.spawn(
@@ -70,9 +73,6 @@ test('worker records an SMTP timeout before exiting on SIGTERM', async () => {
     smtp.stop(true);
   }
 }, 20_000);
-
-const appModule = JSON.stringify(`${import.meta.dir}/app.ts`);
-const updatesModule = JSON.stringify(`${import.meta.dir}/lib/updates.ts`);
 
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   test(`API drains an active database request on ${signal}`, async () => {

@@ -1,4 +1,5 @@
 import './monitoring';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { createDb } from '@app/db';
 import { sql } from 'drizzle-orm';
 import { deliverNext } from './lib/updates';
@@ -11,12 +12,10 @@ import { captureException } from './monitoring';
 const db = createDb(process.env.DATABASE_URL!);
 const interval = Number(process.env.UPDATE_MAIL_INTERVAL_MS || 6000);
 const port = Number(process.env.WORKER_PORT || 3001);
-let stopping = false;
-let wake = () => {};
+const stop = new AbortController();
 
 function shutdown() {
-  stopping = true;
-  wake();
+  stop.abort();
 }
 
 process.on('SIGTERM', shutdown);
@@ -32,7 +31,7 @@ const server = Bun.serve({
 });
 console.log(`[worker] Sending update mails every ${interval} ms, health on port ${port}`);
 
-while (!stopping) {
+while (!stop.signal.aborted) {
   const result = await deliverNext(db, interval).catch((err) => {
     console.error('[worker] Delivery crashed:', err);
     captureException(err);
@@ -40,14 +39,7 @@ while (!stopping) {
   });
   // Nothing due: look again soon. The pace and retries are kept in deliverNext.
   const pause = { idle: 10_000, wait: interval, sent: interval, skipped: 0, failed: interval }[result];
-  if (stopping) break;
-  await new Promise<void>((resolve) => {
-    const timer = setTimeout(resolve, pause);
-    wake = () => {
-      clearTimeout(timer);
-      resolve();
-    };
-  });
+  await sleep(pause, undefined, { signal: stop.signal }).catch(() => {});
 }
 
 await server.stop();

@@ -1,6 +1,6 @@
-import { createHash, randomBytes } from 'node:crypto';
-import { expect, type Page, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import postgres from 'postgres';
+import { logIn } from './login';
 
 const sql = postgres(process.env.DATABASE_URL!, { connection: { timezone: 'UTC' }, onnotice: () => {} });
 test.afterAll(() => sql.end());
@@ -17,17 +17,6 @@ test.beforeEach(({ page }) => {
   page.on('pageerror', (err) => errors.push(err.message));
 });
 test.afterEach(() => expect(errors).toEqual([]));
-
-async function logInAs(page: Page, email: string) {
-  const token = randomBytes(32).toString('hex');
-  const tokenHash = createHash('sha256').update(token).digest('hex');
-  // Sign-up is closed, so the account comes first, as with login-link
-  await sql`insert into users (email, name) values (${email}, ${email.split('@')[0]!}) on conflict do nothing`;
-  await sql`insert into magic_links (email, token_hash, expires_at)
-    values (${email}, ${tokenHash}, ${new Date(Date.now() + 15 * 60_000)})`;
-  await page.goto(`/auth/verify?token=${token}`);
-  await expect(page).toHaveURL(/\/dashboard$/);
-}
 
 const consent = async (email: string) =>
   (await sql`select updates_consent_at from users where email = ${email}`)[0]?.updates_consent_at;
@@ -51,7 +40,7 @@ test('the login form asks for update mails without a preset tick', async ({ page
 
 test('the settings switch turns update mails on and off', async ({ page }) => {
   const email = freshEmail();
-  await logInAs(page, email);
+  await logIn(page, email);
   await page.getByRole('link', { name: 'Einstellungen' }).click();
   const updates = page.getByRole('switch', { name: 'Updates per Mail' });
   await expect(updates).toHaveAttribute('aria-checked', 'false');
@@ -81,7 +70,7 @@ test('the unsubscribe link works without login', async ({ page }) => {
 // The API runs with ADMIN_EMAILS=e2e-admin@example.com, see playwright.config.ts
 test('the admin writes an update, previews it and sends it', async ({ page }) => {
   await sql`insert into users (email, name, updates_consent_at) values (${freshEmail()}, 'Lena', now())`;
-  await logInAs(page, 'e2e-admin@example.com');
+  await logIn(page, 'e2e-admin@example.com');
   await page.getByRole('link', { name: 'Updates' }).click();
   await page.getByRole('button', { name: 'Neues Update' }).click();
 
@@ -106,7 +95,7 @@ test('the admin writes an update, previews it and sends it', async ({ page }) =>
 });
 
 test('others see no updates page and get 403 from the API', async ({ page }) => {
-  await logInAs(page, freshEmail());
+  await logIn(page, freshEmail());
   await expect(page.getByRole('link', { name: 'Updates' })).toBeHidden();
   const res = await page.request.get('/api/v1/updates');
   expect(res.status()).toBe(403);

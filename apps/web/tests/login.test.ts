@@ -1,6 +1,6 @@
-import { createHash, randomBytes } from 'node:crypto';
 import { expect, type Page, test } from '@playwright/test';
 import postgres from 'postgres';
+import { logIn, loginCode } from './login';
 
 const sql = postgres(process.env.DATABASE_URL!, { connection: { timezone: 'UTC' }, onnotice: () => {} });
 test.afterAll(() => sql.end());
@@ -40,11 +40,7 @@ test('the code from the login mail logs in when the link opens elsewhere', async
   await page.getByRole('button', { name: 'Login-Mail senden' }).click();
   await expect(page.getByText('Check deine E-Mails')).toBeVisible();
 
-  // The mailed code is random, the test adds one it knows, stored as hash like the API does
-  const codeHash = createHash('sha256').update('424242').digest('hex');
-  await sql`insert into login_codes (email, code_hash, expires_at)
-    values (${email}, ${codeHash}, ${new Date(Date.now() + 15 * 60_000)})`;
-  await page.getByLabel('Code').fill('424242');
+  await page.getByLabel('Code').fill(loginCode(email));
   await page.getByRole('button', { name: 'Einloggen' }).click();
   await expect(page).toHaveURL(/\/settings$/);
 });
@@ -74,7 +70,7 @@ test('the language button switches to English and keeps it', async ({ page }) =>
 
 test('a magic link opens the dashboard until logout', async ({ page }) => {
   const email = freshEmail();
-  await logInAs(page, email);
+  await logIn(page, email);
   await expect(page.getByRole('heading', { name: `Hallo ${email.split('@')[0]}` })).toBeVisible();
 
   await page.getByRole('button', { name: 'Abmelden' }).click();
@@ -83,21 +79,10 @@ test('a magic link opens the dashboard until logout', async ({ page }) => {
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
 });
 
-async function logInAs(page: Page, email: string) {
-  const token = randomBytes(32).toString('hex');
-  const tokenHash = createHash('sha256').update(token).digest('hex');
-  // Sign-up is closed, so the account comes first, as with login-link
-  await sql`insert into users (email, name) values (${email}, ${email.split('@')[0]!}) on conflict do nothing`;
-  await sql`insert into magic_links (email, token_hash, expires_at)
-    values (${email}, ${tokenHash}, ${new Date(Date.now() + 15 * 60_000)})`;
-  await page.goto(`/auth/verify?token=${token}`);
-  await expect(page).toHaveURL(/\/dashboard$/);
-}
-
 // The API runs with ADMIN_EMAILS=e2e-admin@example.com, see playwright.config.ts
 test('the admin invites a tester, who can log in afterwards', async ({ page }) => {
   const tester = freshEmail();
-  await logInAs(page, 'e2e-admin@example.com');
+  await logIn(page, 'e2e-admin@example.com');
   await page.getByRole('link', { name: 'Tester einladen' }).click();
   await page.getByLabel('E-Mail').fill(tester);
   await page.getByRole('button', { name: 'Einladen' }).click();
@@ -113,7 +98,7 @@ test('the admin invites a tester, who can log in afterwards', async ({ page }) =
 });
 
 test('others see no invite and get 403 from the API', async ({ page }) => {
-  await logInAs(page, freshEmail());
+  await logIn(page, freshEmail());
   await expect(page.getByRole('link', { name: 'Tester einladen' })).toBeHidden();
   const res = await page.request.post('/api/v1/auth/invite', { data: { email: freshEmail() } });
   expect(res.status()).toBe(403);
@@ -137,7 +122,7 @@ async function addAuthenticator(page: Page) {
 
 test('a passkey added in the settings logs in without mail until it is removed', async ({ page }) => {
   await addAuthenticator(page);
-  await logInAs(page, freshEmail());
+  await logIn(page, freshEmail());
   await page.goto('/settings');
   await expect(page.getByText('Noch kein Passkey.')).toBeVisible();
   await page.getByRole('button', { name: 'Passkey hinzufügen' }).click();

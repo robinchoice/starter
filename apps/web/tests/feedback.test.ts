@@ -1,7 +1,7 @@
-import { createHash, randomBytes } from 'node:crypto';
 import { LIVE } from '@app/shared';
-import { expect, type Page, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import postgres from 'postgres';
+import { logIn } from './login';
 
 const sql = postgres(process.env.DATABASE_URL!, { connection: { timezone: 'UTC' }, onnotice: () => {} });
 test.afterAll(() => sql.end());
@@ -16,19 +16,6 @@ test.beforeEach(({ page }) => {
   page.on('pageerror', (err) => errors.push(err.message));
 });
 test.afterEach(() => expect(errors).toEqual([]));
-
-async function logIn(page: Page) {
-  const email = `e2e-${crypto.randomUUID()}@example.com`;
-  const token = randomBytes(32).toString('hex');
-  const tokenHash = createHash('sha256').update(token).digest('hex');
-  // Sign-up is closed, so the account comes first, as with login-link
-  await sql`insert into users (email, name) values (${email}, ${email.split('@')[0]!}) on conflict do nothing`;
-  await sql`insert into magic_links (email, token_hash, expires_at)
-    values (${email}, ${tokenHash}, ${new Date(Date.now() + 15 * 60_000)})`;
-  await page.goto(`/auth/verify?token=${token}`);
-  await expect(page).toHaveURL(/\/dashboard$/);
-  return email;
-}
 
 const reports = (email: string) => sql`select f.kind, f.message, f.screenshot, f.context
   from feedback f join users u on u.id = f.user_id where u.email = ${email} order by f.created_at`;

@@ -7,8 +7,6 @@ import { issueSession } from './lib/login';
 import { relyingParty } from './lib/passkeys';
 import { generateToken, hashToken } from './middleware/auth';
 
-// Runs against DATABASE_URL. Only adds rows with fresh addresses, so the
-// local dev database is safe to use.
 const db = createDb(process.env.DATABASE_URL!);
 const app = createApp(db);
 const log = spyOn(console, 'log');

@@ -4,7 +4,6 @@ import { eq } from 'drizzle-orm';
 import { createApp } from './app';
 import { issueSession } from './lib/login';
 
-// Runs against DATABASE_URL like auth.test.ts, with fresh accounts only
 const db = createDb(process.env.DATABASE_URL!);
 const app = createApp(db);
 const log = spyOn(console, 'log');

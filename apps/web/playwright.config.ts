@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
-// The tests write to DATABASE_URL like the API tests. The CI sets it directly.
+// The test runner supplies its temporary DATABASE_URL; the env file fills in other settings.
 const envFile = new URL('../../.env', import.meta.url);
 if (existsSync(envFile)) process.loadEnvFile(envFile);
 

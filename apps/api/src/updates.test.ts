@@ -10,7 +10,6 @@ import { issueSession } from './lib/login';
 import { type sendMail, updateMail } from './lib/mail';
 import { deliverNext, parseDraft, readDrafts } from './lib/updates';
 
-// Runs against DATABASE_URL like auth.test.ts, with fresh accounts only
 const db = createDb(process.env.DATABASE_URL!);
 const app = createApp(db);
 const log = spyOn(console, 'log');

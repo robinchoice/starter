@@ -1,6 +1,6 @@
 name: Mobile
 
-# Every change to the app gets analyze and test. On main: Android → signed AAB as artifact.
+# Every change to the app gets analyze and test. On main: Android → AAB artifact and internal Play test.
 # iOS → TestFlight only for release tags (v*) and manual runs: macOS minutes count tenfold
 # in private repos, one run costs about 60 minutes.
 # Manual runs stay internal. Only pushed release tags notify external testers and submit for beta review.
@@ -172,8 +172,14 @@ jobs:
     # Skipped until the variable API_URL exists
     if: github.event_name != 'pull_request' && vars.API_URL != ''
     runs-on: ubuntu-latest
+    # Play edits conflict when two uploads run at the same time, even from different refs.
+    concurrency:
+      group: mobile-android-play
+      cancel-in-progress: false
     env:
       HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      # Enable only after the first bundle was uploaded by hand in the Play Console.
+      HAS_PLAY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' && vars.PLAY_UPLOAD == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -214,3 +220,18 @@ jobs:
           path: ${{ runner.temp }}/symbols
           retention-days: 90
           if-no-files-found: error
+
+      - name: Read Android package name
+        if: env.HAS_KEYSTORE == 'true' && env.HAS_PLAY == 'true'
+        id: android-package
+        run: echo "name=$(sed -n 's/^[[:space:]]*applicationId = "\([^"]*\)"/\1/p' android/app/build.gradle.kts)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to Play (internal test)
+        if: env.HAS_KEYSTORE == 'true' && env.HAS_PLAY == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ steps.android-package.outputs.name }}
+          releaseFiles: apps/mobile/build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed

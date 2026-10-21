@@ -6,6 +6,7 @@ import { logger } from 'hono/logger';
 import { t } from './lib/i18n';
 import { captureException } from './monitoring';
 import { agentRoutes } from './routes/agents';
+import { altchaRoutes } from './routes/altcha';
 import { authRoutes } from './routes/auth';
 import { feedbackRoutes } from './routes/feedback';
 import { passkeyRoutes, wellKnownRoutes } from './routes/passkeys';
@@ -37,6 +38,7 @@ export function createApp(db: Database) {
       .route('/', agentRoutes)
       .route('/', wellKnownRoutes)
       .basePath('/api/v1')
+      .route('/altcha', altchaRoutes)
       .route('/auth', authRoutes)
       .route('/auth/passkeys', passkeyRoutes)
       .route('/feedback', feedbackRoutes)

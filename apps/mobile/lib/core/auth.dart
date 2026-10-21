@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:altcha_lib/altcha_lib.dart' as altcha;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,6 +14,18 @@ import 'api.dart';
 final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
 final passkeyAuthenticatorProvider = Provider<PasskeyAuthenticatorInterface>((ref) => PasskeyAuthenticator());
 final authProvider = AsyncNotifierProvider<AuthController, User?>(AuthController.new);
+
+/// Proof of work against bots, what the ALTCHA widget does on the web
+/// (README, „ALTCHA“). Isolates keep the UI responsive meanwhile; widget tests
+/// solve on the main isolate, their fake clock doesn't wait for others.
+final altchaSolverProvider = Provider<Future<altcha.Solution?> Function(altcha.Challenge)>(
+  (ref) =>
+      (challenge) => altcha.solveChallengeIsolates(
+        challenge: challenge,
+        deriveKey: altcha.deriveKey,
+        concurrency: Platform.numberOfProcessors.clamp(1, 4),
+      ),
+);
 
 class User {
   final String id;
@@ -67,8 +81,15 @@ class AuthController extends AsyncNotifier<User?> {
   /// Mails a 6-digit code. A magic link can't open the app without
   /// universal links, a code can be typed in anywhere. [updates] is the
   /// unticked opt-in for update mails, it counts once the code is accepted.
-  Future<void> requestCode(String email, {bool updates = false}) =>
-      _api.post('/auth/code', {'email': email, 'updates': updates});
+  Future<void> requestCode(String email, {bool updates = false}) async =>
+      _api.post('/auth/code', {'email': email, 'updates': updates, 'altcha': await _altcha()});
+
+  /// The challenge goes back as the API sent it, its signature covers it.
+  Future<String> _altcha() async {
+    final challenge = await _api.get('/altcha') as Map<String, dynamic>;
+    final solution = await ref.read(altchaSolverProvider)(altcha.Challenge.fromJson(challenge));
+    return base64Encode(utf8.encode(jsonEncode({'challenge': challenge, 'solution': solution!.toJson()})));
+  }
 
   Future<void> verifyCode(String email, String code) async =>
       _startSession(await _api.post('/auth/code/verify', {'email': email, 'code': code}) as Map<String, dynamic>);

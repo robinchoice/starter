@@ -65,7 +65,11 @@ void main() {
     final container = await start(api);
     final auth = container.read(authProvider.notifier);
     await auth.requestCode('robin@example.com', updates: true);
-    expect(jsonDecode(api.requests.last.body), {'email': 'robin@example.com', 'updates': true});
+    expect(jsonDecode(api.requests.last.body), {
+      'email': 'robin@example.com',
+      'updates': true,
+      'altcha': isA<String>(),
+    });
     await logIn(container);
     expect(container.read(authProvider).value?.updatesSince, isNull);
 

@@ -1,6 +1,6 @@
 # starter
 
-Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Mail mit Link und Code (Web) oder Code (App) und per Passkey, Feedback-Knopf mit Screenshot, Update-Mails mit Opt-in, Link-Vorschau, Mail über SMTP im Design der App, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Secret-Scan, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
+Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postgres, dazu optional eine Flutter-App gegen dieselbe API. Deutsch und Englisch mit Umschalter in der Fußzeile, Login per Mail mit Link und Code (Web) oder Code (App) und per Passkey, Feedback-Knopf mit Screenshot, Update-Mails mit Opt-in, ALTCHA vor Login-Mails, Link-Vorschau, Mail über SMTP im Design der App, Rate-Limit, Security-Header mit CSP, GlitchTip, PostHog, Healthcheck, CI mit Browser-Test, Secret-Scan, Dependabot, Coolify-Deploy und Screenshots nach jedem Deploy sind fertig eingebaut.
 
 ## Neues Projekt
 
@@ -132,6 +132,16 @@ Prototypen sind von außen erreichbar, aber geschlossen, bis Robin ausdrücklich
 - admin@pleasance.org, der agentische Admin, kommt nie in `ADMIN_EMAILS`: Agenten melden sich damit in der Vorschau an und dürfen weder Konten an der Registrierung vorbei anlegen noch Dritte anmailen.
 - Öffnen, erst nach Robins Go: `SIGNUP_OPEN=true` in Coolify setzen und neu deployen. Prüfen: Login-Link an eine neue Adresse anfordern.
 - `login-link` legt Konten selbst an, das Testkonto der Savor-Vorschau braucht keinen Eintrag. Das Skript nimmt jede Adresse, die Grenze sitzt auf dem Server: Agenten kommen nicht in den Container, sondern nur über das root-eigene `login-link` aus dem Kontor, und das übergibt fest admin@pleasance.org. Wer selbst in den Container kommt, hat ohnehin die Datenbank.
+
+## ALTCHA
+
+Öffentliche Formulare, die Mails verschicken oder Daten anlegen, schützt [ALTCHA](https://altcha.org) (MIT, Proof of Work, ohne Cookies und ohne Drittanbieter): Vor dem Absenden rechnet der Browser oder die App eine kleine Aufgabe, die API prüft die Lösung. In der Vorlage gilt das für `/auth/magic-link` und `/auth/code`. Es ergänzt die Rate-Limits: Jede Anfrage kostet Rechenzeit, und ohne Lösung kann niemand die Limits einer fremden Adresse aufbrauchen.
+
+- API: `GET /api/v1/altcha` gibt eine Challenge aus (`altcha-lib`, PBKDF2/SHA-256, 10 Minuten gültig). `requireAltcha` aus `lib/altcha.ts` steht vor `validJson`, liest das Feld `altcha` im JSON-Body und antwortet sonst mit 403 und `altchaFailed`. Jede Lösung gilt einmal, das merkt sich ein Zähler in `rate_limits`. Den HMAC-Schlüssel erzeugt die API beim ersten Aufruf und legt ihn in `server_secrets` ab, alle Instanzen teilen ihn, eine Env-Variable braucht es nicht.
+- Web: `Altcha.svelte` ins Formular, mit `bind:payload` und `bind:this`. Das erste Absenden startet die Rechnung, danach schickt das Widget das Formular selbst noch einmal ab. Der Handler übergeht deshalb Absenden ohne Payload und ruft nach einem Fehler `reset()` auf, Vorbild `routes/login/+page.svelte`. Das Widget kommt aus `altcha/external` mit eigener CSS- und Worker-Datei, so bleibt die CSP ohne Ausnahme. Seine Texte bringt es auf Deutsch und Englisch mit, die Sprache folgt dem Umschalter. Das Sammeln von Zeiger- und Scrolldaten (`humanInteractionSignature`) ist aus.
+- App: `requestCode` holt eine Challenge und löst sie mit [`altcha_lib`](https://pub.dev/packages/altcha_lib) in Isolates. Widget-Tests lösen über `altchaSolverProvider` im Haupt-Isolate, Vorbild `test/fake_api.dart`.
+- Schwierigkeit: `COST` und Zählerbereich in `apps/api/src/lib/altcha.ts`. Auf einem Laptop rechnen Browser und App 0,1–0,5 s, das Widget zeigt mindestens 0,5 s. Nur erhöhen, wenn Bots durchkommen: Die App rechnet in reinem Dart, langsamer als WebCrypto im Browser.
+- Tests: `apps/api/src/testing.ts` löst Challenges für die API-Tests, der Browser-Test rechnet mit dem echten Widget.
 
 ## Passkeys
 

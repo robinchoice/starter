@@ -43,6 +43,13 @@
       "when": 1792183790650,
       "tag": "0005_passkeys",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792603465600,
+      "tag": "0006_server_secrets",
+      "breakpoints": true
     }
   ]
 }

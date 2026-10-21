@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, expect, spyOn, test } from 'bun:test';
+import { afterAll, beforeAll, beforeEach, expect, setSystemTime, spyOn, test } from 'bun:test';
 import { createDb, migrateDb, passkeys, rateLimits, sessions, users } from '@app/db';
 import { APP_ID, messages } from '@app/shared';
 import { eq } from 'drizzle-orm';
@@ -6,6 +6,7 @@ import { createApp } from './app';
 import { issueSession } from './lib/login';
 import { relyingParty } from './lib/passkeys';
 import { generateToken, hashToken } from './middleware/auth';
+import { altchaPayload } from './testing';
 
 const db = createDb(process.env.DATABASE_URL!);
 const app = createApp(db);
@@ -25,7 +26,15 @@ beforeEach(() => {
   ip = crypto.randomUUID();
 });
 
-function post(path: string, body: unknown, headers: Record<string, string> = {}) {
+// Login mails need a solved ALTCHA like the login form sends it, the ALTCHA tests post without
+const ALTCHA_PATHS = ['/auth/magic-link', '/auth/code'];
+
+async function post(path: string, body: object, headers: Record<string, string> = {}) {
+  const altcha = ALTCHA_PATHS.includes(path) ? { altcha: await altchaPayload(app) } : {};
+  return send(path, { ...body, ...altcha }, headers);
+}
+
+function send(path: string, body: unknown, headers: Record<string, string> = {}) {
   return app.request(`/api/v1${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-forwarded-for': ip, ...headers },
@@ -87,6 +96,46 @@ test('magic link logs in, creates the account and logs out', async () => {
   await post('/auth/logout', {}, { cookie: `session=${session}` });
   const after = await app.request('/api/v1/auth/me', { headers: { cookie: `session=${session}` } });
   expect((await body(after)).user).toBeNull();
+});
+
+test('login mails need an ALTCHA solution that is valid and unused', async () => {
+  const email = freshEmail();
+  const mails = mailCount();
+  const missing = await send('/auth/magic-link', { email }, { 'accept-language': 'en' });
+  expect(missing.status).toBe(403);
+  expect(await body(missing)).toEqual({ error: messages.en.altchaFailed });
+  expect((await send('/auth/code', { email, altcha: btoa('nonsense') })).status).toBe(403);
+
+  const altcha = await altchaPayload(app);
+  const { challenge, solution } = JSON.parse(atob(altcha));
+  const easier = { ...challenge, parameters: { ...challenge.parameters, cost: 1 } };
+  const wrong = { ...solution, counter: solution.counter + 1 };
+  for (const forged of [
+    { challenge: easier, solution },
+    { challenge, solution: wrong },
+  ])
+    expect((await send('/auth/code', { email, altcha: btoa(JSON.stringify(forged)) })).status).toBe(403);
+  expect(mailCount()).toBe(mails);
+
+  expect((await send('/auth/code', { email, altcha })).status).toBe(200);
+  expect((await send('/auth/magic-link', { email, altcha })).status).toBe(403);
+  expect(mailCount()).toBe(mails + 1);
+});
+
+test('an ALTCHA solution expires after ten minutes', async () => {
+  const altcha = await altchaPayload(app);
+  setSystemTime(new Date(Date.now() + 11 * 60 * 1000));
+  try {
+    expect((await send('/auth/magic-link', { email: freshEmail(), altcha })).status).toBe(403);
+  } finally {
+    setSystemTime();
+  }
+});
+
+test('requests without ALTCHA leave the rate limits of an address alone', async () => {
+  const email = freshEmail();
+  for (let i = 0; i < 10; i++) await send('/auth/magic-link', { email });
+  expect((await post('/auth/magic-link', { email })).status).toBe(200);
 });
 
 test('a second login reuses the account', async () => {

@@ -1,14 +1,14 @@
-import { afterAll, beforeAll, expect, spyOn, test } from 'bun:test';
+import { afterAll, beforeAll, expect, mock, spyOn, test } from 'bun:test';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { createDb, migrateDb, updateDeliveries, users } from '@app/db';
+import { createDb, migrateDb, updateDeliveries, updates, users } from '@app/db';
 import { APP_NAME } from '@app/shared';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { createApp } from './app';
 import { issueSession } from './lib/login';
-import { updateMail } from './lib/mail';
-import { deliverNext, parseDraft, readDrafts, redact } from './lib/updates';
+import { type sendMail, updateMail } from './lib/mail';
+import { deliverNext, parseDraft, readDrafts } from './lib/updates';
 
 // Runs against DATABASE_URL like auth.test.ts, with fresh accounts only
 const db = createDb(process.env.DATABASE_URL!);
@@ -237,10 +237,48 @@ test('drafts in updates/ parse, broken ones say why', () => {
   expect(() => parseDraft('x', 'Hallo\n# de: A\n- B\n# en: A\n- B', dir)).toThrow('line 1');
 });
 
-test('logged delivery errors carry no addresses', () => {
+test('failed deliveries wait a minute before retrying and stop after three attempts', async () => {
+  const email = freshEmail();
+  const [user] = await db.insert(users).values({ email, name: 'Robin', updatesConsentAt: new Date() }).returning();
+  const [update] = await db.insert(updates).values({ content, sentAt: new Date() }).returning();
+  const [delivery] = await db.insert(updateDeliveries).values({ userId: user!.id, updateId: update!.id }).returning();
+  const row = async () => (await db.select().from(updateDeliveries).where(eq(updateDeliveries.id, delivery!.id)))[0]!;
   const err = Object.assign(new Error('550 5.1.1 <lena@example.com>: Recipient address rejected'), {
     responseCode: 550,
   });
-  expect(redact(err)).toStartWith('550 550 5.1.1');
-  expect(redact(err)).not.toContain('lena');
+  const send = mock<typeof sendMail>(async () => {
+    throw err;
+  });
+  const errors = spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      expect(await deliverNext(db, 0, send)).toBe('failed');
+      expect(send).toHaveBeenCalledTimes(attempt);
+      expect(send.mock.calls[attempt - 1]![0]).toMatchObject({ to: email });
+      expect(await row()).toMatchObject({
+        status: attempt === 3 ? 'failed' : 'pending',
+        attempts: attempt,
+        attemptedAt: expect.any(Date),
+      });
+      expect(errors.mock.calls[attempt - 1]![0]).toContain(`attempt ${attempt}: 550 550 5.1.1`);
+      expect(errors.mock.calls[attempt - 1]![0]).not.toContain('lena@example.com');
+
+      await db
+        .update(updateDeliveries)
+        .set({ attemptedAt: sql`now() - interval '30 seconds'` })
+        .where(eq(updateDeliveries.id, delivery!.id));
+      expect(await deliverNext(db, 0, send)).toBe('idle');
+      expect(send).toHaveBeenCalledTimes(attempt);
+      expect((await row()).attempts).toBe(attempt);
+      await db
+        .update(updateDeliveries)
+        .set({ attemptedAt: sql`now() - interval '61 seconds'` })
+        .where(eq(updateDeliveries.id, delivery!.id));
+    }
+    expect(await deliverNext(db, 0, send)).toBe('idle');
+    expect(send).toHaveBeenCalledTimes(3);
+    expect((await row()).status).toBe('failed');
+  } finally {
+    errors.mockRestore();
+  }
 });

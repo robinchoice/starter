@@ -209,6 +209,10 @@ jobs:
       - name: App Bundle bauen
         run: flutter build appbundle --release --obfuscate --split-debug-info=$RUNNER_TEMP/symbols --dart-define=API_URL=$API_URL --dart-define=SENTRY_DSN=$SENTRY_DSN --build-number=$GITHUB_RUN_NUMBER --dart-define=APP_VERSION=$GITHUB_SHA
 
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/upload-keystore.jks android/key.properties
+
       - uses: actions/upload-artifact@v4
         with:
           name: android-aab
@@ -228,7 +232,7 @@ jobs:
 
       - name: Upload to Play (internal test)
         if: env.HAS_KEYSTORE == 'true' && env.HAS_PLAY == 'true'
-        uses: r0adkll/upload-google-play@v1
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: ${{ steps.android-package.outputs.name }}

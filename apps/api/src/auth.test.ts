@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, expect, spyOn, test } from 'bun:test';
-import { createDb, migrateDb, passkeys, sessions, users } from '@app/db';
-import { APP_ID } from '@app/shared';
+import { createDb, migrateDb, passkeys, rateLimits, sessions, users } from '@app/db';
+import { APP_ID, messages } from '@app/shared';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
 import { issueSession } from './lib/login';
@@ -97,6 +97,30 @@ test('a second login reuses the account', async () => {
     ids.push((await body(post('/auth/verify', { token: lastMailedToken() }))).user.id);
   }
   expect(ids[0]).toBe(ids[1]);
+});
+
+test('magic link checks allow 60 attempts per IP and leave blocked links usable', async () => {
+  const email = freshEmail();
+  expect((await post('/auth/magic-link', { email })).status).toBe(200);
+  const token = lastMailedToken()!;
+
+  const attempts = await Promise.all(Array.from({ length: 60 }, () => post('/auth/verify', { token: 'invalid' })));
+  expect(attempts.map((res) => res.status)).toEqual(Array(60).fill(400));
+  const blocked = await post('/auth/verify', { token }, { 'accept-language': 'en' });
+  expect(blocked.status).toBe(429);
+  expect(await body(blocked)).toEqual({ error: messages.en.tooManyRequests });
+  expect(blocked.headers.get('set-cookie')).toBeNull();
+
+  expect((await post('/auth/verify', { token }, { 'x-forwarded-for': crypto.randomUUID() })).status).toBe(200);
+
+  expect((await post('/auth/magic-link', { email })).status).toBe(200);
+  const nextToken = lastMailedToken()!;
+  expect((await post('/auth/verify', { token: nextToken })).status).toBe(429);
+  await db
+    .update(rateLimits)
+    .set({ resetAt: new Date(Date.now() - 1) })
+    .where(eq(rateLimits.key, `link-checks-per-ip:${ip}`));
+  expect((await post('/auth/verify', { token: nextToken })).status).toBe(200);
 });
 
 test('protected routes need a session', async () => {

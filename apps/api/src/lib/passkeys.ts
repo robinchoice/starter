@@ -2,7 +2,7 @@
 // domain they stop working and users log in by mail once (README, „Passkeys“).
 // The Android app signs in as its signing certificate instead of the domain.
 export function relyingParty() {
-  const url = new URL(process.env.APP_URL!);
+  const url = new URL(process.env.APP_URL);
   const android = androidCertificates().map(
     (fingerprint) =>
       `android:apk-key-hash:${Buffer.from(fingerprint.replaceAll(':', ''), 'hex').toString('base64url')}`,

@@ -1,8 +1,9 @@
 import { type Database, serverSecrets } from '@app/db';
-import { createChallenge, type Payload, randomInt, verifySolution } from 'altcha-lib';
+import { createChallenge, randomInt, verifySolution } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import { eq } from 'drizzle-orm';
 import { createMiddleware } from 'hono/factory';
+import { z } from 'zod';
 import type { AppEnv } from '../types';
 import { t } from './i18n';
 import { rateLimit } from './rate-limit';
@@ -17,6 +18,27 @@ const LIFETIME = 10 * 60 * 1000;
 
 // Each payload counts once. The window outlasts the challenge, after that it has expired.
 const usedPayloads = rateLimit('altcha-used', 1, LIFETIME);
+
+// The challenge as the API hands it out. Loose, so fields the signature
+// covers stay in place; verifySolution checks them.
+export const challengeSchema = z.looseObject({
+  parameters: z.looseObject({
+    algorithm: z.string(),
+    nonce: z.string(),
+    salt: z.string(),
+    cost: z.number(),
+    keyLength: z.number(),
+    keyPrefix: z.string(),
+  }),
+  signature: z.string().exactOptional(),
+});
+
+const payloadSchema = z.object({
+  challenge: challengeSchema,
+  solution: z.object({ counter: z.number(), derivedKey: z.string(), time: z.number().exactOptional() }),
+});
+
+const altchaBody = z.looseObject({ altcha: z.string() });
 
 let key: string | undefined;
 
@@ -42,10 +64,11 @@ export async function altchaChallenge(db: Database) {
 
 // The widget sends a base64 JSON payload; anything that doesn't parse or
 // verify is no solution.
-async function verified(db: Database, payload: unknown) {
-  if (typeof payload !== 'string') return null;
+async function verified(db: Database, payload: string) {
   try {
-    const { challenge, solution } = JSON.parse(atob(payload)) as Payload;
+    const parsed = payloadSchema.safeParse(JSON.parse(atob(payload)));
+    if (!parsed.success) return null;
+    const { challenge, solution } = parsed.data;
     const result = await verifySolution({ challenge, solution, deriveKey, hmacSignatureSecret: await hmacKey(db) });
     return result.verified ? challenge.parameters.nonce : null;
   } catch {
@@ -57,8 +80,8 @@ async function verified(db: Database, payload: unknown) {
 // body carries the solution as `altcha`. Checked before the rate limits, so
 // bots can't use up the limits of an address.
 export const requireAltcha = createMiddleware<AppEnv>(async (c, next) => {
-  const body = await c.req.json().catch(() => null);
-  const nonce = await verified(c.get('db'), body?.altcha);
+  const body = altchaBody.safeParse(await c.req.json().catch(() => null));
+  const nonce = body.success && (await verified(c.get('db'), body.data.altcha));
   if (!nonce || !(await usedPayloads.hit(c, nonce))) return c.json({ error: t(c).altchaFailed }, 403);
   await next();
 });

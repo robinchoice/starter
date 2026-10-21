@@ -86,12 +86,13 @@ test('the test mode switch in the footer hides the bug button', async ({ page })
   await expect(page.getByRole('button', { name: 'Fehler melden' })).toBeVisible();
 });
 
-for (const [mode, position] of [
+const brokenPreferences: [string, string][] = [
   ['broken', 'broken'],
   ['"false"', '{"x":"bad","y":20}'],
   ['0', '{"x":1e999,"y":20}'],
   ['null', '[]'],
-]) {
+];
+for (const [mode, position] of brokenPreferences) {
   test(`invalid feedback preferences recover: ${mode}, ${position}`, async ({ page }) => {
     await page.addInitScript(
       ({ mode, position }) => {

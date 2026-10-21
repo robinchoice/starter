@@ -14,7 +14,16 @@ function start(entry: 'index' | 'worker', setup: string, env: Record<string, str
        await import(${JSON.stringify(`${import.meta.dir}/${entry}.ts`)});`,
     ],
     {
-      env: { ...process.env, PORT: '0', WORKER_PORT: '0', SMTP_HOST: '', SENTRY_DSN: '', NODE_ENV: 'test', ...env },
+      env: {
+        ...process.env,
+        APP_URL: 'http://localhost',
+        PORT: '0',
+        WORKER_PORT: '0',
+        SMTP_HOST: '',
+        SENTRY_DSN: '',
+        NODE_ENV: 'test',
+        ...env,
+      },
       stdout: 'pipe',
       stderr: 'pipe',
     },

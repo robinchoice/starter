@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { z } from 'zod';
   import { auth } from '$lib/auth.svelte';
   import Button from '$lib/components/Button.svelte';
   import {
@@ -17,11 +18,12 @@
 
   const SIZE = 44;
   const STORAGE_KEY = 'feedback-button';
+  // zod's numbers are finite
+  const positionSchema = z.object({ x: z.number(), y: z.number() });
 
   function savedPosition() {
     try {
-      const position = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
-      return position && Number.isFinite(position.x) && Number.isFinite(position.y) ? position : null;
+      return positionSchema.safeParse(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')).data ?? null;
     } catch {
       return null;
     }

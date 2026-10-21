@@ -1,3 +1,4 @@
+import './env';
 import './monitoring';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { createDb } from '@app/db';
@@ -9,7 +10,7 @@ import { captureException } from './monitoring';
 // Sends update mails one by one, Proton's SMTP limits the rate. The jobs are
 // rows in Postgres, so a restart loses nothing and several workers share them.
 // The API migrates the database, compose starts the worker after it.
-const db = createDb(process.env.DATABASE_URL!);
+const db = createDb(process.env.DATABASE_URL);
 const interval = Number(process.env.UPDATE_MAIL_INTERVAL_MS || 6000);
 const port = Number(process.env.WORKER_PORT || 3001);
 const stop = new AbortController();

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { APP_NAME, type Passkey } from '@app/shared';
+  import { APP_NAME, dateLocales, type Passkey } from '@app/shared';
   import { browserSupportsWebAuthn, WebAuthnError } from '@simplewebauthn/browser';
   import { onMount } from 'svelte';
   import { page } from '$app/state';
@@ -11,7 +11,7 @@
   let busy = $state(false);
   const on = $derived(!!auth.user?.updatesSince);
   const day = (iso: string) =>
-    new Date(iso).toLocaleDateString(page.data.locale === 'de' ? 'de-DE' : 'en-GB', { dateStyle: 'long' });
+    new Date(iso).toLocaleDateString(dateLocales[page.data.locale], { dateStyle: 'long' });
   const since = $derived(auth.user?.updatesSince && day(auth.user.updatesSince));
 
   // null until loaded, and if loading failed (the API client showed the error)

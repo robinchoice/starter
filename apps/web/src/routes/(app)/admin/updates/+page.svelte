@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Locale, type UpdateContent, type UpdateSummary, updateComplete } from '@app/shared';
+  import { dateLocales, type Locale, type UpdateContent, type UpdateSummary, updateComplete } from '@app/shared';
   import { onDestroy, onMount } from 'svelte';
   import { page } from '$app/state';
   import { api } from '$lib/api';
@@ -32,7 +32,7 @@
     en: { title: title.en, features: features.en.split('\n').map((line) => line.trim()).filter(Boolean) },
   });
   const date = (iso: string) =>
-    new Date(iso).toLocaleString(page.data.locale === 'de' ? 'de-DE' : 'en-GB', {
+    new Date(iso).toLocaleString(dateLocales[page.data.locale], {
       dateStyle: 'medium',
       timeStyle: 'short',
     });

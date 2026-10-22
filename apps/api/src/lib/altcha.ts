@@ -4,6 +4,7 @@ import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import { eq } from 'drizzle-orm';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
+import { generateToken } from '../middleware/auth';
 import type { AppEnv } from '../types';
 import { t } from './i18n';
 import { rateLimit } from './rate-limit';
@@ -44,7 +45,7 @@ let key: string | undefined;
 
 async function hmacKey(db: Database) {
   if (key) return key;
-  const value = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('hex');
+  const value = generateToken();
   await db.insert(serverSecrets).values({ name: 'altcha', value }).onConflictDoNothing();
   const [row] = await db.select().from(serverSecrets).where(eq(serverSecrets.name, 'altcha'));
   key = row!.value;

@@ -2,6 +2,7 @@ import { updateDeliveries, updates, users } from '@app/db';
 import { type Locale, saveUpdateSchema, type UpdateSummary, updateComplete } from '@app/shared';
 import { and, count, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import { t } from '../lib/i18n';
 import { imageType, UUID } from '../lib/image';
 import { sendMail, updateMail } from '../lib/mail';
@@ -62,7 +63,12 @@ async function forAdmin(c: Context<AppEnv>) {
   if (!UUID.test(id)) return null;
   const db = c.get('db');
   const [update] = await db
-    .select({ id: updates.id, content: updates.content, image: updates.image, sentAt: updates.sentAt })
+    .select({
+      id: updates.id,
+      content: updates.content,
+      hasImage: sql<boolean>`${updates.image} is not null`,
+      sentAt: updates.sentAt,
+    })
     .from(updates)
     .where(eq(updates.id, id));
   const [user] = await db
@@ -71,7 +77,7 @@ async function forAdmin(c: Context<AppEnv>) {
     .where(eq(users.id, c.get('user').id));
   if (!update) return null;
   return {
-    update: { id, content: update.content, hasImage: !!update.image, date: update.sentAt ?? new Date() },
+    update: { id, content: update.content, hasImage: update.hasImage, date: update.sentAt ?? new Date() },
     user: user!,
   };
 }
@@ -198,20 +204,18 @@ export const updateRoutes = new Hono<AppEnv>()
     if (!found) return c.json({ error: t(c).notFound }, 404);
     // Checked on the locked row, so a save from another tab can't slip in between
     const id = found.update.id;
-    const error = await c.get('db').transaction(async (tx) => {
+    await c.get('db').transaction(async (tx) => {
       const [row] = await tx
         .select({ content: updates.content, sentAt: updates.sentAt })
         .from(updates)
         .where(eq(updates.id, id))
         .for('update');
-      if (!row || row.sentAt) return t(c).updateAlreadySent;
-      if (!updateComplete(row.content)) return t(c).updateIncomplete;
+      if (!row || row.sentAt) throw new HTTPException(409, { message: t(c).updateAlreadySent });
+      if (!updateComplete(row.content)) throw new HTTPException(400, { message: t(c).updateIncomplete });
       await tx.update(updates).set({ sentAt: new Date() }).where(eq(updates.id, id));
       await tx.execute(
         sql`insert into ${updateDeliveries} (update_id, user_id) select ${id}::uuid, id from ${users} where updates_consent_at is not null`,
       );
-      return null;
     });
-    if (error) return c.json({ error }, error === t(c).updateIncomplete ? 400 : 409);
     return c.json({ update: (await summaries(c, id))[0] });
   });

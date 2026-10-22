@@ -10,7 +10,7 @@ import { createApp } from './app';
 import { issueSession } from './lib/login';
 import { type sendMail, updateMail } from './lib/mail';
 import { deliverNext, parseDraft, readDrafts } from './lib/updates';
-import { altchaPayload } from './testing';
+import { altchaPayload, body, read } from './testing';
 
 const db = createDb(process.env.DATABASE_URL);
 const app = createApp(db);
@@ -41,15 +41,6 @@ function request(method: string, path: string, body?: unknown, headers: Record<s
     headers: { 'content-type': 'application/json', 'x-forwarded-for': ip, ...headers },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-}
-
-async function body(res: Response | Promise<Response>): Promise<unknown> {
-  return (await res).json();
-}
-
-// For fields a test reads on, the schema checks they are there
-async function read<T extends z.ZodType>(res: Response | Promise<Response>, schema: T): Promise<z.output<T>> {
-  return schema.parse(await body(res));
 }
 
 const userAnswer = z.object({ user: z.object({ updatesSince: z.string().nullable() }) });

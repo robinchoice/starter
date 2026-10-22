@@ -18,9 +18,9 @@ export const consentNow = sql`coalesce(${users.updatesConsentAt}, now())`;
 //
 //   # en: The map now shows language families
 //   - Languages on the map are coloured by family.
-export const DRAFTS_DIR = path.join(import.meta.dir, '../../../../updates');
+const DRAFTS_DIR = path.join(import.meta.dir, '../../../../updates');
 
-export type Draft = { slug: string; content: UpdateContent; image: Buffer | null };
+type Draft = { slug: string; content: UpdateContent; image: Buffer | null };
 
 export function parseDraft(slug: string, text: string, dir = DRAFTS_DIR): Draft {
   const content: Partial<UpdateContent> = {};
@@ -49,10 +49,10 @@ export function parseDraft(slug: string, text: string, dir = DRAFTS_DIR): Draft 
   return { slug, content: content as UpdateContent, image };
 }
 
-export function readDrafts(dir = DRAFTS_DIR) {
-  return readdirSync(dir)
+export function readDrafts() {
+  return readdirSync(DRAFTS_DIR)
     .filter((file) => file.endsWith('.md'))
-    .map((file) => parseDraft(file.slice(0, -3), readFileSync(path.join(dir, file), 'utf8'), dir));
+    .map((file) => parseDraft(file.slice(0, -3), readFileSync(path.join(DRAFTS_DIR, file), 'utf8')));
 }
 
 // On every API start. A file becomes a draft once and is never overwritten, so

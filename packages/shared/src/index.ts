@@ -3,6 +3,7 @@ import type { Band } from './band';
 
 export * from './band';
 export * from './messages';
+export * from './monitoring';
 
 // The one place to rename a new project. API mails and web titles read it.
 export const APP_NAME = 'Starter';

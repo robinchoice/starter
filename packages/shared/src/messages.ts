@@ -84,7 +84,6 @@ const de = {
   cancel: 'Abbrechen',
   sentAlong: 'Was mitgeschickt wird',
   contextPage: 'Seite',
-  contextVersion: 'Version',
   contextDevice: 'Gerät',
   contextWindow: 'Fenster',
   contextLanguage: 'Sprache',
@@ -94,7 +93,6 @@ const de = {
   feedbackThanks: 'Danke! Wir melden uns per Mail.',
   updatesOptIn: 'Schick mir Updates zu neuen Funktionen per Mail. Abbestellen geht jederzeit.',
   mails: 'Mails',
-  account: 'Konto',
   updatesByMail: 'Updates per Mail',
   updatesHint: (app: string) => `Neue Funktionen in ${app}, höchstens ein paar Mal im Monat. Login-Mails kommen immer.`,
   updatesSince: (date: string) => `Eingeschaltet am ${date}`,
@@ -127,7 +125,6 @@ const de = {
   newUpdate: 'Neues Update',
   drafts: 'Entwürfe',
   sentUpdates: 'Versendet',
-  draft: 'Entwurf',
   fromFile: (slug: string) => `aus updates/${slug}.md`,
   noUpdates: 'Noch keine Updates.',
   untitled: 'Ohne Titel',
@@ -243,7 +240,6 @@ const en: Messages = {
   cancel: 'Cancel',
   sentAlong: 'What gets sent along',
   contextPage: 'Page',
-  contextVersion: 'Version',
   contextDevice: 'Device',
   contextWindow: 'Window',
   contextLanguage: 'Language',
@@ -253,7 +249,6 @@ const en: Messages = {
   feedbackThanks: "Thanks! We'll get back to you by email.",
   updatesOptIn: 'Send me updates about new features by email. Unsubscribe any time.',
   mails: 'Emails',
-  account: 'Account',
   updatesByMail: 'Updates by email',
   updatesHint: (app) => `New features in ${app}, a few times a month at most. Login emails always arrive.`,
   updatesSince: (date) => `Turned on ${date}`,
@@ -285,7 +280,6 @@ const en: Messages = {
   newUpdate: 'New update',
   drafts: 'Drafts',
   sentUpdates: 'Sent',
-  draft: 'Draft',
   fromFile: (slug) => `from updates/${slug}.md`,
   noUpdates: 'No updates yet.',
   untitled: 'Untitled',
@@ -317,6 +311,8 @@ const en: Messages = {
 export const messages = { de, en };
 
 export type Locale = keyof typeof messages;
+
+export const dateLocales = { de: 'de-DE', en: 'en-GB' };
 
 // The first language from a saved choice or an Accept-Language header that we
 // speak, else German. Browsers list their languages by preference.

@@ -3,6 +3,7 @@ import {
   APP_NAME,
   bandColor,
   DEEP,
+  dateLocales,
   GLOW,
   type Locale,
   type Messages,
@@ -65,7 +66,7 @@ const BODY = `-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial
 const TEXT = `font-family:${BODY};font-size:16px;line-height:1.55;color:#17171A`;
 const SMALL = `font-family:${BODY};font-size:13px;line-height:1.6;color:#5E5E66`;
 
-export const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
 
 const cells = (colors: string[], height: number) =>
   `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>${colors
@@ -178,7 +179,7 @@ export function updateMail({ id, content, hasImage, date }: UpdateMail, locale: 
   const texts = messages[locale];
   const { title, features } = content[locale];
   const items = features.filter(Boolean);
-  const day = new Intl.DateTimeFormat(locale === 'de' ? 'de-DE' : 'en-GB', { dateStyle: 'long' }).format(date);
+  const day = new Intl.DateTimeFormat(dateLocales[locale], { dateStyle: 'long' }).format(date);
   const unsubscribePage = `${url}/unsubscribe?token=${unsubscribeToken}`;
   const settings = `${url}/settings`;
 

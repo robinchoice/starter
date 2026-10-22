@@ -7,7 +7,6 @@ import { env } from '$env/dynamic/public';
 Sentry.init({
   ...sentryPrivacyOptions,
   dsn: env.PUBLIC_SENTRY_DSN,
-  environment: env.PUBLIC_SENTRY_ENVIRONMENT || 'production',
   sendClientReports: false,
   integrations: (defaults) =>
     defaults.filter((integration) => !['BrowserSession', 'Breadcrumbs', 'HttpContext'].includes(integration.name)),

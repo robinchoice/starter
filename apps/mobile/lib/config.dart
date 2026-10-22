@@ -18,6 +18,14 @@ const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost
 // Commit of the build, set by CI. Feedback sends it along.
 const appVersion = String.fromEnvironment('APP_VERSION', defaultValue: 'dev');
 
+// The CI run number, the same as the store build number. The API asks builds
+// below MIN_BUILD_IOS/MIN_BUILD_ANDROID to update. Local builds have 0 and are never asked.
+const buildNumber = int.fromEnvironment('BUILD_NUMBER');
+
+// Apple ID of the app in App Store Connect (App Information), for the update
+// screen. Set it before the first store build, README „Update-Pflicht“.
+const appStoreId = '';
+
 // OSM tiles are fine for prototypes. Heavier use needs a tile server of our own.
 const mapTileUrl = String.fromEnvironment(
   'MAP_TILE_URL',

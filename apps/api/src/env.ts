@@ -14,6 +14,8 @@ const envSchema = z.object({
   WORKER_PORT: number.or(unset).exactOptional(),
   SMTP_PORT: number.or(unset).exactOptional(),
   UPDATE_MAIL_INTERVAL_MS: number.or(unset).exactOptional(),
+  MIN_BUILD_IOS: number.or(unset).exactOptional(),
+  MIN_BUILD_ANDROID: number.or(unset).exactOptional(),
   SIGNUP_OPEN: z.enum(['true', 'false']).or(unset).exactOptional(),
   SENTRY_DSN: z.url().or(unset).exactOptional(),
 });

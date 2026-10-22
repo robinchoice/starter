@@ -61,6 +61,9 @@ abstract class Messages {
   String get updatesOptIn;
   String get updatesByMail;
   String updatesHint(String app);
+  String get updateTitle;
+  String updateRequired(String app);
+  String get updateNow;
 }
 
 class De extends Messages {
@@ -160,6 +163,12 @@ class De extends Messages {
   String get send => 'Senden';
   @override
   String get feedbackThanks => 'Danke! Wir melden uns per Mail.';
+  @override
+  String get updateTitle => 'Update nötig';
+  @override
+  String updateRequired(String app) => 'Diese Version von $app ist zu alt. Aktualisiere die App, um sie weiter zu nutzen.';
+  @override
+  String get updateNow => 'Jetzt aktualisieren';
 }
 
 class En extends Messages {
@@ -259,4 +268,10 @@ class En extends Messages {
   String get send => 'Send';
   @override
   String get feedbackThanks => "Thanks! We'll get back to you by email.";
+  @override
+  String get updateTitle => 'Update required';
+  @override
+  String updateRequired(String app) => 'This version of $app is too old. Update the app to keep using it.';
+  @override
+  String get updateNow => 'Update now';
 }

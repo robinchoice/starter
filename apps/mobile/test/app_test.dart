@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:starter/app.dart';
+import 'package:starter/core/api.dart';
 
 import 'fake_api.dart';
 
@@ -54,5 +55,21 @@ void main() {
     await tester.pumpWidget(ProviderScope(key: UniqueKey(), overrides: FakeApi().overrides, child: const App()));
     await tester.pumpAndSettle();
     expect(find.text('Code schicken'), findsOneWidget);
+  });
+
+  testWidgets('an outdated build shows only the update screen', (tester) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    tester.platformDispatcher.localesTestValue = const [Locale('de', 'DE')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [...FakeApi().overrides, updateRequiredProvider.overrideWith((ref) async => true)],
+        child: const App(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Update nötig'), findsOneWidget);
+    expect(find.text('Jetzt aktualisieren'), findsOneWidget);
+    expect(find.text('Code schicken'), findsNothing);
   });
 }

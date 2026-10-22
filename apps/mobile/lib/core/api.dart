@@ -11,6 +11,18 @@ import 'messages.dart';
 final httpClientProvider = Provider((ref) => http.Client());
 final apiProvider = Provider((ref) => Api(ref.watch(httpClientProvider), '$apiUrl/api/v1'));
 
+/// Asked once at launch, true replaces the app with the update screen.
+final updateRequiredProvider = FutureProvider((ref) => ref.watch(apiProvider).updateRequired());
+
+/// Platform and build for the minimum build check in apps/api/src/app.ts.
+/// Local builds send nothing and are never blocked.
+Map<String, String> get _appHeaders => buildNumber == 0
+    ? const {}
+    : {
+        'x-app-platform': defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android',
+        'x-app-build': '$buildNumber',
+      };
+
 class ApiException implements Exception {
   final int status;
   final String message;
@@ -57,7 +69,8 @@ class Api {
     final request = http.Request(method, Uri.parse('$_baseUrl$path'))
       ..headers['accept'] = 'application/json'
       ..headers['accept-language'] = locale.name
-      ..headers['content-type'] = 'application/json';
+      ..headers['content-type'] = 'application/json'
+      ..headers.addAll(_appHeaders);
     if (auth != null) request.headers['authorization'] = 'Bearer $auth';
     if (body != null) request.body = jsonEncode(body);
 
@@ -83,6 +96,19 @@ class Api {
       throw ApiException(response.statusCode, message);
     }
     return text.isEmpty ? null : jsonDecode(text);
+  }
+
+  /// Below the minimum build of its platform the API answers 426. Offline or
+  /// failing, the app just starts.
+  Future<bool> updateRequired() async {
+    if (buildNumber == 0) return false;
+    try {
+      final response = await _client.get(Uri.parse('$_baseUrl/app'), headers: _appHeaders).timeout(const Duration(seconds: 10));
+      return response.statusCode == 426;
+    } catch (e) {
+      debugPrint('Update check failed: $e');
+      return false;
+    }
   }
 
   void _noteError(String method, String path, Object status) {

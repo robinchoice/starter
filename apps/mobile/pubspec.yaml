@@ -22,6 +22,7 @@ dependencies:
   latlong2: ^0.10.1
   passkeys: ^2.23.1
   sentry_flutter: ^9.30.1
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:

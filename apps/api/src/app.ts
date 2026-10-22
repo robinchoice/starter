@@ -37,6 +37,22 @@ export function createApp(db: Database) {
       // /llms.txt, /llms-full.txt and <page>.md, forwarded by the web server
       .route('/', agentRoutes)
       .route('/', wellKnownRoutes)
+      // The app sends its platform and build number. Below the minimum from the env it gets 426
+      // and shows only the update screen, feedback stays open. Web and local builds send nothing.
+      .use('/api/v1/*', async (c, next) => {
+        const platform = c.req.header('x-app-platform');
+        const minimum =
+          Number(
+            platform === 'ios' ? process.env.MIN_BUILD_IOS : platform === 'android' ? process.env.MIN_BUILD_ANDROID : 0,
+          ) || 0;
+        const build = Number(c.req.header('x-app-build'));
+        if (c.req.path !== '/api/v1/feedback' && Number.isInteger(build) && build > 0 && build < minimum) {
+          return c.json({ error: t(c).updateRequired, code: 'UPDATE_REQUIRED' }, 426);
+        }
+        await next();
+      })
+      // The app asks this at launch, the check above answers it
+      .get('/api/v1/app', (c) => c.json({ ok: true }))
       .basePath('/api/v1')
       .route('/altcha', altchaRoutes)
       .route('/auth', authRoutes)

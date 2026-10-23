@@ -82,8 +82,13 @@ export function redact(err: unknown) {
 
 // Sends the oldest due delivery, at most one per intervalMs across all
 // workers: an advisory lock lets one worker at a time in, and the last attempt
-// of any worker sets the pace. The row stays locked until it is marked, so no
-// mail goes out twice. 'wait' means another worker or the pace holds it back.
+// of any worker sets the pace. The row stays locked until it is marked, so two
+// workers never send the same delivery at once. The mark commits only after
+// SMTP answered: if the worker dies or the commit fails after the server
+// accepted the mail, or the server reports an error for a mail it delivered,
+// the delivery is sent again. So a mail may rarely arrive twice, but no
+// delivery counts as sent unless SMTP accepted it. 'wait' means another
+// worker or the pace holds it back.
 export function deliverNext(
   db: Database,
   intervalMs: number,

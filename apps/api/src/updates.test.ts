@@ -295,3 +295,25 @@ test('failed deliveries wait a minute before retrying and stop after three attem
     errors.mockRestore();
   }
 });
+
+test('while one worker sends, another worker waits instead of sending', async () => {
+  const [user] = await db
+    .insert(users)
+    .values({ email: freshEmail(), name: 'Robin', updatesConsentAt: new Date() })
+    .returning();
+  const [update] = await db.insert(updates).values({ content, sentAt: new Date() }).returning();
+  await db.insert(updateDeliveries).values({ userId: user!.id, updateId: update!.id });
+  const sending = Promise.withResolvers<void>();
+  const release = Promise.withResolvers<void>();
+  const send = mock<typeof sendMail>(async () => {
+    sending.resolve();
+    await release.promise;
+  });
+
+  const first = deliverNext(db, 0, send);
+  await sending.promise;
+  expect(await deliverNext(db, 0, send)).toBe('wait');
+  release.resolve();
+  expect(await first).toBe('sent');
+  expect(send).toHaveBeenCalledTimes(1);
+});

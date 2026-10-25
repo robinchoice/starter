@@ -28,6 +28,17 @@
         "@types/nodemailer": "^8.0.2",
       },
     },
+    "apps/cli": {
+      "name": "@app/cli",
+      "dependencies": {
+        "@app/shared": "workspace:*",
+        "altcha-lib": "^2.7.0",
+        "zod": "^4.6.5",
+      },
+      "devDependencies": {
+        "@app/db": "workspace:*",
+      },
+    },
     "apps/web": {
       "name": "@app/web",
       "devDependencies": {
@@ -77,6 +88,8 @@
   },
   "packages": {
     "@app/api": ["@app/api@workspace:apps/api"],
+
+    "@app/cli": ["@app/cli@workspace:apps/cli"],
 
     "@app/db": ["@app/db@workspace:packages/db"],
 

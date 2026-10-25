@@ -4,12 +4,12 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 ## Zweck & Links
 
-- Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle, Postgres, optional Flutter in `apps/mobile`. Neue Projekte: README.md, „Neues Projekt“.
+- Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle, Postgres, CLI in `apps/cli`, optional Flutter in `apps/mobile`. Neue Projekte: README.md, „Neues Projekt“.
 - Selbst nicht deployt. Im Projekt: Live-URL `https://<slug>.pleasance.org`, ab 1.0 eine eigene Domain (README, „Live als 1.0“), Coolify-Projekt `pleasance-<slug>` oder `privat-<slug>`, Ressource `<slug>`.
 
 ## Checks
 
-`bun run check && bun run test` (`test` baut das Web und testet den Build), bei App-Änderungen zusätzlich `flutter analyze && flutter test && node --test tool/testflight.test.mjs` in `apps/mobile`. Die Browser-Tests starten API und Web auf eigenen Ports (31100, 31101), unter dem ephemeren Linux-Portbereich (32768–60999), damit ausgehende Verbindungen sie nicht kurzzeitig belegen. Testet ein anderer Worktree gleichzeitig, mit anderen Ports unter 32768 aufrufen: `TEST_API_PORT=31102 TEST_WEB_PORT=31103 bun run test`.
+`bun run check && bun run test` (`test` baut das Web und testet den Build, dazu die CLI gegen die API), bei CLI-Änderungen zusätzlich `bun run build` (baut auch die CLI-Datei), bei App-Änderungen zusätzlich `flutter analyze && flutter test && node --test tool/testflight.test.mjs` in `apps/mobile`. Die Browser-Tests starten API und Web auf eigenen Ports (31100, 31101), unter dem ephemeren Linux-Portbereich (32768–60999), damit ausgehende Verbindungen sie nicht kurzzeitig belegen. Testet ein anderer Worktree gleichzeitig, mit anderen Ports unter 32768 aufrufen: `TEST_API_PORT=31102 TEST_WEB_PORT=31103 bun run test`.
 
 ## Deploy
 
@@ -32,7 +32,8 @@ Stack und Aufbau: siehe README.md. Gestaltung: siehe DESIGN.md.
 - Neue Tabelle: `packages/db/src/schema.ts` ändern, `bun run db:generate`. Die Migration läuft beim nächsten API-Start, `migrateDb` lässt mehrere Instanzen nacheinander migrieren. Jede Migration muss mit dem noch laufenden alten Code funktionieren: Spalten nullable oder mit Default hinzufügen, Umbenennen und Löschen erst im Deploy danach. Nichts von Hand in der Datenbank ändern.
 - Korrelierte Subselects in `sql`-Templates: Bei einem `select` aus nur einer Tabelle rendert Drizzle Spalten ohne Tabellennamen, auch im Template. `exists (select 1 from ${subs} where ${subs.userId} = ${users.id})` wird zu `where "user_id" = "id"`, `"id"` meint dann die Spalte des Subselects, das Ergebnis ist ohne Fehler falsch. Solche Subselects nur in Abfragen mit Join oder mit `alias()`, sonst zwei einfache Abfragen.
 - Neue Route: Datei in `apps/api/src/routes`, in `app.ts` einhängen. `requireAuth` für eingeloggte Nutzer, `requireAdmin` für Admins aus `ADMIN_EMAILS` (jeweils allein, danach `c.get('user')`), `validJson(schema)` mit dem Schema aus `packages/shared`.
-- Jeder sichtbare Text steht auf Deutsch und Englisch: für Web und API in `packages/shared/src/messages.ts`, für die App in `lib/core/messages.dart`. Fehlt eine Sprache, schlagen `bun run check` bzw. `flutter analyze` fehl. Im Web `t()` aus `$lib/i18n`, in der API `t(c)` aus `lib/i18n.ts`, in der App `ref.watch(messagesProvider)`. Eigene zod-Meldungen sind Schlüssel aus `messages.ts`. Umgeschaltet wird im `PleasanceFooter`.
+- Jeder sichtbare Text steht auf Deutsch und Englisch: für Web, API und CLI in `packages/shared/src/messages.ts`, für die App in `lib/core/messages.dart`. Fehlt eine Sprache, schlagen `bun run check` bzw. `flutter analyze` fehl. Im Web `t()` aus `$lib/i18n`, in der API `t(c)` aus `lib/i18n.ts`, in der App `ref.watch(messagesProvider)`. Eigene zod-Meldungen sind Schlüssel aus `messages.ts`. Umgeschaltet wird im `PleasanceFooter`.
+- CLI (README, „CLI“): Jedes Kern-Feature bekommt im selben Zug einen Befehl in `apps/cli/src/commands` nach dem Beispiel `settings.ts`, mit Text und `--json` und einem Test in `cli.test.ts`. Die CLI spricht nur mit der HTTP-API, nie mit der Datenbank, so gelten Rechte, Rate-Limits und die Registrierungssperre. Agenten melden sie nur mit admin@pleasance.org an (`login-link <slug> | <slug> login --link -`), nie mit Kundenkonten.
 - Fehler antworten immer als `{ error: string }` mit einem Text aus `t(c)`, also in der Sprache, die der Client per `Accept-Language` schickt. Das Web zeigt ihn als Toast.
 - Alles, was Mails verschickt oder Geheimnisse prüft, bekommt ein `rateLimit` aus `lib/rate-limit.ts`. Die Zähler liegen in Postgres und gelten für alle API-Instanzen.
 - Öffentliche Formulare ohne Login, die Mails verschicken oder Daten anlegen, prüfen ALTCHA (README, „ALTCHA“): `requireAltcha` vor `validJson`, im Web `Altcha.svelte` im Formular, in der App wie `requestCode`. Nicht für Links aus Mails wie Abmelden oder Login-Link, die tragen schon ein Geheimnis.

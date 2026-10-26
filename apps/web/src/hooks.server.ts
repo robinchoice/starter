@@ -1,7 +1,7 @@
 import dns from 'node:dns';
 import { pickLocale } from '@app/shared';
-import type { Handle, HandleServerError } from '@sveltejs/kit';
-import { dev } from '$app/environment';
+import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
+import { dev } from '$app/env';
 import { captureException } from './monitoring.server';
 
 // Docker's embedded DNS doesn't answer AAAA queries, which otherwise stalls
@@ -29,7 +29,7 @@ function upstream(url: URL) {
   if (url.pathname.startsWith('/ingest/')) return `https://eu.i.posthog.com${url.pathname.slice(7)}${url.search}`;
 }
 
-// The CSP comes from svelte.config.js. Browsers ignore HSTS over plain HTTP,
+// The CSP comes from vite.config.ts. Browsers ignore HSTS over plain HTTP,
 // so it is harmless in dev.
 const SECURITY_HEADERS = {
   'strict-transport-security': 'max-age=31536000',

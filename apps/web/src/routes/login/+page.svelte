@@ -6,13 +6,13 @@
     WebAuthnAbortService,
   } from '@simplewebauthn/browser';
   import { onDestroy, onMount, tick } from 'svelte';
+  import { auth, checkAuth, passkeyLogin, sendMagicLink, verifyCode } from '#lib/auth.svelte.ts';
+  import Altcha from '#lib/components/Altcha.svelte';
+  import Button from '#lib/components/Button.svelte';
+  import Input from '#lib/components/Input.svelte';
+  import { t } from '#lib/i18n.ts';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { auth, checkAuth, passkeyLogin, sendMagicLink, verifyCode } from '$lib/auth.svelte';
-  import Altcha from '$lib/components/Altcha.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Input from '$lib/components/Input.svelte';
-  import { t } from '$lib/i18n';
 
   // Page that sent us here, e.g. a link opened while logged out
   const next = safeNextPath(page.url.searchParams.get('next'));
@@ -41,7 +41,7 @@
   onMount(async () => {
     await checkAuth();
     if (lifetime.signal.aborted) return;
-    if (auth.user) return goto(next ?? '/dashboard', { replaceState: true });
+    if (auth.user) return goto(next ?? '/dashboard', { replace: true });
     passkeys = browserSupportsWebAuthn();
     autofillAvailable = await browserSupportsWebAuthnAutofill();
   });
@@ -79,7 +79,7 @@
     }
     try {
       await passkeyLogin(autofill, signal);
-      await goto(next ?? '/dashboard', { replaceState: true });
+      await goto(next ?? '/dashboard', { replace: true });
     } catch {
       // Cancelled, replaced by the button's request, or the API client showed the error
     } finally {
@@ -110,7 +110,7 @@
     loading = true;
     try {
       await verifyCode(email, code);
-      goto(next ?? '/dashboard', { replaceState: true });
+      goto(next ?? '/dashboard', { replace: true });
     } catch {
       // The API client already shows the error as a toast
     } finally {

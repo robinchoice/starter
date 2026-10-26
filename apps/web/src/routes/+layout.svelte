@@ -1,9 +1,9 @@
 <script lang="ts">
   import { APP_BAND, APP_NAME, bandColor, bandGradient, DEEP, GLOW } from '@app/shared';
+  import PleasanceFooter from '#lib/components/PleasanceFooter.svelte';
+  import Toasts from '#lib/components/Toasts.svelte';
+  import { t } from '#lib/i18n.ts';
   import { page } from '$app/state';
-  import PleasanceFooter from '$lib/components/PleasanceFooter.svelte';
-  import Toasts from '$lib/components/Toasts.svelte';
-  import { t } from '$lib/i18n';
 
   let { children } = $props();
 

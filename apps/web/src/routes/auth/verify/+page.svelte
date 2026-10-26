@@ -1,10 +1,10 @@
 <script lang="ts">
   import { safeNextPath } from '@app/shared';
   import { onMount } from 'svelte';
+  import { auth, checkAuth, verify } from '#lib/auth.svelte.ts';
+  import { t } from '#lib/i18n.ts';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { auth, checkAuth, verify } from '$lib/auth.svelte';
-  import { t } from '$lib/i18n';
 
   const token = page.url.searchParams.get('token');
   const next = safeNextPath(page.url.searchParams.get('next'));
@@ -24,7 +24,7 @@
       }
     }
     // Replace the history entry, so the token doesn't linger in it
-    goto(next ?? '/dashboard', { replaceState: true });
+    goto(next ?? '/dashboard', { replace: true });
   });
 </script>
 

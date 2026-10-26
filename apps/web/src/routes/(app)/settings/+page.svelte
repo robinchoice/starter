@@ -2,11 +2,11 @@
   import { APP_NAME, dateLocales, type Passkey } from '@app/shared';
   import { browserSupportsWebAuthn, WebAuthnError } from '@simplewebauthn/browser';
   import { onMount } from 'svelte';
+  import { addPasskey, auth, listPasskeys, removePasskey, setUpdates } from '#lib/auth.svelte.ts';
+  import Button from '#lib/components/Button.svelte';
+  import { t } from '#lib/i18n.ts';
+  import { toast, toastError } from '#lib/toast.svelte.ts';
   import { page } from '$app/state';
-  import { addPasskey, auth, listPasskeys, removePasskey, setUpdates } from '$lib/auth.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import { t } from '$lib/i18n';
-  import { toast, toastError } from '$lib/toast.svelte';
 
   let busy = $state(false);
   const on = $derived(!!auth.user?.updatesSince);

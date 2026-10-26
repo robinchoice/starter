@@ -134,7 +134,7 @@ Im Starter liegen sie als `--needs`, `--new`, `--error` (deep) und `--needs-bg`,
 
 ## Absender
 
-Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ (englisch „a tool by“) und dahinter die Pleasance-Wortmarke in Textfarbe. Fertig gebaut ist das als `PleasanceFooter`, im Web in `$lib/components`, in der App in `lib/core/brand.dart`. Im Web verlinkt der Absender auf https://pleasance.org. „ein Werkzeug von“ steht in der Display-Schrift, aber leise: wght 650, wdth 80 %, 14 px, Muted. Wortmarke und Farbband bilden zusammen die Signatur: Das Band liegt als 2-px-Linie direkt unter der Wortmarke, genau so breit wie sie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist dieselbe Linie in 4 px Höhe im Produktverlauf, ohne Pille und ohne Halo. Ganz rechts sitzt der Sprachumschalter, er nennt die andere Sprache: „English“ oder „Deutsch“.
+Jedes Produkt hat in der Fußzeile den Absender „ein Werkzeug von“ (englisch „a tool by“) und dahinter die Pleasance-Wortmarke in Textfarbe. Fertig gebaut ist das als `PleasanceFooter`, im Web in `apps/web/src/lib/components`, in der App in `lib/core/brand.dart`. Im Web verlinkt der Absender auf https://pleasance.org. „ein Werkzeug von“ steht in der Display-Schrift, aber leise: wght 650, wdth 80 %, 14 px, Muted. Wortmarke und Farbband bilden zusammen die Signatur: Das Band liegt als 2-px-Linie direkt unter der Wortmarke, genau so breit wie sie, abgedunkelt (dunkel: 55 % Schwarz darüber, hell: 60 % Weiß). Der eigene Ausschnitt ist dieselbe Linie in 4 px Höhe im Produktverlauf, ohne Pille und ohne Halo. Ganz rechts sitzt der Sprachumschalter, er nennt die andere Sprache: „English“ oder „Deutsch“.
 
 ## Vorschaubild
 

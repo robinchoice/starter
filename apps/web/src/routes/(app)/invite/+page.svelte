@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { auth, invite } from '$lib/auth.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Input from '$lib/components/Input.svelte';
-  import { t } from '$lib/i18n';
-  import { toast } from '$lib/toast.svelte';
+  import { auth, invite } from '#lib/auth.svelte.ts';
+  import Button from '#lib/components/Button.svelte';
+  import Input from '#lib/components/Input.svelte';
+  import { t } from '#lib/i18n.ts';
+  import { toast } from '#lib/toast.svelte.ts';
 
   let email = $state('');
   let sending = $state(false);

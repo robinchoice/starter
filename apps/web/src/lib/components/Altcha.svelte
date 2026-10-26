@@ -10,7 +10,7 @@
   let widget = $state<HTMLElementTagNameMap['altcha-widget']>();
 
   onMount(() => {
-    import('$lib/altcha');
+    import('#lib/altcha.ts');
   });
 
   // Each solution counts once, after a failed request the form needs a new one

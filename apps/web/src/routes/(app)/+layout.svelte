@@ -1,13 +1,13 @@
 <script lang="ts">
   import { APP_NAME } from '@app/shared';
   import { onMount } from 'svelte';
+  import { auth, checkAuth, logout } from '#lib/auth.svelte.ts';
+  import Button from '#lib/components/Button.svelte';
+  import Feedback from '#lib/components/Feedback.svelte';
+  import { openFeedback } from '#lib/feedback.svelte.ts';
+  import { t } from '#lib/i18n.ts';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { auth, checkAuth, logout } from '$lib/auth.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Feedback from '$lib/components/Feedback.svelte';
-  import { openFeedback } from '$lib/feedback.svelte';
-  import { t } from '$lib/i18n';
 
   let { children } = $props();
   let ready = $state(false);
@@ -19,7 +19,7 @@
       return;
     }
     // Come back to the requested page after logging in
-    goto(`/login?next=${encodeURIComponent(page.url.pathname + page.url.search)}`, { replaceState: true });
+    goto(`/login?next=${encodeURIComponent(page.url.pathname + page.url.search)}`, { replace: true });
   });
 
   async function handleLogout() {

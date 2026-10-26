@@ -1,9 +1,9 @@
 <script lang="ts">
   import { APP_BAND } from '@app/shared';
+  import { auth } from '#lib/auth.svelte.ts';
+  import { setTestMode, testMode } from '#lib/feedback.svelte.ts';
+  import { setLocale, t } from '#lib/i18n.ts';
   import { page } from '$app/state';
-  import { auth } from '$lib/auth.svelte';
-  import { setTestMode, testMode } from '$lib/feedback.svelte';
-  import { setLocale, t } from '$lib/i18n';
 
   const other = $derived(page.data.locale === 'de' ? 'en' : 'de');
 </script>

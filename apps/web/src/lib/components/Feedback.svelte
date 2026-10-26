@@ -1,8 +1,8 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { z } from 'zod';
-  import { auth } from '$lib/auth.svelte';
-  import Button from '$lib/components/Button.svelte';
+  import { auth } from '#lib/auth.svelte.ts';
+  import Button from '#lib/components/Button.svelte';
   import {
     closeFeedback,
     feedback,
@@ -12,9 +12,9 @@
     sendFeedback,
     takeScreenshot,
     testMode,
-  } from '$lib/feedback.svelte';
-  import { t } from '$lib/i18n';
-  import { toast } from '$lib/toast.svelte';
+  } from '#lib/feedback.svelte.ts';
+  import { t } from '#lib/i18n.ts';
+  import { toast } from '#lib/toast.svelte.ts';
 
   const SIZE = 44;
   const STORAGE_KEY = 'feedback-button';

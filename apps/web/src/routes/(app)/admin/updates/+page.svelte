@@ -1,13 +1,13 @@
 <script lang="ts">
   import { dateLocales, type Locale, type UpdateContent, type UpdateSummary, updateComplete } from '@app/shared';
   import { onDestroy, onMount } from 'svelte';
+  import { api } from '#lib/api.ts';
+  import { auth } from '#lib/auth.svelte.ts';
+  import Button from '#lib/components/Button.svelte';
+  import Input from '#lib/components/Input.svelte';
+  import { t } from '#lib/i18n.ts';
+  import { toast } from '#lib/toast.svelte.ts';
   import { page } from '$app/state';
-  import { api } from '$lib/api';
-  import { auth } from '$lib/auth.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Input from '$lib/components/Input.svelte';
-  import { t } from '$lib/i18n';
-  import { toast } from '$lib/toast.svelte';
 
   // Agents write drafts as updates/<slug>.md, the API imports them on start.
   // Only admins from ADMIN_EMAILS send, see README „Update-Mails“.

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { APP_NAME } from '@app/shared';
   import { onMount } from 'svelte';
+  import { api } from '#lib/api.ts';
+  import Button from '#lib/components/Button.svelte';
+  import { t } from '#lib/i18n.ts';
   import { page } from '$app/state';
-  import { api } from '$lib/api';
-  import Button from '$lib/components/Button.svelte';
-  import { t } from '$lib/i18n';
 
   // The link from the update mails. Opening it unsubscribes without login.
   // Mail scanners fetch links without running scripts, so they don't.

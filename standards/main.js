@@ -31,6 +31,7 @@ const PRODUCTS = table('Produkt').map(([name, stage, section, , , sign]) => {
 const SIGNS = {
   'Route mit Ziel': '<path d="M30 76 V60 Q30 50 40 50 H60 Q70 50 70 40 V38"/><circle cx="70" cy="27" r="7"/>',
   Welle: '<path d="M22 50 C28 30 36 30 41 50 S54 70 59 50 S72 30 78 50"/>',
+  Briefumschlag: '<rect x="24.5" y="31.5" width="51" height="37" rx="5"/><path d="M27 35 l23 18 23-18"/>',
   Spieß: '<path d="M50 22 V78"/><path d="M36 32 H64 L57 66 H43 Z"/>',
   'Blitz im Rahmen': '<rect x="24" y="24" width="52" height="52" rx="12"/><path d="M54 33 L43 51 H57 L46 68"/>',
   'zwei Ringe': '<path d="M39 34 a16 16 0 1 0 0.01 0 M61 34 a16 16 0 1 0 0.01 0"/>',

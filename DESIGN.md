@@ -64,6 +64,7 @@ Jedes Produkt bekommt einen Ausschnitt aus dem Farbband. Der Ausschnitt enthält
 |---|---|---|---|---|---|
 | Fahrbar | 1 | 1,00–1,35 | `#F2545B` `#F45E57` `#F56853` | `#B3262D` `#B12C2A` `#AF3126` | Route mit Ziel |
 | Music Hub | 2 | 1,35–2,20 | `#F56853` `#F97F4A` `#F99747` | `#AF3126` `#AA3F1E` `#A14B16` | Welle |
+| Gigpost | 2 | 1,95–2,60 | `#FB8946` `#F99B47` `#F6AC4A` | `#A9441B` `#9F4D15` `#94560F` | Briefumschlag |
 | Döner-App | 3 | 2,55–3,20 | `#F6A94A` `#F3BA4D` `#D7C45B` | `#965410` `#8B5D0A` `#726214` | Spieß |
 | Fieldtest | 3 | 3,20–3,85 | `#D7C45B` `#ACC870` `#80CD84` | `#726214` `#4F6527` `#2D693B` | Blitz im Rahmen |
 | findyourlogic | 4 | 3,60–4,20 | `#A2C974` `#79CE88` `#64CC9E` | `#47662C` `#28693E` `#1B6A52` | zwei Punkte mit Brücke |

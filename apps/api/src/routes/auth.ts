@@ -68,6 +68,7 @@ export const authRoutes = new Hono<AppEnv>()
 
   .post('/verify', validJson(verifySchema), async (c) => {
     if (!(await linkChecksPerIp.hit(c, clientIp(c)))) return tooManyRequests(c);
+    const { token, cookie = true } = c.req.valid('json');
     const db = c.get('db');
 
     // Marking the link as used in the same statement keeps it single-use
@@ -77,7 +78,7 @@ export const authRoutes = new Hono<AppEnv>()
       .set({ usedAt: new Date() })
       .where(
         and(
-          eq(magicLinks.tokenHash, hashToken(c.req.valid('json').token)),
+          eq(magicLinks.tokenHash, hashToken(token)),
           isNull(magicLinks.usedAt),
           gt(magicLinks.expiresAt, new Date()),
         ),
@@ -85,7 +86,7 @@ export const authRoutes = new Hono<AppEnv>()
       .returning({ email: magicLinks.email, updatesOptIn: magicLinks.updatesOptIn });
     if (!link) return c.json({ error: t(c).linkExpired }, 400);
 
-    return respondWithSession(c, link.email, link.updatesOptIn, c.req.valid('json').cookie ?? true);
+    return respondWithSession(c, link.email, link.updatesOptIn, cookie);
   })
 
   // Mobile apps: a 6-digit code by mail instead of a link

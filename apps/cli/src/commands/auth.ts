@@ -1,4 +1,4 @@
-import { altchaChallengeSchema } from '@app/shared';
+import { altchaChallengeSchema, userSchema } from '@app/shared';
 import { solveChallenge } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import { z } from 'zod';
@@ -6,13 +6,6 @@ import { createClient } from '../client';
 import { type Command, type Context, EXIT, Failure, str } from '../command';
 import { loadSession, removeSession, saveSession } from '../config';
 
-export const userSchema = z.object({
-  id: z.string(),
-  email: z.string(),
-  name: z.string(),
-  admin: z.boolean(),
-  updatesSince: z.string().nullable(),
-});
 const meSchema = z.object({ user: userSchema.nullable() });
 const loginSchema = z.object({ user: userSchema, token: z.string() });
 const okSchema = z.object({ ok: z.literal(true) });

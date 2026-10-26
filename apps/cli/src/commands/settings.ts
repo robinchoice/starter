@@ -1,8 +1,8 @@
-import { dateLocales } from '@app/shared';
+import { dateLocales, userSchema } from '@app/shared';
 import { z } from 'zod';
 import { type Command, EXIT, Failure, str } from '../command';
 import { SLUG } from '../config';
-import { currentUser, userSchema } from './auth';
+import { currentUser } from './auth';
 
 // Example of a command for the app's own thing: what /settings shows in the
 // web, read and changed over the same API. New commands follow it (README, „CLI“).

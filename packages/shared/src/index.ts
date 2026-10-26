@@ -20,15 +20,16 @@ export const APP_BAND: Band = { from: 1, to: 7 };
 // the bug button waits for the test mode switch, see testMode in the web's feedback.svelte.ts.
 export const LIVE = false;
 
-export type User = {
-  id: string;
-  email: string;
-  name: string;
+export const userSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string(),
   // In ADMIN_EMAILS, may invite testers and send updates
-  admin: boolean;
+  admin: z.boolean(),
   // Since when the account gets update mails, as ISO date; null = off
-  updatesSince: string | null;
-};
+  updatesSince: z.string().nullable(),
+});
+export type User = z.infer<typeof userSchema>;
 
 // Custom error messages are keys of messages.ts, the API translates them.
 const email = z.string().trim().toLowerCase().pipe(z.email('invalidEmail'));

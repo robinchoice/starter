@@ -1,15 +1,16 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { APP_ID } from '@app/shared';
 import { z } from 'zod';
 import type { Env } from './command';
 
 // The slug of the app, last part of the bundle ID. The CLI's file and config folder carry it.
 export const SLUG = APP_ID.split('.').at(-1)!;
+export const LIVE_URL = `https://${SLUG}.pleasance.org`;
 
 // build.ts bakes in the URL of the live app, from source it's the default address
-export const DEFAULT_URL = process.env.CLI_URL || `https://${SLUG}.pleasance.org`;
+export const DEFAULT_URL = process.env.CLI_URL || LIVE_URL;
 
 // XDG_CONFIG_HOME wherever it is set, else the usual place of the platform
 export function sessionFile(env: Env) {
@@ -40,7 +41,7 @@ export async function loadSession(env: Env): Promise<Session | null> {
 // file, so the file is replaced.
 export async function saveSession(env: Env, session: Session) {
   const file = sessionFile(env);
-  await mkdir(join(file, '..'), { recursive: true, mode: 0o700 });
+  await mkdir(dirname(file), { recursive: true, mode: 0o700 });
   await rm(file, { force: true });
   await writeFile(file, JSON.stringify(session), { mode: 0o600 });
 }

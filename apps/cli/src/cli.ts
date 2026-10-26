@@ -66,12 +66,17 @@ export async function run(args: string[], io: Io): Promise<number> {
     json = values.json === true;
     if (!command && !values.help && args.length > 0) throw new Failure(m.cliUsage(SLUG), EXIT.usage);
 
-    // The address of the last login, unless --url names another
-    const stored = await loadSession(io.env);
-    const url = (typeof values.url === 'string' ? values.url : (stored?.url ?? DEFAULT_URL)).replace(/\/+$/, '');
-    const session = stored?.url === url ? stored : null;
-    const api = createClient(url, session?.token, locale, m);
-    const result = command && !values.help ? await command.run({ api, url, session, values, m, locale, io }) : help(m);
+    let result: Result;
+    if (command && !values.help) {
+      // The address of the last login, unless --url names another
+      const stored = await loadSession(io.env);
+      const url = (typeof values.url === 'string' ? values.url : (stored?.url ?? DEFAULT_URL)).replace(/\/+$/, '');
+      const session = stored?.url === url ? stored : null;
+      const api = createClient(url, session?.token, locale, m);
+      result = await command.run({ api, url, session, values, m, locale, io });
+    } else {
+      result = help(m);
+    }
     io.out(json ? JSON.stringify(result.data, null, 2) : result.text);
     return EXIT.ok;
   } catch (error) {

@@ -1,6 +1,7 @@
 # Weekly update PRs, one per ecosystem. The CI checks them like any other PR.
 # The cooldown skips releases younger than a week, which keeps freshly
-# hijacked packages out.
+# hijacked packages out. Majors come as PRs of their own, so one that needs
+# a migration doesn't hold back the minor and patch updates.
 version: 2
 updates:
   - package-ecosystem: bun
@@ -8,7 +9,7 @@ updates:
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
     groups:
-      all: { patterns: ['*'] }
+      all: { patterns: ['*'], update-types: [minor, patch] }
 
   # Web-only projects: remove this entire block when deleting apps/mobile.
   - package-ecosystem: pub
@@ -16,10 +17,10 @@ updates:
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
     groups:
-      all: { patterns: ['*'] }
+      all: { patterns: ['*'], update-types: [minor, patch] }
 
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
     groups:
-      all: { patterns: ['*'] }
+      all: { patterns: ['*'], update-types: [minor, patch] }

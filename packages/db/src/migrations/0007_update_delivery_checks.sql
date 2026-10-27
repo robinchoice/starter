@@ -1,0 +1,2 @@
+ALTER TABLE "update_deliveries" ADD CONSTRAINT "update_deliveries_status" CHECK ("update_deliveries"."status" in ('pending', 'sent', 'failed', 'skipped'));--> statement-breakpoint
+ALTER TABLE "update_deliveries" ADD CONSTRAINT "update_deliveries_attempts" CHECK ("update_deliveries"."attempts" >= 0);

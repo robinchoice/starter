@@ -1,7 +1,9 @@
 import type { FeedbackContext, UpdateContent } from '@app/shared/schemas';
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   boolean,
+  check,
   customType,
   integer,
   jsonb,
@@ -144,5 +146,9 @@ export const updateDeliveries = pgTable(
     attemptedAt: timestamp('attempted_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  (table) => [unique().on(table.updateId, table.userId)],
+  (table) => [
+    unique().on(table.updateId, table.userId),
+    check('update_deliveries_status', sql`${table.status} in ('pending', 'sent', 'failed', 'skipped')`),
+    check('update_deliveries_attempts', sql`${table.attempts} >= 0`),
+  ],
 );

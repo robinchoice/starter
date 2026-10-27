@@ -50,6 +50,13 @@
       "when": 1792603465600,
       "tag": "0006_server_secrets",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793142404472,
+      "tag": "0007_update_delivery_checks",
+      "breakpoints": true
     }
   ]
 }

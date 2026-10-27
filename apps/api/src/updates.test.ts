@@ -6,6 +6,7 @@ import { createDb, migrateDb } from '@app/db';
 import { updateDeliveries, updates, users } from '@app/db/schema';
 import { APP_NAME } from '@app/shared/app';
 import { eq, sql } from 'drizzle-orm';
+import fc from 'fast-check';
 import { z } from 'zod';
 import { createApp } from './app';
 import { issueSession } from './lib/login';
@@ -249,6 +250,23 @@ test('drafts in updates/ parse, broken ones say why', () => {
 
   expect(() => parseDraft('x', '# de: Nur Deutsch\n- Eins', dir)).toThrow('needs a title');
   expect(() => parseDraft('x', 'Hallo\n# de: A\n- B\n# en: A\n- B', dir)).toThrow('line 1');
+});
+
+test('any complete update survives writing it as a draft and parsing it back', () => {
+  // One line of text as an agent would write it: no line break, no outer spaces
+  const line = fc.string({ minLength: 1 }).filter((s) => s === s.trim() && !s.includes('\n'));
+  const text = fc.record({ title: line, features: fc.array(line, { minLength: 1, maxLength: 5 }) });
+  fc.assert(
+    fc.property(fc.record({ de: text, en: text }), (content) => {
+      const draft = (['de', 'en'] as const)
+        .flatMap((locale) => [
+          `# ${locale}: ${content[locale].title}`,
+          ...content[locale].features.map((f) => `- ${f}`),
+        ])
+        .join('\n');
+      expect(parseDraft('x', draft).content).toEqual(content);
+    }),
+  );
 });
 
 test('failed deliveries wait a minute before retrying and stop after three attempts', async () => {

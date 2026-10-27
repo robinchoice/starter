@@ -9,13 +9,17 @@
 
   // Link previews. Public pages override them with meta in their server load,
   // pages with ssr = false don't get any (link crawlers run no JavaScript).
-  const meta = $derived({ title: APP_NAME, description: t().tagline, image: '', ...page.data.meta });
+  const meta = $derived({ title: APP_NAME, description: t().pitch, image: '', ...page.data.meta });
 </script>
 
 <svelte:head>
-  <title>{APP_NAME}</title>
+  <title>{meta.title}</title>
+  <meta name="description" content={meta.description} />
+  <link rel="canonical" href="{page.url.origin}{page.url.pathname}" />
+  <meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
   <meta property="og:site_name" content={APP_NAME} />
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content={page.data.locale === 'de' ? 'de_DE' : 'en_US'} />
   <meta property="og:title" content={meta.title} />
   <meta property="og:description" content={meta.description} />
   {#if meta.image}

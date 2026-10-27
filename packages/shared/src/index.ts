@@ -16,6 +16,14 @@ export const APP_ID = 'org.pleasance.starter';
 // starter shows the whole band until a project picks its own.
 export const APP_BAND: Band = { from: 1, to: 7 };
 
+// Links on the landing page and in the footer. Store links stay empty, and
+// their buttons hidden, until the app is listed there (README, "Landingpage").
+export const LINKS = {
+  repo: 'https://github.com/robinchoice/starter',
+  appStore: '',
+  googlePlay: '',
+};
+
 // True once the project is live as 1.0 (README, "Live als 1.0"). From then on
 // the bug button waits for the test mode switch, see testMode in the web's feedback.svelte.ts.
 export const LIVE = false;

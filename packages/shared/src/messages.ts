@@ -1,3 +1,8 @@
+// A picture on the landing page, the file lies in apps/web/static/shots. width
+// and height are the file's pixels, they reserve the space while it loads.
+export type Shot = { src: string; alt: string; width: number; height: number };
+const noShots: Shot[] = [];
+
 // Every text that web and API show, one object per language. TypeScript reports
 // any text that English lacks. The app has its own in lib/core/messages.dart.
 const de = {
@@ -48,6 +53,33 @@ const de = {
   logOut: 'Abmelden',
   tagline: 'Ein Satz dazu, was dieser Prototyp kann.',
   openApp: 'Zur App',
+  // Landing page (README, "Landingpage"): tagline is the headline, pitch the
+  // paragraph below it and the description in link previews and search results.
+  pitch: 'Für wen ist die App und was nimmt sie ihnen ab? Zwei Sätze ohne Fachwörter.',
+  heroNote: 'Kostenlos · im Browser',
+  shots: noShots,
+  shotsLabel: 'Bilder aus der App',
+  highlightsTitle: 'Was die App kann',
+  highlights: [
+    { title: 'Erstes Feature', text: 'Was es tut und was man davon hat, in ein, zwei Sätzen.' },
+    { title: 'Zweites Feature', text: 'Aus Sicht der Nutzer geschrieben, nicht aus Sicht der Technik.' },
+    { title: 'Drittes Feature', text: 'Drei reichen. Was nicht hineinpasst, zeigen die Screenshots.' },
+  ],
+  valuesTitle: 'Worauf du dich verlassen kannst',
+  values: [
+    { title: 'Offener Quelltext', text: 'Der ganze Code liegt öffentlich auf GitHub.' },
+    {
+      title: 'Deine Daten bleiben deine',
+      text: 'Wir erheben nur, was die App braucht. Nichts davon wird verkauft oder für Werbung ausgewertet.',
+    },
+    { title: 'Keine Werbung', text: 'Keine Werbe-SDKs und keine Tracking-Cookies.' },
+  ],
+  closingTitle: 'Probier es aus.',
+  sourceCode: 'Quelltext auf GitHub',
+  appStore: 'Im App Store laden',
+  googlePlay: 'Bei Google Play herunterladen',
+  imprint: 'Impressum',
+  privacy: 'Datenschutz',
   email: 'E-Mail',
   emailPlaceholder: 'du@example.com',
   linkIntro: 'Wir schicken dir einen Login-Link und einen Code. Beim ersten Login legen wir dein Konto an.',
@@ -230,6 +262,31 @@ const en: Messages = {
   logOut: 'Log out',
   tagline: 'One sentence on what this prototype does.',
   openApp: 'Open the app',
+  pitch: 'Who is the app for and what does it take off their hands? Two sentences without jargon.',
+  heroNote: 'Free · in your browser',
+  shots: noShots,
+  shotsLabel: 'Pictures of the app',
+  highlightsTitle: 'What the app does',
+  highlights: [
+    { title: 'First feature', text: 'What it does and what you get out of it, in one or two sentences.' },
+    { title: 'Second feature', text: "Written from the user's point of view, not the technology's." },
+    { title: 'Third feature', text: "Three are enough. The screenshots show what doesn't fit." },
+  ],
+  valuesTitle: 'What you can count on',
+  values: [
+    { title: 'Open source', text: 'All of the code is public on GitHub.' },
+    {
+      title: 'Your data stays yours',
+      text: 'We only collect what the app needs. None of it is sold or used for advertising.',
+    },
+    { title: 'No ads', text: 'No ad SDKs and no tracking cookies.' },
+  ],
+  closingTitle: 'Give it a try.',
+  sourceCode: 'Source code on GitHub',
+  appStore: 'Download on the App Store',
+  googlePlay: 'Get it on Google Play',
+  imprint: 'Imprint',
+  privacy: 'Privacy',
   email: 'Email',
   emailPlaceholder: 'you@example.com',
   linkIntro: "We'll send you a login link and a code. Your first login creates your account.",

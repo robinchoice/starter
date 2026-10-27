@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { APP_BAND } from '@app/shared';
+  import { APP_BAND, LINKS } from '@app/shared';
   import { auth } from '#lib/auth.svelte.ts';
   import { setTestMode, testMode } from '#lib/feedback.svelte.ts';
   import { setLocale, t } from '#lib/i18n.ts';
@@ -21,6 +21,9 @@
     </span>
   </a>
   <div class="settings">
+    <a href="https://pleasance.org/impressum.html">{t().imprint}</a>
+    <a href="https://pleasance.org/datenschutz.html">{t().privacy}</a>
+    <a href={LINKS.repo}>{t().sourceCode}</a>
     {#if auth.user}
       <label title={t().testModeHint}>
         <input type="checkbox" checked={testMode.on} onchange={(e) => setTestMode(e.currentTarget.checked)} />
@@ -34,6 +37,7 @@
 <style>
   footer {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
     align-items: center;
     justify-content: space-between;
@@ -42,7 +46,7 @@
     color: var(--muted);
     font-size: 0.8125rem;
   }
-  a {
+  footer > a {
     display: inline-flex;
     gap: 0.5rem;
     align-items: baseline;
@@ -84,7 +88,8 @@
   }
   .settings {
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
     align-items: center;
   }
   label {

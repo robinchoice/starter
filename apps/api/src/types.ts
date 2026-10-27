@@ -1,5 +1,5 @@
 import type { Database } from '@app/db';
-import type { User } from '@app/shared';
+import type { User } from '@app/shared/schemas';
 
 export type AppEnv = {
   Variables: {

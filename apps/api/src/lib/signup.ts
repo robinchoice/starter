@@ -1,4 +1,5 @@
-import { type Database, users } from '@app/db';
+import type { Database } from '@app/db';
+import { users } from '@app/db/schema';
 import { eq } from 'drizzle-orm';
 
 // Env lists of addresses, read on every call, so the tests can switch them

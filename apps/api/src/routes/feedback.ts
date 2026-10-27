@@ -1,5 +1,5 @@
-import { feedback } from '@app/db';
-import { type FeedbackContext, feedbackSchema, type User } from '@app/shared';
+import { feedback } from '@app/db/schema';
+import { type FeedbackContext, feedbackSchema, type User } from '@app/shared/schemas';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { createIssue } from '../lib/github';

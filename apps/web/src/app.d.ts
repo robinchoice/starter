@@ -1,5 +1,5 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
-import type { Locale } from '@app/shared';
+import type { Locale } from '@app/shared/messages';
 
 declare global {
   namespace App {

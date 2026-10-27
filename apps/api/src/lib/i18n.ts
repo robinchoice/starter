@@ -1,4 +1,4 @@
-import { messages, pickLocale } from '@app/shared';
+import { messages, pickLocale } from '@app/shared/messages';
 import type { Context } from 'hono';
 
 // The language the client asks for. Web and app send the chosen one as Accept-Language.

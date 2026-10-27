@@ -1,4 +1,4 @@
-import { loginCodes, magicLinks, sessions, users } from '@app/db';
+import { loginCodes, magicLinks, sessions, users } from '@app/db/schema';
 import {
   inviteSchema,
   loginCodeSchema,
@@ -7,7 +7,7 @@ import {
   updateMeSchema,
   verifyCodeSchema,
   verifySchema,
-} from '@app/shared';
+} from '@app/shared/schemas';
 import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { deleteCookie } from 'hono/cookie';

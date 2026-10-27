@@ -1,4 +1,5 @@
-import { type Database, loginCodes, magicLinks, sessions, users } from '@app/db';
+import type { Database } from '@app/db';
+import { loginCodes, magicLinks, sessions, users } from '@app/db/schema';
 import type { Context } from 'hono';
 import { generateToken, hashToken, sessionExpiry, setSessionCookie, toUser, userColumns } from '../middleware/auth';
 import type { AppEnv } from '../types';

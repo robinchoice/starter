@@ -1,7 +1,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { type Database, updateDeliveries, updates, users } from '@app/db';
-import { type Locale, type UpdateContent, updateComplete } from '@app/shared';
+import type { Database } from '@app/db';
+import { updateDeliveries, updates, users } from '@app/db/schema';
+import type { Locale } from '@app/shared/messages';
+import { type UpdateContent, updateComplete } from '@app/shared/schemas';
 import { and, asc, eq, gt, isNull, lt, or, sql } from 'drizzle-orm';
 import { imageType } from './image';
 import { sendMail, updateMail } from './mail';

@@ -5,7 +5,9 @@
 // tile in static/favicon.svg, and commit the pictures.
 // Run: bun run og-image
 import { readFileSync } from 'node:fs';
-import { APP_BAND, APP_NAME, bandGradient, GLOW, type Locale, messages } from '@app/shared';
+import { APP_BAND, APP_NAME } from '@app/shared/app';
+import { bandGradient, GLOW } from '@app/shared/band';
+import { type Locale, messages } from '@app/shared/messages';
 import { chromium } from '@playwright/test';
 
 const STATIC = new URL('static/', import.meta.url);

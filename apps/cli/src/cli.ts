@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util';
-import { APP_NAME, type Messages, messages, pickLocale } from '@app/shared';
+import { APP_NAME } from '@app/shared/app';
+import { type Messages, messages, pickLocale } from '@app/shared/messages';
 import { createClient } from './client';
 import { type Command, EXIT, Failure, type Io, type Result } from './command';
 import { auth } from './commands/auth';

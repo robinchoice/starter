@@ -1,4 +1,5 @@
-import { dateLocales, userSchema } from '@app/shared';
+import { dateLocales } from '@app/shared/messages';
+import { userSchema } from '@app/shared/schemas';
 import { z } from 'zod';
 import { type Command, EXIT, Failure, str } from '../command';
 import { SLUG } from '../config';

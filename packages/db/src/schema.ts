@@ -1,4 +1,4 @@
-import type { FeedbackContext, UpdateContent } from '@app/shared';
+import type { FeedbackContext, UpdateContent } from '@app/shared/schemas';
 import {
   bigint,
   boolean,
@@ -17,7 +17,7 @@ const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' });
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
-  // Stored lowercase, see the email schema in @app/shared
+  // Stored lowercase, see the email schema in @app/shared/schemas
   email: varchar('email', { length: 255 }).notNull().unique(),
   name: varchar('name', { length: 255 }).notNull(),
   // Opt-in for update mails, null = off. The time is the proof of consent.

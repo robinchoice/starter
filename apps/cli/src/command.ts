@@ -1,4 +1,4 @@
-import type { Locale, Messages } from '@app/shared';
+import type { Locale, Messages } from '@app/shared/messages';
 import type { Client } from './client';
 import type { Session } from './config';
 

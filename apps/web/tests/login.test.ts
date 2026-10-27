@@ -1,4 +1,4 @@
-import { messages } from '@app/shared';
+import { messages } from '@app/shared/messages';
 import { expect, type Page, test } from '@playwright/test';
 import postgres from 'postgres';
 import { logIn, loginCode } from './login';

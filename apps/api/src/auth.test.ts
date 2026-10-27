@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, expect, setSystemTime, spyOn, test } from 'bun:test';
-import { createDb, migrateDb, passkeys, rateLimits, sessions, users } from '@app/db';
-import { APP_ID, messages } from '@app/shared';
+import { createDb, migrateDb } from '@app/db';
+import { passkeys, rateLimits, sessions, users } from '@app/db/schema';
+import { APP_ID } from '@app/shared/app';
+import { messages } from '@app/shared/messages';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { createApp } from './app';

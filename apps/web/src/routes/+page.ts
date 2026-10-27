@@ -1,4 +1,5 @@
-import { APP_NAME, messages } from '@app/shared';
+import { APP_NAME } from '@app/shared/app';
+import { messages } from '@app/shared/messages';
 import type { PageLoad } from './$types';
 
 // The landing page's title in search results and link previews

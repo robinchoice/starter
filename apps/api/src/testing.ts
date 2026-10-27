@@ -1,4 +1,4 @@
-import { altchaChallengeSchema } from '@app/shared';
+import { altchaChallengeSchema } from '@app/shared/schemas';
 import { solveChallenge } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import type { z } from 'zod';

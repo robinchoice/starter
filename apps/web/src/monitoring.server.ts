@@ -1,4 +1,4 @@
-import { sentryPrivacyOptions } from '@app/shared';
+import { sentryPrivacyOptions } from '@app/shared/monitoring';
 import * as Sentry from '@sentry/bun';
 
 Sentry.init({

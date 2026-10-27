@@ -1,4 +1,5 @@
-import { APP_NAME, messages, pickLocale } from '@app/shared';
+import { APP_NAME } from '@app/shared/app';
+import { messages, pickLocale } from '@app/shared/messages';
 import { type Context, Hono } from 'hono';
 import { type PublicPage, publicPages } from '../lib/public-pages';
 import type { AppEnv } from '../types';

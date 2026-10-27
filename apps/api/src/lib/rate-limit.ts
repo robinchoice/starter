@@ -1,4 +1,4 @@
-import { rateLimits } from '@app/db';
+import { rateLimits } from '@app/db/schema';
 import { lt, sql } from 'drizzle-orm';
 import type { Context } from 'hono';
 import type { AppEnv } from '../types';

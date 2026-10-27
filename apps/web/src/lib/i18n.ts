@@ -1,4 +1,4 @@
-import { type Locale, messages } from '@app/shared';
+import { type Locale, messages } from '@app/shared/messages';
 import { refreshAll } from '$app/navigation';
 import { page } from '$app/state';
 

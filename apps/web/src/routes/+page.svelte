@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { APP_NAME, LINKS } from '@app/shared';
+  import { APP_NAME, LINKS } from '@app/shared/app';
   import { onMount } from 'svelte';
   import { auth, checkAuth } from '#lib/auth.svelte.ts';
   import Button from '#lib/components/Button.svelte';

@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    "./app": "./src/app.ts",
+    "./band": "./src/band.ts",
+    "./messages": "./src/messages.ts",
+    "./monitoring": "./src/monitoring.ts",
+    "./schemas": "./src/schemas.ts"
   },
   "scripts": {
     "check": "tsc --noEmit"

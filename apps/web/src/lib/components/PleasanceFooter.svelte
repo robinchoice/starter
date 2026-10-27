@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { APP_BAND, LINKS } from '@app/shared';
+  import { APP_BAND, LINKS } from '@app/shared/app';
   import { auth } from '#lib/auth.svelte.ts';
   import { setTestMode, testMode } from '#lib/feedback.svelte.ts';
   import { setLocale, t } from '#lib/i18n.ts';

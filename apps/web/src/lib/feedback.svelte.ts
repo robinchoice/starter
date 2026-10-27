@@ -1,4 +1,5 @@
-import { type FeedbackContext, LIVE } from '@app/shared';
+import { LIVE } from '@app/shared/app';
+import type { FeedbackContext } from '@app/shared/schemas';
 import { browser } from '$app/env';
 import { page } from '$app/state';
 import { api, recentErrors } from './api';

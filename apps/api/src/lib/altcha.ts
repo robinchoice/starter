@@ -1,5 +1,6 @@
-import { type Database, serverSecrets } from '@app/db';
-import { altchaChallengeSchema } from '@app/shared';
+import type { Database } from '@app/db';
+import { serverSecrets } from '@app/db/schema';
+import { altchaChallengeSchema } from '@app/shared/schemas';
 import { createChallenge, randomInt, verifySolution } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import { eq } from 'drizzle-orm';

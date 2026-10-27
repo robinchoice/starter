@@ -1,5 +1,6 @@
-import { updateDeliveries, updates, users } from '@app/db';
-import { type Locale, saveUpdateSchema, type UpdateSummary, updateComplete } from '@app/shared';
+import { updateDeliveries, updates, users } from '@app/db/schema';
+import type { Locale } from '@app/shared/messages';
+import { saveUpdateSchema, type UpdateSummary, updateComplete } from '@app/shared/schemas';
 import { and, count, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';

@@ -1,5 +1,5 @@
 import dns from 'node:dns';
-import { pickLocale } from '@app/shared';
+import { pickLocale } from '@app/shared/messages';
 import type { Handle, HandleServerError } from '@sveltejs/kit/hooks';
 import { dev } from '$app/env';
 import { captureException } from './monitoring.server';

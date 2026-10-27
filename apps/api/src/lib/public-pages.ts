@@ -1,5 +1,6 @@
 import type { Database } from '@app/db';
-import { APP_NAME, LINKS, type Messages } from '@app/shared';
+import { APP_NAME, LINKS } from '@app/shared/app';
+import type { Messages } from '@app/shared/messages';
 
 // A page anyone sees without logging in. Agents get it as <path>.md, listed in
 // llms.txt and joined in llms-full.txt (routes/agents.ts). body is Markdown

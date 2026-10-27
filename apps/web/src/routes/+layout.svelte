@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { APP_BAND, APP_NAME, bandColor, bandGradient, DEEP, GLOW } from '@app/shared';
+  import { APP_BAND, APP_NAME } from '@app/shared/app';
+import { bandColor, bandGradient, DEEP, GLOW } from '@app/shared/band';
   import PleasanceFooter from '#lib/components/PleasanceFooter.svelte';
   import Toasts from '#lib/components/Toasts.svelte';
   import { t } from '#lib/i18n.ts';

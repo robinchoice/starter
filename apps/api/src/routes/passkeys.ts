@@ -1,5 +1,6 @@
-import { passkeyChallenges, passkeys, users } from '@app/db';
-import { APP_ID, APP_NAME, type Passkey, passkeyLoginSchema, passkeyRegisterSchema } from '@app/shared';
+import { passkeyChallenges, passkeys, users } from '@app/db/schema';
+import { APP_ID, APP_NAME } from '@app/shared/app';
+import { type Passkey, passkeyLoginSchema, passkeyRegisterSchema } from '@app/shared/schemas';
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,

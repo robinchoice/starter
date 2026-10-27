@@ -1,4 +1,4 @@
-import type { Locale, Messages } from '@app/shared';
+import type { Locale, Messages } from '@app/shared/messages';
 import { z } from 'zod';
 import { EXIT, Failure } from './command';
 

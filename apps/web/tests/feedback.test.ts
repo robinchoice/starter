@@ -1,4 +1,4 @@
-import { LIVE } from '@app/shared';
+import { LIVE } from '@app/shared/app';
 import { expect, test } from '@playwright/test';
 import postgres from 'postgres';
 import { logIn } from './login';

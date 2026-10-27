@@ -1,6 +1,7 @@
 import { afterAll, expect, test } from 'bun:test';
 import { createDb } from '@app/db';
-import { APP_NAME, messages } from '@app/shared';
+import { APP_NAME } from '@app/shared/app';
+import { messages } from '@app/shared/messages';
 import { createApp } from './app';
 import { publicPages } from './lib/public-pages';
 

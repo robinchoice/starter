@@ -1,5 +1,5 @@
-import { sessions, users } from '@app/db';
-import type { User } from '@app/shared';
+import { sessions, users } from '@app/db/schema';
+import type { User } from '@app/shared/schemas';
 import { and, eq, gt } from 'drizzle-orm';
 import type { Context } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';

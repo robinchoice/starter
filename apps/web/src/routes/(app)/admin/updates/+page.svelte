@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { dateLocales, type Locale, type UpdateContent, type UpdateSummary, updateComplete } from '@app/shared';
+  import { dateLocales, type Locale } from '@app/shared/messages';
+import { type UpdateContent, type UpdateSummary, updateComplete } from '@app/shared/schemas';
   import { onDestroy, onMount } from 'svelte';
   import { api } from '#lib/api.ts';
   import { auth } from '#lib/auth.svelte.ts';

@@ -3,7 +3,7 @@ import { mkdtemp, readFile, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createDb, migrateDb } from '@app/db';
-import { messages } from '@app/shared';
+import { messages } from '@app/shared/messages';
 import { z } from 'zod';
 import { createApp } from '../../api/src/app';
 import { createAccount, issueMagicLink } from '../../api/src/lib/login';

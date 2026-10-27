@@ -25,5 +25,3 @@ export async function migrateDb(connectionString: string) {
     await client.end();
   }
 }
-
-export * from './schema';

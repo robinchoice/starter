@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { safeNextPath } from '@app/shared';
+  import { safeNextPath } from '@app/shared/schemas';
   import { onMount } from 'svelte';
   import { auth, checkAuth, verify } from '#lib/auth.svelte.ts';
   import { t } from '#lib/i18n.ts';

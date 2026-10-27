@@ -1,4 +1,4 @@
-import type { Messages } from '@app/shared';
+import type { Messages } from '@app/shared/messages';
 import { zValidator } from '@hono/zod-validator';
 import type { ZodType } from 'zod';
 import { t } from './i18n';

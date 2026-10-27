@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { APP_NAME } from '@app/shared';
+  import { APP_NAME } from '@app/shared/app';
   import { onMount } from 'svelte';
   import { api } from '#lib/api.ts';
   import Button from '#lib/components/Button.svelte';

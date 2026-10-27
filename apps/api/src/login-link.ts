@@ -4,7 +4,7 @@
 //   bun apps/api/src/login-link.ts <email>
 import './env';
 import { createDb } from '@app/db';
-import { magicLinkSchema } from '@app/shared';
+import { magicLinkSchema } from '@app/shared/schemas';
 import { createAccount, issueMagicLink } from './lib/login';
 
 const { email } = magicLinkSchema.parse({ email: process.argv[2] });

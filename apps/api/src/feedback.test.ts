@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, expect, spyOn, test } from 'bun:test';
-import { createDb, feedback, migrateDb, users } from '@app/db';
+import { createDb, migrateDb } from '@app/db';
+import { feedback, users } from '@app/db/schema';
 import { eq } from 'drizzle-orm';
 import { createApp } from './app';
 import { issueSession } from './lib/login';

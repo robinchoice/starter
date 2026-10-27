@@ -1,4 +1,4 @@
-import { APP_NAME } from '@app/shared';
+import { APP_NAME } from '@app/shared/app';
 import { z } from 'zod';
 
 const issueSchema = z.object({ html_url: z.url() });

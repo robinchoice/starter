@@ -1,7 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { APP_ID } from '@app/shared';
+import { APP_ID } from '@app/shared/app';
 import { z } from 'zod';
 import type { Env } from './command';
 

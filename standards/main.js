@@ -354,7 +354,7 @@ function renderBand() {
   ];
   $('facts').innerHTML = facts.map(([c, k, v]) => `<div class="fact ${c}"><span>${k}</span><b>${v}</b></div>`).join('');
   const r = (n) => Number(n.toFixed(2));
-  $('snip').innerHTML = `<i>// packages/shared/src/index.ts</i>
+  $('snip').innerHTML = `<i>// packages/shared/src/app.ts</i>
 export const APP_BAND: Band = { from: ${r(from)}, to: ${r(to)} };
 <i>// apps/mobile/lib/config.dart</i>
 const appBand = Band(${r(from)}, ${r(to)});

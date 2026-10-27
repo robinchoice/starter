@@ -1,4 +1,4 @@
-import type { Passkey, User } from '@app/shared';
+import type { Passkey, User } from '@app/shared/schemas';
 import {
   type PublicKeyCredentialCreationOptionsJSON,
   type PublicKeyCredentialRequestOptionsJSON,

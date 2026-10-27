@@ -1,15 +1,7 @@
-import {
-  APP_BAND,
-  APP_NAME,
-  bandColor,
-  DEEP,
-  dateLocales,
-  GLOW,
-  type Locale,
-  type Messages,
-  messages,
-  type UpdateContent,
-} from '@app/shared';
+import { APP_BAND, APP_NAME } from '@app/shared/app';
+import { bandColor, DEEP, GLOW } from '@app/shared/band';
+import { dateLocales, type Locale, type Messages, messages } from '@app/shared/messages';
+import type { UpdateContent } from '@app/shared/schemas';
 import nodemailer from 'nodemailer';
 
 const port = Number(process.env.SMTP_PORT || 587);

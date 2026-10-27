@@ -70,6 +70,8 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Karte ruckelt');
     await tester.pump();
+    await tester.drag(find.byType(ListView), const Offset(0, -200));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Senden'));
     await tester.pumpAndSettle();
     expect(find.text('Danke! Wir melden uns per Mail.'), findsOneWidget);

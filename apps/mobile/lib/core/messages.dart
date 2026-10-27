@@ -55,6 +55,7 @@ abstract class Messages {
   String get contextWindow;
   String get contextLanguage;
   String get contextErrors;
+  String get feedbackPublic;
   String repliesTo(String email);
   String get send;
   String get feedbackThanks;
@@ -157,6 +158,8 @@ class De extends Messages {
   String get contextLanguage => 'Sprache';
   @override
   String get contextErrors => 'Letzte Fehler';
+  @override
+  String get feedbackPublic => 'Nachricht und mitgeschickte Angaben erscheinen öffentlich auf GitHub, ohne Name, Mail und Screenshot.';
   @override
   String repliesTo(String email) => 'Antworten bekommst du per Mail an $email.';
   @override
@@ -262,6 +265,8 @@ class En extends Messages {
   String get contextLanguage => 'Language';
   @override
   String get contextErrors => 'Recent errors';
+  @override
+  String get feedbackPublic => 'Your message and what gets sent along appear publicly on GitHub, without your name, email or screenshot.';
   @override
   String repliesTo(String email) => 'Replies reach you by email at $email.';
   @override

@@ -121,6 +121,8 @@ const de = {
   contextWindow: 'Fenster',
   contextLanguage: 'Sprache',
   contextErrors: 'Letzte Fehler',
+  feedbackPublic:
+    'Nachricht und mitgeschickte Angaben erscheinen öffentlich auf GitHub, ohne Name, Mail und Screenshot.',
   repliesTo: (email: string) => `Antworten bekommst du per Mail an ${email}.`,
   send: 'Senden',
   feedbackThanks: 'Danke! Wir melden uns per Mail.',
@@ -328,6 +330,8 @@ const en: Messages = {
   contextWindow: 'Window',
   contextLanguage: 'Language',
   contextErrors: 'Recent errors',
+  feedbackPublic:
+    'Your message and what gets sent along appear publicly on GitHub, without your name, email or screenshot.',
   repliesTo: (email) => `Replies reach you by email at ${email}.`,
   send: 'Send',
   feedbackThanks: "Thanks! We'll get back to you by email.",

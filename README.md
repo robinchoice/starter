@@ -47,7 +47,7 @@ Den Käfer schaltet der Testmodus, in der Fußzeile (Web) bzw. im Profil (App), 
 
 Mitgeschickt werden Seite, Version, Gerät, Fenstergröße, Sprache und die letzten fünf fehlgeschlagenen API-Aufrufe. Der Tester sieht das im Formular unter „Was mitgeschickt wird“.
 
-Die API speichert jede Meldung in `feedback` und legt dann ein Issue im Repo des Prototyps an, mit den Labels `feedback`, `bug` oder `idea` und der Plattform. Im Issue steht keine Mail-Adresse. Danach geht eine Mail an `FEEDBACK_EMAIL` mit Screenshot im Anhang und Link aufs Issue. Wer auf die Mail antwortet, schreibt dem Tester. Fällt GitHub oder die Mail aus, bleibt die Meldung gespeichert.
+Die API speichert jede Meldung in `feedback` und legt dann ein Issue im Repo des Prototyps an, mit den Labels `feedback`, `bug` oder `idea` und der Plattform. Im Issue steht keine Mail-Adresse, das Formular sagt Testern, dass ihre Nachricht öffentlich erscheint. Danach geht eine Mail an `FEEDBACK_EMAIL` mit Screenshot im Anhang und Link aufs Issue. Wer auf die Mail antwortet, schreibt dem Tester. Fällt GitHub oder die Mail aus, bleibt die Meldung gespeichert.
 
 - Alle offenen Meldungen: `gh search issues --owner robinchoice --label feedback --state open`
 - Screenshots stehen nicht im öffentlichen Issue. `/api/v1/feedback/<id>/screenshot` liefert sie nur an eingeloggte Admins aus `ADMIN_EMAILS` aus.

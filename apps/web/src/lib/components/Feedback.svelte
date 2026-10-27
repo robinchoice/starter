@@ -210,7 +210,7 @@
           {/each}
         </dl>
       </details>
-      <p class="hint">{t().repliesTo(auth.user.email)}</p>
+      <p class="hint">{t().feedbackPublic} {t().repliesTo(auth.user.email)}</p>
       <Button type="submit" loading={sending} disabled={message.trim().length < 5}>{t().send}</Button>
     </form>
   </div>

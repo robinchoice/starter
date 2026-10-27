@@ -151,7 +151,7 @@ class _FeedbackSheetState extends ConsumerState<FeedbackSheet> {
                 Text('$label: $value', style: muted),
             ],
           ),
-          Text(t.repliesTo(email), style: muted),
+          Text('${t.feedbackPublic} ${t.repliesTo(email)}', style: muted),
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),

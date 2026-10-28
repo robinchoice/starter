@@ -1,7 +1,7 @@
 <script lang="ts">
   import { APP_NAME } from '@app/shared/app';
-import { dateLocales } from '@app/shared/messages';
-import type { Passkey } from '@app/shared/schemas';
+  import { dateLocales } from '@app/shared/messages';
+  import type { Passkey } from '@app/shared/schemas';
   import { browserSupportsWebAuthn, WebAuthnError } from '@simplewebauthn/browser';
   import { onMount } from 'svelte';
   import { addPasskey, auth, listPasskeys, removePasskey, setUpdates } from '#lib/auth.svelte.ts';

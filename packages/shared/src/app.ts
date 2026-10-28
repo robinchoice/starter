@@ -15,6 +15,8 @@ export const APP_BAND: Band = { from: 1, to: 7 };
 // their buttons hidden, until the app is listed there (README, "Landingpage").
 export const LINKS = {
   repo: 'https://github.com/robinchoice/starter',
+  imprint: 'https://pleasance.org/impressum.html',
+  privacy: 'https://pleasance.org/datenschutz.html',
   appStore: '',
   googlePlay: '',
 };

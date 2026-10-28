@@ -1,6 +1,6 @@
 <script lang="ts">
   import { APP_BAND, APP_NAME } from '@app/shared/app';
-import { bandColor, bandGradient, DEEP, GLOW } from '@app/shared/band';
+  import { bandColor, bandGradient, DEEP, GLOW } from '@app/shared/band';
   import PleasanceFooter from '#lib/components/PleasanceFooter.svelte';
   import Toasts from '#lib/components/Toasts.svelte';
   import { t } from '#lib/i18n.ts';
@@ -11,13 +11,14 @@ import { bandColor, bandGradient, DEEP, GLOW } from '@app/shared/band';
   // Link previews. Public pages override them with meta in their server load,
   // pages with ssr = false don't get any (link crawlers run no JavaScript).
   const meta = $derived({ title: APP_NAME, description: t().pitch, image: '', ...page.data.meta });
+  const canonicalUrl = $derived(page.url.origin + page.url.pathname);
 </script>
 
 <svelte:head>
   <title>{meta.title}</title>
   <meta name="description" content={meta.description} />
-  <link rel="canonical" href="{page.url.origin}{page.url.pathname}" />
-  <meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
+  <link rel="canonical" href={canonicalUrl} />
+  <meta property="og:url" content={canonicalUrl} />
   <meta property="og:site_name" content={APP_NAME} />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content={page.data.locale === 'de' ? 'de_DE' : 'en_US'} />

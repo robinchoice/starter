@@ -17,8 +17,7 @@ export async function publicPages(_db: Database, m: Messages): Promise<PublicPag
 
 // The landing page (apps/web/src/routes/+page.svelte) from the same texts
 function landing(m: Messages) {
-  const list = (items: { title: string; text: string }[]) =>
-    items.map((item) => `- **${item.title}**: ${item.text}`).join('\n');
+  const list = (items: Messages['highlights']) => items.map((item) => `- **${item.title}**: ${item.text}`).join('\n');
   const links = [
     [m.appStore, LINKS.appStore],
     [m.googlePlay, LINKS.googlePlay],

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { APP_NAME } from '@app/shared/app';
-import { safeNextPath } from '@app/shared/schemas';
+  import { safeNextPath } from '@app/shared/schemas';
   import {
     browserSupportsWebAuthn,
     browserSupportsWebAuthnAutofill,

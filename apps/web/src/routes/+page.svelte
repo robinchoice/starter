@@ -1,5 +1,6 @@
 <script lang="ts">
   import { APP_NAME, LINKS } from '@app/shared/app';
+  import type { Messages } from '@app/shared/messages';
   import { onMount } from 'svelte';
   import { auth, checkAuth } from '#lib/auth.svelte.ts';
   import Button from '#lib/components/Button.svelte';
@@ -25,7 +26,7 @@
   </div>
 {/snippet}
 
-{#snippet cards(items: { title: string; text: string }[])}
+{#snippet cards(items: Messages['highlights'])}
   <div class="cards">
     {#each items as item (item.title)}
       <article>

@@ -21,8 +21,8 @@
     </span>
   </a>
   <div class="settings">
-    <a href="https://pleasance.org/impressum.html">{t().imprint}</a>
-    <a href="https://pleasance.org/datenschutz.html">{t().privacy}</a>
+    <a href={LINKS.imprint}>{t().imprint}</a>
+    <a href={LINKS.privacy}>{t().privacy}</a>
     <a href={LINKS.repo}>{t().sourceCode}</a>
     {#if auth.user}
       <label title={t().testModeHint}>

@@ -7,7 +7,8 @@ Vorlage für Web- und Mobile-Prototypen: Bun, Hono, SvelteKit, Drizzle und Postg
 1. Einen Slug aus ASCII-Kleinbuchstaben und Ziffern wählen, beginnend mit einem Buchstaben, ohne Bindestrich (z. B. `savor`). Repo und lokaler Ordner heißen gleich: `~/dev/<slug>`. Repo aus der Vorlage anlegen: `gh repo create robinchoice/<slug> --template robinchoice/starter --public --clone`. Repos sind öffentlich, danach Push Protection einschalten (siehe „Secret-Scan“), die Vorlage vererbt sie nicht: `gh api -X PATCH repos/robinchoice/<slug> --input - <<<'{"security_and_analysis":{"secret_scanning":{"status":"enabled"},"secret_scanning_push_protection":{"status":"enabled"}}}'`
 2. `APP_NAME`, `APP_ID` (`org.pleasance.<slug>`, daraus heißt auch die CLI), `APP_BAND` und `LINKS.repo` in `packages/shared/src/app.ts` setzen. Welcher Ausschnitt aus dem Farbband passt, steht in DESIGN.md. Die Texte der Landingpage folgen, sobald klar ist, was der Prototyp kann (siehe „Landingpage“).
 3. In `AGENTS.md` Titel, „Zweck & Links“, die Prüf-URL unter „Deploy“ und „Fallen“ für das Projekt ausfüllen und den einleitenden Absatz zur Vorlage löschen.
-4. Lokal starten:
+4. Lizenz: starter ist MIT, Produkte darunter AGPL-3.0-or-later. `LICENSE` durch den AGPL-3.0-Text ersetzen (`cp ~/dev/savor/LICENSE LICENSE`) und, falls ein Manifest ein `license`-Feld hat, es auf `AGPL-3.0-or-later` setzen.
+5. Lokal starten:
    ```sh
    cp .env.example .env
    docker compose up -d

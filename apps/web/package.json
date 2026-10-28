@@ -17,10 +17,10 @@
   },
   "devDependencies": {
     "@app/shared": "workspace:*",
-    "@opentelemetry/api": "^1.9.1",
-    "@playwright/test": "^1.63.0",
-    "@sentry/browser": "^11.4.0",
-    "@sentry/bun": "^11.4.0",
+    "@opentelemetry/api": "^1.10.0",
+    "@playwright/test": "^1.64.1",
+    "@sentry/browser": "^11.8.0",
+    "@sentry/bun": "^11.8.0",
     "@simplewebauthn/browser": "^14.0.0",
     "@sveltejs/adapter-node": "^6.0.0",
     "@sveltejs/kit": "^3.1.0",
@@ -28,11 +28,11 @@
     "altcha": "^3.4.1",
     "modern-screenshot": "^4.7.0",
     "postgres": "^3.4.9",
-    "posthog-js": "^1.438.2",
+    "posthog-js": "^1.438.13",
     "qrcode-generator": "^2.0.4",
-    "svelte": "^5.57.1",
-    "svelte-check": "^4.7.6",
-    "vite": "^8.3.4",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "vite": "^8.3.5",
     "zod": "^4.6.6"
   }
 }

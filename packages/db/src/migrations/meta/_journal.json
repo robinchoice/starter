@@ -57,6 +57,13 @@
       "when": 1793142404472,
       "tag": "0007_update_delivery_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793222423581,
+      "tag": "0008_payments",
+      "breakpoints": true
     }
   ]
 }

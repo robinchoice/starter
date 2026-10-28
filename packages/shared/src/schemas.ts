@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { productIds } from './payments';
 
 export const userSchema = z.object({
   id: z.string(),
@@ -181,3 +182,26 @@ export function safeNextPath(value: string | null | undefined): string | null {
     return null;
   }
 }
+
+// Checkout (README, „Zahlungen“): the client names a product, the server sets the price.
+export const createPaymentSchema = z.object({ product: z.enum(productIds) });
+
+export const paymentSchema = z.object({
+  id: z.string(),
+  product: z.enum(productIds),
+  sats: z.number(),
+  // BOLT11 invoice for the QR code
+  invoice: z.string(),
+  status: z.enum(['pending', 'paid', 'expired']),
+  expiresAt: z.string(),
+  paidAt: z.string().nullable(),
+});
+export type Payment = z.infer<typeof paymentSchema>;
+
+export const paymentsSchema = z.object({
+  products: z.array(z.object({ id: z.enum(productIds), sats: z.number() })),
+  // Products this user has paid for, the unlock
+  unlocked: z.array(z.enum(productIds)),
+  payments: z.array(paymentSchema),
+});
+export type Payments = z.infer<typeof paymentsSchema>;

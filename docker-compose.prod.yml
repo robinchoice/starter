@@ -34,6 +34,12 @@ services:
       - ANDROID_CERT_SHA256=${ANDROID_CERT_SHA256:-}
       - MIN_BUILD_IOS=${MIN_BUILD_IOS:-}
       - MIN_BUILD_ANDROID=${MIN_BUILD_ANDROID:-}
+      - PAYMENTS_BACKEND=${PAYMENTS_BACKEND:-}
+      - BTCPAY_URL=${BTCPAY_URL:-}
+      - BTCPAY_STORE_ID=${BTCPAY_STORE_ID:-}
+      - BTCPAY_API_KEY=${BTCPAY_API_KEY:-}
+      - BTCPAY_WEBHOOK_SECRET=${BTCPAY_WEBHOOK_SECRET:-}
+      - NWC_URL=${NWC_URL:-}
       - SENTRY_DSN=${SENTRY_DSN:-}
     depends_on:
       postgres:
@@ -55,6 +61,11 @@ services:
       - SMTP_PASS=${SMTP_PASS:-}
       - EMAIL_FROM=${EMAIL_FROM:-}
       - UPDATE_MAIL_INTERVAL_MS=${UPDATE_MAIL_INTERVAL_MS:-6000}
+      - PAYMENTS_BACKEND=${PAYMENTS_BACKEND:-}
+      - BTCPAY_URL=${BTCPAY_URL:-}
+      - BTCPAY_STORE_ID=${BTCPAY_STORE_ID:-}
+      - BTCPAY_API_KEY=${BTCPAY_API_KEY:-}
+      - NWC_URL=${NWC_URL:-}
       - SENTRY_DSN=${SENTRY_DSN:-}
     healthcheck:
       test: ["CMD", "bun", "-e", "fetch('http://localhost:3001/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]

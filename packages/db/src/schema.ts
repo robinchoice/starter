@@ -1,3 +1,4 @@
+import type { Product, Sats } from '@app/shared/payments';
 import type { FeedbackContext, UpdateContent } from '@app/shared/schemas';
 import { sql } from 'drizzle-orm';
 import {
@@ -150,5 +151,34 @@ export const updateDeliveries = pgTable(
     unique().on(table.updateId, table.userId),
     check('update_deliveries_status', sql`${table.status} in ('pending', 'sent', 'failed', 'skipped')`),
     check('update_deliveries_attempts', sql`${table.attempts} >= 0`),
+  ],
+);
+
+// Lightning checkout (README, „Zahlungen“): one row per invoice. The API and
+// the worker move pending rows to paid or expired once the backend says so,
+// a paid row is the unlock of its product.
+export const payments = pgTable(
+  'payments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    product: varchar('product', { length: 50 }).$type<Product>().notNull(),
+    sats: integer('sats').$type<Sats>().notNull(),
+    // PAYMENTS_BACKEND at creation and its id of the invoice
+    backend: varchar('backend', { length: 10 }).notNull(),
+    invoiceId: varchar('invoice_id', { length: 100 }).notNull(),
+    invoice: text('invoice').notNull(),
+    status: varchar('status', { length: 10 }).$type<'pending' | 'paid' | 'expired'>().default('pending').notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    paidAt: timestamp('paid_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    unique().on(table.backend, table.invoiceId),
+    check('payments_sats', sql`${table.sats} > 0`),
+    check('payments_status', sql`${table.status} in ('pending', 'paid', 'expired')`),
+    check('payments_paid_at', sql`(${table.status} = 'paid') = (${table.paidAt} is not null)`),
   ],
 );

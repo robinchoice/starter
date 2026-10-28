@@ -7,6 +7,7 @@
     "./band": "./src/band.ts",
     "./messages": "./src/messages.ts",
     "./monitoring": "./src/monitoring.ts",
+    "./payments": "./src/payments.ts",
     "./schemas": "./src/schemas.ts"
   },
   "scripts": {

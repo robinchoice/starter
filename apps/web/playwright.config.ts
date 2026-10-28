@@ -36,6 +36,8 @@ export default defineConfig({
         ADMIN_EMAILS: 'e2e-admin@example.com',
         SIGNUP_OPEN: '',
         SIGNUP_ALLOWLIST: '',
+        // Fake money that pays itself, see apps/api/src/lib/lightning.ts
+        PAYMENTS_BACKEND: 'fake',
       },
       url: `${API}/api/health`,
       reuseExistingServer: false,

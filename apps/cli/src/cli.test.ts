@@ -98,6 +98,27 @@ test('the example command reads and changes the settings', async () => {
   expect((await cli(['settings', '--updates', 'maybe'])).code).toBe(2);
 });
 
+test('payments: buy a product with a Lightning invoice, the list shows it', async () => {
+  const { cli } = await device();
+  await cli(['login'], { email: freshEmail() });
+  expect((await cli(['payments', '--json'])).json()).toEqual({ error: de.paymentsOff });
+
+  process.env.PAYMENTS_BACKEND = 'fake';
+  try {
+    expect((await cli(['payments', '--buy', 'gold'])).code).toBe(2);
+    const bought = await cli(['payments', '--buy', 'demo', '--json']);
+    expect(bought.code).toBe(0);
+    expect(bought.json()).toMatchObject({ payment: { product: 'demo', sats: 21, status: 'pending' } });
+    const listed = await cli(['payments']);
+    expect(listed.out).toContain(`${de.productNames.demo}: ${de.sats(21)}`);
+    expect(listed.out).toContain(
+      `${bought.json().payment.id}  ${de.productNames.demo}  ${de.sats(21)}  ${de.paymentStatus.pending}`,
+    );
+  } finally {
+    delete process.env.PAYMENTS_BACKEND;
+  }
+});
+
 test('every device has its own token, logout revokes only that one', async () => {
   const email = freshEmail();
   const laptop = await device();

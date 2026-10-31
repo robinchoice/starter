@@ -135,7 +135,7 @@ jobs:
             -authenticationKeyID ${{ vars.ASC_KEY_ID }} \
             -authenticationKeyIssuerID ${{ vars.ASC_ISSUER_ID }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: symbols-ios
           path: ${{ runner.temp }}/symbols
@@ -213,12 +213,12 @@ jobs:
         if: always()
         run: rm -f android/upload-keystore.jks android/key.properties
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android-aab
           path: apps/mobile/build/app/outputs/bundle/release/app-release.aab
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: symbols-android
           path: ${{ runner.temp }}/symbols

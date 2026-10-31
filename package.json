@@ -16,8 +16,8 @@
     "standards": "bun --port 4300 standards/index.html"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.15",
-    "@types/bun": "^1.4.2",
+    "@biomejs/biome": "^2.6.2",
+    "@types/bun": "^1.4.4",
     "typescript": "^6.0.3"
   },
   "overrides": {

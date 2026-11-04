@@ -161,8 +161,8 @@
     type="button"
     class="bug"
     data-feedback-ignore
-    style:left="{x}px"
-    style:top="{y}px"
+    style:left="clamp(env(safe-area-inset-left), {x}px, calc(100% - 44px - env(safe-area-inset-right)))"
+    style:top="clamp(env(safe-area-inset-top), {y}px, calc(100% - 44px - env(safe-area-inset-bottom)))"
     aria-label={t().reportBug}
     title={t().reportBug}
     onpointerdown={down}
@@ -308,7 +308,8 @@
     width: min(420px, 100%);
     flex-direction: column;
     gap: 0.8rem;
-    padding: 1.25rem 1.5rem;
+    padding: max(1.25rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right))
+      max(1.25rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
     overflow: auto;
     background: var(--surface);
     box-shadow: -8px 0 30px rgb(0 0 0 / 0.15);

@@ -119,10 +119,15 @@ class PleasanceFooter extends ConsumerWidget {
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: hairline)),
         ),
-        child: Row(
+        child: Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 16,
+          runSpacing: 8,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 Text(
                   t.madeBy,
@@ -135,7 +140,6 @@ class PleasanceFooter extends ConsumerWidget {
                     fontVariations: [FontVariation('wdth', 80), FontVariation('wght', 650)],
                   ),
                 ),
-                const SizedBox(width: 8),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +157,6 @@ class PleasanceFooter extends ConsumerWidget {
                 ),
               ],
             ),
-            const Spacer(),
             TextButton(
               onPressed: () => ref.read(localeProvider.notifier).toggle(),
               style: TextButton.styleFrom(

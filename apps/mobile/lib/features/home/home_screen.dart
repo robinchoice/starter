@@ -51,16 +51,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: const Text(appName),
         actions: [IconButton(icon: const Icon(Icons.person_outline), onPressed: () => context.go('/profile'))],
       ),
-      body: FlutterMap(
-        mapController: _map,
-        options: const MapOptions(initialCenter: _fallbackCenter, initialZoom: 13),
-        children: [
-          TileLayer(urlTemplate: mapTileUrl, userAgentPackageName: appId),
-          if (_position != null)
-            MarkerLayer(markers: [Marker(point: _position!, child: const Icon(Icons.my_location, color: Colors.blue))]),
-          // Required by the OSM tile usage policy
-          const SimpleAttributionWidget(source: Text('OpenStreetMap contributors')),
-        ],
+      body: SafeArea(
+        child: FlutterMap(
+          mapController: _map,
+          options: const MapOptions(initialCenter: _fallbackCenter, initialZoom: 13),
+          children: [
+            TileLayer(urlTemplate: mapTileUrl, userAgentPackageName: appId),
+            if (_position != null)
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: _position!,
+                    child: const Icon(Icons.my_location, color: Colors.blue),
+                  ),
+                ],
+              ),
+            // Required by the OSM tile usage policy
+            Padding(
+              padding: const EdgeInsets.only(right: 80),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: ColoredBox(
+                  color: Theme.of(context).colorScheme.surface,
+                  child: const Padding(
+                    padding: EdgeInsets.all(3),
+                    child: Text('flutter_map | © OpenStreetMap contributors', textAlign: TextAlign.end),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _locate,

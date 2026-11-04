@@ -80,7 +80,7 @@ class _FeedbackButtonState extends ConsumerState<FeedbackButton> {
       builder: (context, constraints) {
         final padding = MediaQuery.paddingOf(context);
         final position = _position ?? Offset(constraints.maxWidth - _size - 12, constraints.maxHeight * 0.62);
-        final left = clampDouble(position.dx, 0, max(0.0, constraints.maxWidth - _size));
+        final left = clampDouble(position.dx, padding.left, max(padding.left, constraints.maxWidth - _size - padding.right));
         final top = clampDouble(
           position.dy,
           padding.top,

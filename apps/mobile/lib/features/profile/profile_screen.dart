@@ -66,52 +66,56 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(t.profile)),
       bottomNavigationBar: const PleasanceFooter(),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          Text(user?.email ?? '', style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _name,
-            maxLength: 255,
-            decoration: InputDecoration(labelText: t.name),
-            onSubmitted: (_) => _save(),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Text(user?.email ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _name,
+                  maxLength: 255,
+                  decoration: InputDecoration(labelText: t.name),
+                  onSubmitted: (_) => _save(),
+                ),
+                FilledButton(onPressed: _busy ? null : _save, child: Text(t.save)),
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(t.updatesByMail),
+                  subtitle: Text(t.updatesHint(appName)),
+                  value: user?.updatesSince != null,
+                  onChanged: (on) => _setUpdates(on),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.fingerprint),
+                  title: Text(t.addPasskey),
+                  subtitle: Text(t.passkeyHint),
+                  onTap: _addPasskey,
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => showFeedbackSheet(context, ref, FeedbackKind.idea),
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  label: Text(t.giveFeedback),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(t.testMode),
+                  subtitle: Text(t.testModeHint),
+                  value: ref.watch(testModeProvider).value ?? false,
+                  onChanged: (on) => ref.read(testModeProvider.notifier).set(on),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(onPressed: () => ref.read(authProvider.notifier).logout(), child: Text(t.logOut)),
+              ],
+            ),
           ),
-          FilledButton(onPressed: _busy ? null : _save, child: Text(t.save)),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(t.updatesByMail),
-            subtitle: Text(t.updatesHint(appName)),
-            value: user?.updatesSince != null,
-            onChanged: (on) => _setUpdates(on),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.fingerprint),
-            title: Text(t.addPasskey),
-            subtitle: Text(t.passkeyHint),
-            onTap: _addPasskey,
-          ),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: () => showFeedbackSheet(context, ref, FeedbackKind.idea),
-            icon: const Icon(Icons.chat_bubble_outline),
-            label: Text(t.giveFeedback),
-          ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(t.testMode),
-            subtitle: Text(t.testModeHint),
-            value: ref.watch(testModeProvider).value ?? false,
-            onChanged: (on) => ref.read(testModeProvider.notifier).set(on),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => ref.read(authProvider.notifier).logout(),
-            child: Text(t.logOut),
-          ),
-        ],
+        ),
       ),
     );
   }

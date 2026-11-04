@@ -243,6 +243,21 @@ Flutter mit Riverpod und go_router, Karte mit flutter_map und OSM, Token in `flu
    ```
    Auf einem echten Gerät die LAN-IP des Laptops nehmen. Ohne `SMTP_HOST` steht der Code im API-Log.
 
+### Fenstergrößen, Tablets und Foldables
+
+Die native Vorlage ist für iPhone und iPad konfiguriert (`TARGETED_DEVICE_FAMILY = "1,2"`); die iPad-Orientierungen sind vollständig, `UIRequiresFullScreen` ist nicht gesetzt. Das ermöglicht iPadOS-Fenster/Split View, beweist aber keine gute Bedienung. Android hat keine Orientierungs-, Seitenverhältnis- oder Resize-Sperre, behandelt Größenänderungen in `configChanges` und nutzt `adjustResize` für die Tastatur. Mehrere iOS-Szenen sind weiterhin deaktiviert; das ist von Split View mit einer anderen App zu unterscheiden. Web-Support im iPad-Browser ist unabhängig vom nativen Target.
+
+Das Grundlayout folgt der verfügbaren Fensterbreite, ohne Geräteerkennung: Login und Update sind auf 420, das Profil auf 600 logische Pixel begrenzt; Karte und scrollbare Formulare wachsen mit. Footer und Kartenattribution umbrechen; die Attribution lässt Platz für den Standortknopf. Native Inhalte und Web-Shell/Feedback berücksichtigen Safe Areas. Größenwechsel ersetzen weder Router noch Formular-Controller.
+
+Vor einer Gerätefreigabe mit Test-/Demodaten prüfen (keine Produktions-Kundendaten):
+
+- Login, Karte, Profil und geöffnetes Feedback in schmalen/breiten Fenstern, Hoch-/Querformat und Split View bedienen; bei laufender Sitzung mehrfach verkleinern/vergrößern und auf-/zuklappen. Route, Mail/Code, ungespeicherter Name, Feedback-Entwurf und Kartenposition/Zoom müssen erhalten bleiben.
+- Mit geöffneter Tastatur auch im flachen Querformat zu Feld und Absenden/Speichern scrollen; kein horizontaler Überlauf, keine verdeckten Bedienelemente an Kameraausschnitt, Systemleisten oder Home-Indikator. Bei Foldables zusätzlich Trennbereich/Scharnier in den unterstützten Positionen prüfen.
+- Automatisch: `bun run check && bun run test` prüft u. a. Chromium-Resize mit erhaltenem Login-/Feedback-Entwurf; in `apps/mobile` prüfen `flutter analyze && flutter test && node --test tool/testflight.test.mjs` u. a. Profil-/Feedback-Resize mit simulierten Safe Areas und Tastatur. Die Testfenster sind Layout-Stressfälle, keine behaupteten Geräteabmessungen.
+- Zusätzlich auf iPad/iPadOS (Safari und native App), Android-Tablet/Foldable (Emulator und echtes Gerät) und iPhone Duo prüfen. Für Duo nach [Apple](https://developer.apple.com/news/?id=kkphp5qo) mit Xcode 27.1 oder neuer neu bauen und Device Hub für Positionen/Orientierungen nutzen. Widget-/Chromium-Tests und ein erfolgreicher CI-Build ersetzen diese Plattformprüfung nicht; ungetestete Geräte ausdrücklich benennen.
+
+Grundlagen: [Android: Adaptive do’s and don’ts](https://developer.android.com/develop/adaptive-apps/guides/adaptive-dos-and-donts), [Flutter: Large screens](https://docs.flutter.dev/ui/adaptive-responsive/large-screens). Ein neues Mehrspalten- oder Navigationskonzept benötigt vorher Mockupfreigabe nach `prototyp-start`.
+
 ### Update-Pflicht
 
 Ohne sie bleiben alte Versionen für immer im Umlauf, darum gehört sie vor den ersten Store-Build. Release-Builds kennen ihre Build-Nummer (`--dart-define=BUILD_NUMBER`, dieselbe CI-Run-Nummer wie `--build-number`) und senden sie mit der Plattform als `X-App-Build` und `X-App-Platform` an jede Anfrage. Liegt sie unter `MIN_BUILD_IOS` bzw. `MIN_BUILD_ANDROID` (Coolify, leer = kein Minimum), antwortet die API auf `/api/v1/*` mit 426 und `{ error, code: 'UPDATE_REQUIRED' }`, nur Feedback bleibt offen. Beim Start fragt die App `GET /api/v1/app` (höchstens 10 Sekunden, offline oder bei Fehlern startet sie normal) und zeigt bei 426 nur den Update-Screen mit Link in den Store. Web und lokale Builds (Build-Nummer 0) senden nichts und werden nie gesperrt.

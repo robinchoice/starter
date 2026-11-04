@@ -11,6 +11,8 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 `bun run check && bun run test` (`test` baut das Web und testet den Build, dazu die CLI gegen die API), bei CLI-Änderungen zusätzlich `bun run build` (baut auch die CLI-Datei), bei App-Änderungen zusätzlich `flutter analyze && flutter test && node --test tool/testflight.test.mjs` in `apps/mobile`. Die Browser-Tests starten API und Web auf eigenen Ports (31100, 31101), unter dem ephemeren Linux-Portbereich (32768–60999), damit ausgehende Verbindungen sie nicht kurzzeitig belegen. Testet ein anderer Worktree gleichzeitig, mit anderen Ports unter 32768 aufrufen: `TEST_API_PORT=31102 TEST_WEB_PORT=31103 bun run test`.
 
+Bei Layoutänderungen zusätzlich die konkreten Geräteprüfkriterien in README.md, „Fenstergrößen, Tablets und Foldables“, anwenden. Automatisierte Resize-Tests ersetzen keine Geräte-/Simulatorprüfung; offene Plattformchecks im Abschluss nennen.
+
 ## Deploy
 
 - Ein Push auf `main` baut nach grüner CI die Images (nicht bei Änderungen ausschließlich an den unter `paths-ignore` in `ci.yml` aufgeführten Pfaden) und deployt sie über die Coolify-API. Danach fotografiert sie die Live-Seite nach `docs/screenshots/`, committet geänderte Bilder mit `[skip ci]` und meldet den Deploy an `robinchoice/pleasance` (README, „Screenshots“). Ohne das Secret `COOLIFY_TOKEN` überspringt die CI Deploy, Screenshots und Meldung, so auch hier in der Vorlage. Ohne `PLEASANCE_DISPATCH_TOKEN` entfällt nur die Meldung. Pull Requests durchlaufen die CI unabhängig von den geänderten Pfaden.

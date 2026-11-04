@@ -98,7 +98,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Stelle markieren'), findsNothing);
     await tester.enterText(find.byType(TextField).last, 'Dunkler Modus wäre schön');
-    await tester.pump();
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    for (final size in [const Size(320, 700), const Size(1024, 768), const Size(768, 1024), const Size(700, 400)]) {
+      tester.view.physicalSize = size;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 160);
+      tester.view.padding = const FakeViewPadding(left: 24, right: 24);
+      tester.view.viewPadding = const FakeViewPadding(left: 24, right: 24, bottom: 24);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(tester.widget<TextField>(find.byType(TextField).last).controller!.text, 'Dunkler Modus wäre schön');
+      await tester.dragUntilVisible(find.text('Senden'), find.byType(ListView).last, const Offset(0, -100));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.text('Senden')).bottom, lessThanOrEqualTo(size.height - 160));
+    }
     await tester.tap(find.text('Senden'));
     await tester.pumpAndSettle();
 

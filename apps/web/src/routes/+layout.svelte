@@ -107,6 +107,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   .content {
     flex: 1;

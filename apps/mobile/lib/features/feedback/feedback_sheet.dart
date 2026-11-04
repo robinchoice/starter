@@ -99,67 +99,70 @@ class _FeedbackSheetState extends ConsumerState<FeedbackSheet> {
     final muted = Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        children: [
-          Text(
-            widget.kind == FeedbackKind.bug ? t.reportBug : t.giveFeedback,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _message,
-            autofocus: true,
-            minLines: 4,
-            maxLines: 10,
-            maxLength: 5000,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: widget.kind == FeedbackKind.bug ? t.bugPlaceholder : t.ideaPlaceholder,
-              border: const OutlineInputBorder(),
-              counterText: '',
+      child: SafeArea(
+        top: false,
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          children: [
+            Text(
+              widget.kind == FeedbackKind.bug ? t.reportBug : t.giveFeedback,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
-          if (_screenshot != null) ...[
             const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.memory(_screenshot!, height: 180, fit: BoxFit.contain, semanticLabel: 'Screenshot'),
+            TextField(
+              controller: _message,
+              autofocus: true,
+              minLines: 4,
+              maxLines: 10,
+              maxLength: 5000,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                hintText: widget.kind == FeedbackKind.bug ? t.bugPlaceholder : t.ideaPlaceholder,
+                border: const OutlineInputBorder(),
+                counterText: '',
+              ),
             ),
-            Wrap(
-              alignment: WrapAlignment.center,
+            if (_screenshot != null) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.memory(_screenshot!, height: 180, fit: BoxFit.contain, semanticLabel: 'Screenshot'),
+              ),
+              Wrap(
+                alignment: WrapAlignment.center,
+                children: [
+                  TextButton(onPressed: () => setState(() => _screenshot = null), child: Text(t.removeScreenshot)),
+                  TextButton(onPressed: _mark, child: Text(t.markSpot)),
+                ],
+              ),
+            ],
+            ExpansionTile(
+              title: Text(t.sentAlong, style: Theme.of(context).textTheme.bodyMedium),
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 8),
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextButton(onPressed: () => setState(() => _screenshot = null), child: Text(t.removeScreenshot)),
-                TextButton(onPressed: _mark, child: Text(t.markSpot)),
+                for (final (label, value) in [
+                  (t.contextPage, c['page']),
+                  (t.contextDevice, c['device']),
+                  (t.contextWindow, c['viewport']),
+                  (t.contextLanguage, c['locale']),
+                  (t.contextErrors, (c['errors'] as List).isEmpty ? '–' : (c['errors'] as List).join(', ')),
+                ])
+                  Text('$label: $value', style: muted),
               ],
             ),
+            Text('${t.feedbackPublic} ${t.repliesTo(email)}', style: muted),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              ),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: _sending || _message.text.trim().length < 5 ? null : _send, child: Text(t.send)),
           ],
-          ExpansionTile(
-            title: Text(t.sentAlong, style: Theme.of(context).textTheme.bodyMedium),
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: const EdgeInsets.only(bottom: 8),
-            expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final (label, value) in [
-                (t.contextPage, c['page']),
-                (t.contextDevice, c['device']),
-                (t.contextWindow, c['viewport']),
-                (t.contextLanguage, c['locale']),
-                (t.contextErrors, (c['errors'] as List).isEmpty ? '–' : (c['errors'] as List).join(', ')),
-              ])
-                Text('$label: $value', style: muted),
-            ],
-          ),
-          Text('${t.feedbackPublic} ${t.repliesTo(email)}', style: muted),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            ),
-          const SizedBox(height: 12),
-          FilledButton(onPressed: _sending || _message.text.trim().length < 5 ? null : _send, child: Text(t.send)),
-        ],
+        ),
       ),
     );
   }

@@ -190,3 +190,39 @@ test('the web server hands the app links to the API', async ({ request }) => {
   expect(res.status()).toBe(404);
   expect(res.headers()['content-type']).toContain('application/json');
 });
+
+test('forms stay usable and keep their draft across live window resizes', async ({ page }) => {
+  await openHydrated(page, '/login');
+  await page.getByLabel('E-Mail').fill('resize@example.com');
+  for (const size of [
+    { width: 280, height: 640 },
+    { width: 1024, height: 768 },
+    { width: 640, height: 360 },
+  ]) {
+    await page.setViewportSize(size);
+    await expect(page.getByLabel('E-Mail')).toHaveValue('resize@example.com');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await logIn(page);
+  await page.goto('/settings');
+  await page.getByRole('button', { name: 'Feedback geben' }).click();
+  const panel = page.getByRole('dialog', { name: 'Feedback geben' });
+  await panel.getByRole('textbox').fill('Unsaved resize draft');
+  for (const size of [
+    { width: 280, height: 640 },
+    { width: 1024, height: 768 },
+    { width: 768, height: 1024 },
+    { width: 640, height: 360 },
+    { width: 280, height: 640 },
+  ]) {
+    await page.setViewportSize(size);
+    await expect(page).toHaveURL(/\/settings$/);
+    await expect(panel.getByRole('textbox')).toHaveValue('Unsaved resize draft');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const box = await panel.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeLessThanOrEqual(size.width);
+    await panel.getByRole('button', { name: 'Senden', exact: true }).scrollIntoViewIfNeeded();
+    await expect(panel.getByRole('button', { name: 'Senden', exact: true })).toBeInViewport();
+  }
+});

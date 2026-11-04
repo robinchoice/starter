@@ -13,6 +13,8 @@ Diese Datei ist zugleich die Vorlage für neue Projekte. Dort ersetzen Titel, �
 
 Bei Layoutänderungen zusätzlich die konkreten Geräteprüfkriterien in README.md, „Fenstergrößen, Tablets und Foldables“, anwenden. Automatisierte Resize-Tests ersetzen keine Geräte-/Simulatorprüfung; offene Plattformchecks im Abschluss nennen.
 
+Die Mobile-CI kompiliert außerdem bei jedem Lauf iOS unsigned (`flutter build ios --release --no-codesign`) auf dem Standardrunner `xcode-27`, fest mit stabilem Xcode 27.1 (27A9275) und iOS-27.1-SDK. Keine Secrets oder Uploads im Job `ios-compile`; native Prüfung unter Linux nur über CI. Das Runner-Image ist Public Preview, Xcode selbst stabil. Compile ist keine Duo-Geräte-/Simulator-Freigabe.
+
 ## Deploy
 
 - Ein Push auf `main` baut nach grüner CI die Images (nicht bei Änderungen ausschließlich an den unter `paths-ignore` in `ci.yml` aufgeführten Pfaden) und deployt sie über die Coolify-API. Danach fotografiert sie die Live-Seite nach `docs/screenshots/`, committet geänderte Bilder mit `[skip ci]` und meldet den Deploy an `robinchoice/pleasance` (README, „Screenshots“). Ohne das Secret `COOLIFY_TOKEN` überspringt die CI Deploy, Screenshots und Meldung, so auch hier in der Vorlage. Ohne `PLEASANCE_DISPATCH_TOKEN` entfällt nur die Meldung. Pull Requests durchlaufen die CI unabhängig von den geänderten Pfaden.

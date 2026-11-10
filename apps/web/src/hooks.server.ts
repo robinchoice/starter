@@ -58,6 +58,7 @@ async function markdown(request: Request, url: URL) {
   const path = url.pathname === '/' ? '/index.md' : `${url.pathname.replace(/\/$/, '')}.md`;
   const response = await proxy(request, `${API_ORIGIN}${path}${url.search}`);
   if (response.ok) return response;
+  await response.body?.cancel();
 }
 
 async function proxy(request: Request, target: string) {

@@ -14,12 +14,16 @@
   let payment = $state<Payment | null>(null);
   let buying = $state<Product | null>(null);
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let destroyed = false;
 
   const load = async () => {
     overview = await api.get<Payments>('/payments').catch(() => overview);
   };
   onMount(load);
-  onDestroy(() => clearTimeout(timer));
+  onDestroy(() => {
+    destroyed = true;
+    clearTimeout(timer);
+  });
 
   async function buy(product: Product) {
     buying = product;
@@ -37,7 +41,8 @@
   function poll(id: string) {
     timer = setTimeout(async () => {
       const answer = await api.get<{ payment: Payment }>(`/payments/${id}`, true).catch(() => null);
-      if (payment?.id !== id) return;
+      // A request still in flight when the page was left must not start the next one
+      if (destroyed || payment?.id !== id) return;
       if (answer) payment = answer.payment;
       if (payment.status === 'pending') poll(id);
       else if (payment.status === 'paid') await load();

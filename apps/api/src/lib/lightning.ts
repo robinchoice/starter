@@ -5,7 +5,7 @@ import { nwcBackend } from './nwc';
 
 // The Lightning node behind checkout and L402 (README, „Zahlungen“), chosen
 // by PAYMENTS_BACKEND. Empty = payments off, the routes answer 404.
-export type Invoice = {
+type Invoice = {
   // The backend's id, for invoiceState
   id: string;
   bolt11: string;

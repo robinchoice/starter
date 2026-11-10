@@ -9,7 +9,7 @@ import { settings } from './commands/settings';
 import { DEFAULT_URL, loadSession, SLUG } from './config';
 
 // Every command of the CLI. A new one goes in here (README, „CLI“).
-export const commands: Record<string, Command> = { ...auth, settings, payments };
+const commands: Record<string, Command> = { ...auth, settings, payments };
 
 const globalOptions = {
   json: { type: 'boolean' },

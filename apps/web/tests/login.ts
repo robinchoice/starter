@@ -1,10 +1,12 @@
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
 
 const apiDirectory = new URL('../../api/', import.meta.url);
+const loginLink = fileURLToPath(new URL('src/login-link.ts', apiDirectory));
 
 export async function logIn(page: Page, email = `e2e-${crypto.randomUUID()}@example.com`) {
-  const link = execFileSync('bun', ['src/login-link.ts', email], {
+  const link = execFileSync('bun', [loginLink, email], {
     cwd: apiDirectory,
     env: { ...process.env, APP_URL: 'http://localhost' },
     encoding: 'utf8',

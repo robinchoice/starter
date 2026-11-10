@@ -8,7 +8,7 @@ import { t } from '../lib/i18n';
 import { imageType, UUID } from '../lib/image';
 import { sendMail, updateMail } from '../lib/mail';
 import { clientIp, rateLimit, tooManyRequests } from '../lib/rate-limit';
-import { consentNow, redact } from '../lib/updates';
+import { consentNow, hasImage, redact } from '../lib/updates';
 import { validJson } from '../lib/validate';
 import { requireAdmin } from '../middleware/auth';
 import type { AppEnv } from '../types';
@@ -37,7 +37,7 @@ async function summaries(c: Context<AppEnv>, id?: string): Promise<UpdateSummary
       id: updates.id,
       slug: updates.slug,
       content: updates.content,
-      hasImage: sql<boolean>`${updates.image} is not null`,
+      hasImage,
       createdAt: updates.createdAt,
       sentAt: updates.sentAt,
       sent: deliveries.sent,
@@ -67,7 +67,7 @@ async function forAdmin(c: Context<AppEnv>) {
     .select({
       id: updates.id,
       content: updates.content,
-      hasImage: sql<boolean>`${updates.image} is not null`,
+      hasImage,
       sentAt: updates.sentAt,
     })
     .from(updates)

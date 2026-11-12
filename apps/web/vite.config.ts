@@ -19,8 +19,9 @@ export default defineConfig({
           'style-src': ['self', 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='],
           // Style attributes in app.html and in SvelteKit's route announcer
           'style-src-attr': ['unsafe-inline'],
-          'img-src': ['self', 'data:'],
-          'connect-src': ['self', 'https://glitchtip.pleasance.org'],
+          // pleasance.org: app list and icons for the dock in the footer
+          'img-src': ['self', 'data:', 'https://pleasance.org'],
+          'connect-src': ['self', 'https://glitchtip.pleasance.org', 'https://pleasance.org'],
           'frame-ancestors': ['none'],
           'base-uri': ['self'],
           'form-action': ['self'],

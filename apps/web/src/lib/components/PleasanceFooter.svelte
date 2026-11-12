@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { APP_BAND, LINKS } from '@app/shared/app';
+  import { LINKS } from '@app/shared/app';
   import { auth } from '#lib/auth.svelte.ts';
+  import AppDock from '#lib/components/AppDock.svelte';
   import { setTestMode, testMode } from '#lib/feedback.svelte.ts';
   import { setLocale, t } from '#lib/i18n.ts';
   import { page } from '$app/state';
@@ -9,17 +10,14 @@
 </script>
 
 <footer>
-  <a href="https://pleasance.org">
-    <span class="by">{t().madeBy}</span>
-    <span class="signature">
+  <!-- Sender and wordmark link to pleasance.org, the band below is the app dock -->
+  <div class="sender">
+    <a href="https://pleasance.org">
+      <span class="by">{t().madeBy}</span>
       <span class="wordmark" role="img" aria-label="Pleasance"></span>
-      <span class="band" aria-hidden="true"><span
-          class="marker"
-          style:left="{((APP_BAND.from - 1) / 6) * 100}%"
-          style:width="{((APP_BAND.to - APP_BAND.from) / 6) * 100}%"
-        ></span></span>
-    </span>
-  </a>
+    </a>
+    <AppDock />
+  </div>
   <div class="settings">
     <a href={LINKS.imprint}>{t().imprint}</a>
     <a href={LINKS.privacy}>{t().privacy}</a>
@@ -46,45 +44,36 @@
     color: var(--muted);
     font-size: 0.8125rem;
   }
-  footer > a {
-    display: inline-flex;
-    gap: 0.5rem;
-    align-items: baseline;
+  /* Two columns, so the band sits under the wordmark, outside the link */
+  .sender {
+    display: inline-grid;
+    grid-template-columns: auto 99px;
+    gap: 5px 0.5rem;
+    transform: translateY(4px);
+  }
+  .sender > a {
+    display: grid;
+    grid-column: 1 / 3;
+    grid-template-columns: subgrid;
+    align-items: end;
     text-decoration: none;
+  }
+  .sender > :global(.dock) {
+    grid-column: 2;
   }
   .by {
     font-family: var(--font-display);
     font-size: 0.875rem;
     font-weight: 650;
     font-stretch: 80%;
-    transform: translateY(2px);
-  }
-  .signature {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 5px;
-    transform: translateY(4px);
+    line-height: 1;
+    transform: translateY(1px);
   }
   .wordmark {
     width: 99px;
     height: 11px;
     background: currentColor;
     mask: url('/pleasance-wordmark.svg') left center / contain no-repeat;
-  }
-  .band {
-    position: relative;
-    width: 99px;
-    height: 2px;
-    border-radius: 1px;
-    background: linear-gradient(rgb(255 255 255 / 0.6), rgb(255 255 255 / 0.6)), var(--spectrum);
-  }
-  .marker {
-    position: absolute;
-    top: -1px;
-    min-width: 6px;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--gradient);
   }
   .settings {
     display: flex;

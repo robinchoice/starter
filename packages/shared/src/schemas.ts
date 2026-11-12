@@ -205,3 +205,21 @@ export const paymentsSchema = z.object({
   payments: z.array(paymentSchema),
 });
 export type Payments = z.infer<typeof paymentsSchema>;
+
+// https://pleasance.org/apps.json, read by the app dock in the footer. Only web
+// links, so a broken or hijacked file cannot plant javascript: URLs. The band is
+// the product's section of the colour band (DESIGN.md), desktop marks apps
+// whose page is a download rather than the app itself.
+const webUrl = z.url({ protocol: /^https?$/ });
+export const pleasanceAppsSchema = z.object({
+  apps: z.array(
+    z.object({
+      name: z.string().min(1).max(40),
+      url: webUrl,
+      icon: webUrl,
+      band: z.object({ from: z.number().min(1).max(7), to: z.number().min(1).max(7) }),
+      desktop: z.boolean().optional(),
+    }),
+  ),
+});
+export type PleasanceApp = z.infer<typeof pleasanceAppsSchema>['apps'][number];

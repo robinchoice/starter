@@ -17,6 +17,8 @@ export const LINKS = {
   repo: 'https://github.com/robinchoice/starter',
   imprint: 'https://pleasance.org/impressum.html',
   privacy: 'https://pleasance.org/datenschutz.html',
+  // Pleasance's apps for the dock under the wordmark, see AppDock.svelte
+  pleasanceApps: 'https://pleasance.org/apps.json',
   appStore: '',
   googlePlay: '',
 };

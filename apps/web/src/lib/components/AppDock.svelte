@@ -63,7 +63,10 @@
 
   function place() {
     const touch = matchMedia('(pointer: coarse)').matches;
-    const base = touch ? 40 : 34;
+    const width = document.documentElement.clientWidth;
+    // Smaller tiles on narrow screens, so the row still fits when it grows
+    const units = slots.reduce((sum, slot) => sum + (slot.app ? 1 : FREE), 0) + 1.2;
+    const base = Math.min(touch ? 40 : 34, (width - 16 - GAP * (slots.length - 1)) / units);
     const r = root.getBoundingClientRect();
     rootLeft = r.left;
     row = dockLayout({
@@ -74,7 +77,7 @@
       center: r.left + r.width / 2,
       pointer,
       min: 8,
-      max: document.documentElement.clientWidth - 8,
+      max: width - 8,
     });
   }
 

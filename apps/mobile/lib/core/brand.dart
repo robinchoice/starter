@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config.dart';
+import 'app_dock.dart';
 import 'locale.dart';
 
 // Family colour band, see DESIGN.md. Same values as packages/shared/src/band.ts:
@@ -102,9 +104,11 @@ ThemeData buildTheme() {
   );
 }
 
+void _openPleasance() => launchUrl(Uri.parse('https://pleasance.org'), mode: LaunchMode.externalApplication);
+
 /// Sender line at the bottom of a screen: made by Pleasance, signed with the
-/// wordmark over the family band that marks where this app sits, and the
-/// language button.
+/// wordmark over the family band that marks where this app sits and opens the
+/// app dock, and the language button.
 class PleasanceFooter extends ConsumerWidget {
   const PleasanceFooter({super.key});
 
@@ -129,30 +133,45 @@ class PleasanceFooter extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                Text(
-                  t.madeBy,
-                  style: const TextStyle(
-                    color: muted,
-                    fontFamily: displayFont,
-                    fontSize: 14,
-                    height: 1,
-                    fontWeight: FontWeight.w600,
-                    fontVariations: [FontVariation('wdth', 80), FontVariation('wght', 650)],
+                // Sender and wordmark lead to pleasance.org, the band below is the app dock
+                Semantics(
+                  link: true,
+                  label: '${t.madeBy} Pleasance',
+                  excludeSemantics: true,
+                  onTap: _openPleasance,
+                  child: GestureDetector(
+                    onTap: _openPleasance,
+                    child: Text(
+                      t.madeBy,
+                      style: const TextStyle(
+                        color: muted,
+                        fontFamily: displayFont,
+                        fontSize: 14,
+                        height: 1,
+                        fontWeight: FontWeight.w600,
+                        fontVariations: [FontVariation('wdth', 80), FontVariation('wght', 650)],
+                      ),
+                    ),
                   ),
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SvgPicture.asset(
-                      'assets/pleasance-wordmark.svg',
-                      width: _signatureWidth,
-                      height: 11,
-                      colorFilter: const ColorFilter.mode(muted, BlendMode.srcIn),
-                      semanticsLabel: 'Pleasance',
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _openPleasance,
+                      child: ExcludeSemantics(
+                        child: SvgPicture.asset(
+                          'assets/pleasance-wordmark.svg',
+                          width: signatureWidth,
+                          height: 11,
+                          colorFilter: const ColorFilter.mode(muted, BlendMode.srcIn),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    const _BandLine(),
+                    const SizedBox(height: 3),
+                    const AppDock(),
                   ],
                 ),
               ],
@@ -170,49 +189,6 @@ class PleasanceFooter extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// Width of the wordmark at 11 high, the band below spans exactly that.
-const _signatureWidth = 99.0;
-
-class _BandLine extends StatelessWidget {
-  const _BandLine();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: _signatureWidth,
-      height: 4,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 1,
-            height: 2,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(1)),
-                gradient: LinearGradient(colors: [for (final c in glow) Color.lerp(c, Colors.white, 0.6)!]),
-              ),
-            ),
-          ),
-          Positioned(
-            left: _signatureWidth * (appBand.from - 1) / 6,
-            top: 0,
-            width: math.max(6, _signatureWidth * (appBand.to - appBand.from) / 6),
-            height: 4,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: bandGradient(glow),
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

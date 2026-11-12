@@ -13,6 +13,10 @@ abstract class Messages {
   const Messages();
 
   String get madeBy;
+  String get pleasanceTools;
+  String get youAreHere;
+  String get desktopApp;
+  String get freeSpot;
 
   /// Label of the language button, in the language it switches to
   String get otherLanguage;
@@ -72,6 +76,14 @@ class De extends Messages {
 
   @override
   String get madeBy => 'ein Werkzeug von';
+  @override
+  String get pleasanceTools => 'Werkzeuge von Pleasance';
+  @override
+  String get youAreHere => 'Du bist hier';
+  @override
+  String get desktopApp => 'Desktop-App';
+  @override
+  String get freeSpot => 'Freier Platz';
   @override
   String get otherLanguage => 'English';
   @override
@@ -179,6 +191,14 @@ class En extends Messages {
 
   @override
   String get madeBy => 'a tool by';
+  @override
+  String get pleasanceTools => 'Tools by Pleasance';
+  @override
+  String get youAreHere => 'You are here';
+  @override
+  String get desktopApp => 'Desktop app';
+  @override
+  String get freeSpot => 'Free spot';
   @override
   String get otherLanguage => 'Deutsch';
   @override

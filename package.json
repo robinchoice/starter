@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "bun run --filter './apps/*' dev",
-    "check": "biome check && knip && bun run --filter '*' check",
+    "check": "scripts/check-comments.sh && biome check && knip && bun run --filter '*' check",
     "test": "bun run --filter '*' test",
     "build": "bun run --filter '*' build",
     "db:generate": "bun run --filter @app/db db:generate",

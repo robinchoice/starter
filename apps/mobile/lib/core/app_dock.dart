@@ -156,7 +156,10 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
     setState(() => _hot = _hit(local, geometry.band, row));
   }
 
+  DockSlot? get _hotSlot => _hot >= 0 && _hot < _slots.length ? _slots[_hot] : null;
+
   void _cancel() {
+    // A slow first load must not open the dock after the finger has lifted
     if (!_portal.isShowing) _wanted = false;
     setState(() {
       _pointer = null;
@@ -165,16 +168,11 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
   }
 
   void _release() {
-    // A slow first load must not open the dock after the finger has lifted
-    if (!_portal.isShowing) _wanted = false;
-    final app = _hot >= 0 && _hot < _slots.length ? _slots[_hot].app : null;
+    final app = _hotSlot?.app;
     if (app != null) {
       _launch(app);
     } else {
-      setState(() {
-        _pointer = null;
-        _hot = -1;
-      });
+      _cancel();
     }
   }
 
@@ -218,7 +216,7 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
     final row = _layout(geometry.band, geometry.area);
     final bottom = _row(geometry.band);
     final markerStage = (appBand.from + appBand.to) / 2;
-    final hot = _hot >= 0 && _hot < _slots.length ? _slots[_hot] : null;
+    final hot = _hotSlot;
     return Stack(
       children: [
         // Sliding grows the icons, a tap on one opens it, a tap anywhere else closes the dock

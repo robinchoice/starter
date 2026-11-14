@@ -227,9 +227,10 @@
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Pops out of the band, the icons nearest to the marker first
   function pop(_node: Element, { delay }: { delay: number }) {
+    const still = reduced();
     return {
-      delay: reduced() ? 0 : delay,
-      duration: reduced() ? 0 : 320,
+      delay: still ? 0 : delay,
+      duration: still ? 0 : 320,
       easing: backOut,
       css: (k: number) => `opacity: ${Math.min(1, k * 2)}; transform: translateY(${(1 - k) * 14}px) scale(${0.4 + 0.6 * k})`,
     };
@@ -257,6 +258,8 @@
   bind:this={root}
   role="presentation"
   style:--glow={bandColor(markerStage, GLOW)}
+  style:--above="{ABOVE}px"
+  style:--rise="{LIFT - ABOVE}px"
   onpointerenter={enter}
   onpointerleave={leave}
   onpointermove={track}
@@ -382,7 +385,7 @@
      300 ms before the dock closes. */
   ul {
     position: absolute;
-    bottom: calc(1px + 20px);
+    bottom: calc(1px + var(--above));
     z-index: 20;
     height: 70px;
     margin: 0;
@@ -391,8 +394,7 @@
   }
   li {
     position: absolute;
-    /* LIFT - ABOVE */
-    bottom: 6px;
+    bottom: var(--rise);
     transform-origin: 50% 100%;
   }
   li.free {

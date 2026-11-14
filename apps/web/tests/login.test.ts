@@ -104,7 +104,7 @@ test('a magic link opens the dashboard until logout', async ({ page }) => {
 test('the admin invites a tester, who can log in afterwards', async ({ page }) => {
   const tester = freshEmail();
   await logIn(page, 'e2e-admin@example.com');
-  await page.getByRole('link', { name: 'Tester einladen' }).click();
+  await page.getByRole('link', { name: 'Zum Testen einladen' }).click();
   await page.getByLabel('E-Mail').fill(tester);
   await page.getByRole('button', { name: 'Einladen' }).click();
   await expect(page.getByText(`Einladung an ${tester} verschickt`)).toBeVisible();
@@ -120,7 +120,7 @@ test('the admin invites a tester, who can log in afterwards', async ({ page }) =
 
 test('others see no invite and get 403 from the API', async ({ page }) => {
   await logIn(page, freshEmail());
-  await expect(page.getByRole('link', { name: 'Tester einladen' })).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Zum Testen einladen' })).toBeHidden();
   const res = await page.request.post('/api/v1/auth/invite', { data: { email: freshEmail() } });
   expect(res.status()).toBe(403);
 });

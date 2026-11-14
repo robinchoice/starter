@@ -84,7 +84,7 @@ test('the admin writes an update, previews it and sends it', async ({ page }) =>
   await expect(page.getByText('Gespeichert')).toBeVisible();
   await expect(page.frameLocator('iframe').getByRole('heading', { name: 'Language families' })).toBeVisible();
 
-  await page.getByRole('button', { name: /^An \d+ Abonnenten senden$/ }).click();
+  await page.getByRole('button', { name: /^An \d+ Adressen senden$/ }).click();
   await page.getByRole('button', { name: 'Jetzt senden' }).click();
   await expect(page.getByText('Versendet am', { exact: false })).toBeVisible();
   const [update] =

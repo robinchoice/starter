@@ -140,6 +140,7 @@ const RULES = {
   Code: [
     [
       'Jeder sichtbare Text auf Deutsch und Englisch in messages.ts',
+      'Deutsch ohne Gendern formulieren: alle, die Person, Kontakte',
       'Fehler als { error } in der Sprache des Clients',
       'rateLimit für alles, was Mails schickt oder Geheimnisse prüft',
       'Externe Quellen in die CSP eintragen',
@@ -148,6 +149,7 @@ const RULES = {
       'AGENTS.md mit Zweck & Links, Checks, Deploy, Fallen',
     ],
     [
+      'Gender-Sternchen, „jede und jeder“, generisches Maskulinum',
       'Vorzeitige Abstraktionen',
       'Error-Handling für Fälle, die nicht eintreten können',
       'Feature-Flags oder Kompatibilitäts-Shims',

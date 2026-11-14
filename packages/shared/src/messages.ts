@@ -65,7 +65,7 @@ const de = {
   highlightsTitle: 'Was die App kann',
   highlights: [
     { title: 'Erstes Feature', text: 'Was es tut und was man davon hat, in ein, zwei Sätzen.' },
-    { title: 'Zweites Feature', text: 'Aus Sicht der Nutzer geschrieben, nicht aus Sicht der Technik.' },
+    { title: 'Zweites Feature', text: 'Aus Sicht der Menschen, die die App nutzen, nicht aus Sicht der Technik.' },
     { title: 'Drittes Feature', text: 'Drei reichen. Was nicht hineinpasst, zeigen die Screenshots.' },
   ],
   valuesTitle: 'Worauf du dich verlassen kannst',
@@ -101,8 +101,8 @@ const de = {
   displayName: 'Anzeigename',
   save: 'Speichern',
   saved: 'Gespeichert',
-  inviteTester: 'Tester einladen',
-  inviteIntro: 'Legt das Konto an und schickt einen Login-Link. Danach meldet sich der Tester wie jedes Konto an.',
+  inviteTester: 'Zum Testen einladen',
+  inviteIntro: 'Legt das Konto an und schickt einen Login-Link. Danach läuft die Anmeldung wie bei jedem Konto.',
   invite: 'Einladen',
   invited: (email: string) => `Einladung an ${email} verschickt`,
   close: 'Schließen',
@@ -195,14 +195,14 @@ const de = {
   preview: 'Vorschau',
   testMail: 'Testmail an mich',
   testSent: (email: string) => `Testmail an ${email} gesendet, auf Deutsch und Englisch`,
-  sendTo: (n: number) => `An ${n} Abonnenten senden`,
+  sendTo: (n: number) => `An ${n} Adressen senden`,
   confirmSend: (n: number) => `${n} Mails an alle mit Opt-in senden?`,
   confirmSendHint:
-    'Jeder bekommt die Fassung in seiner Sprache. Der Versand läuft gedrosselt im Hintergrund, die Seite darf zu. Danach lässt sich das Update nicht mehr ändern.',
+    'Alle bekommen die Fassung in ihrer Sprache. Der Versand läuft gedrosselt im Hintergrund, die Seite darf zu. Danach lässt sich das Update nicht mehr ändern.',
   sendNow: 'Jetzt senden',
   sending: (sent: number, total: number, failed: number) => `${sent} von ${total} versendet · ${failed} Fehler`,
   sentOn: (date: string, total: number, failed: number) =>
-    `Versendet am ${date} · ${total} Empfänger · ${failed} Fehler`,
+    `Versendet am ${date} · ${total} Adressen · ${failed} Fehler`,
   sentReadOnly: 'Versendete Updates lassen sich nicht mehr ändern.',
   deleteDraft: 'Entwurf löschen',
 

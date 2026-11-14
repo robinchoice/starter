@@ -31,7 +31,7 @@ class AppDock extends ConsumerStatefulWidget {
   ConsumerState<AppDock> createState() => _AppDockState();
 }
 
-class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStateMixin {
+class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final _portal = OverlayPortalController();
   late final _pop = AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
   List<DockSlot> _slots = const [];
@@ -40,9 +40,24 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
   bool _wanted = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pop.dispose();
     super.dispose();
+  }
+
+  // Rotation or a resized window moves the band: place the dock again once the new layout is done
+  @override
+  void didChangeMetrics() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _portal.isShowing) setState(() {});
+    });
   }
 
   bool _isCurrent(PleasanceApp app) => app.url.origin == Uri.parse(apiUrl).origin;
@@ -181,7 +196,7 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
           onTap: () => open ? _close() : _show(),
           onPanStart: (details) async {
             await _show();
-            _track(details.globalPosition);
+            if (mounted) _track(details.globalPosition);
           },
           onPanUpdate: (details) => _track(details.globalPosition),
           onPanEnd: (_) => _release(),
@@ -278,11 +293,8 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
             top: bottom - row[_hot].size - 8 - 80,
             height: 80,
             child: IgnorePointer(
-              child: Align(
-                alignment: Alignment(
-                  ((row[_hot].left + row[_hot].size / 2 - 8) / (geometry.area.width - 16) * 2 - 1).clamp(-1.0, 1.0),
-                  1,
-                ),
+              child: CustomSingleChildLayout(
+                delegate: _LabelLayout(row[_hot].left + row[_hot].size / 2 - 8),
                 child: _Label(
                   name: hot.app?.name ?? t.freeSpot,
                   note: switch (hot.app) {
@@ -399,6 +411,24 @@ class _Tile extends StatelessWidget {
       ],
     );
   }
+}
+
+// Centres the label on the tile, held inside the screen near the edges
+class _LabelLayout extends SingleChildLayoutDelegate {
+  final double center;
+  const _LabelLayout(this.center);
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) => Offset(
+    (center - childSize.width / 2).clamp(0.0, math.max(0.0, size.width - childSize.width)),
+    size.height - childSize.height,
+  );
+
+  @override
+  bool shouldRelayout(_LabelLayout old) => old.center != center;
 }
 
 class _Label extends StatelessWidget {

@@ -182,11 +182,7 @@
     all[Math.min(all.length - 1, Math.max(0, start + step))]?.focus();
   }
   function keyInDock(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      close();
-      button.focus();
-      return;
-    }
+    if (event.key === 'Escape') return close();
     const all = appLinks();
     const i = all.indexOf(document.activeElement as HTMLAnchorElement);
     if (i < 0) return;
@@ -221,6 +217,13 @@
     };
   });
 
+  // Back from an app opened here, the page may come out of the bfcache as it was left
+  function restore(event: PageTransitionEvent) {
+    if (!event.persisted) return;
+    close();
+    launching = -1;
+  }
+
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Pops out of the band, the icons nearest to the marker first
   function pop(_node: Element, { delay }: { delay: number }) {
@@ -245,6 +248,8 @@
     return { name: slot.app?.name ?? t().freeSpot, note, x: at.left - rootLeft + at.size / 2, y: LIFT - ABOVE + at.size + 8 };
   });
 </script>
+
+<svelte:window onpageshow={restore} />
 
 <div
   class="dock"
@@ -277,7 +282,8 @@
   </button>
   {#if open}
     <ul id="pleasance-apps" aria-label={t().pleasanceTools} style:left="{rowLeft}px" style:width="{rowWidth}px">
-      {#each slots as slot, i (slot.app?.url ?? `free-${slot.stage}`)}
+      <!-- Unkeyed: apps.json may list a URL twice -->
+      {#each slots as slot, i}
         {@const at = row[i]}
         {#if at}
           <li

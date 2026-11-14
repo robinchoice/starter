@@ -81,7 +81,9 @@ final pleasanceAppsProvider = FutureProvider<List<PleasanceApp>>(retry: (_, _) =
       client
           .get(entry.icon)
           .timeout(const Duration(seconds: 10))
-          .then((r) => r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null, onError: (_) => null)
+          .then((r) => r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null)
+          // A tile that fails to load or decode falls back to the placeholder, the dock stays
+          .onError((_, _) => null)
           .then(
             (svg) => PleasanceApp(
               name: entry.app.name,

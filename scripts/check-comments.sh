@@ -5,11 +5,14 @@
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
-mapfile -t files < <(
+# A read loop instead of mapfile, which the bash 3.2 of macOS lacks
+files=()
+while IFS= read -r f; do
+  if [[ -f $f ]]; then files+=("$f"); fi
+done < <(
   git ls-files --cached --others --exclude-standard -- apps packages |
     grep -E '\.(ts|tsx|js|mjs|svelte|dart|swift|kts|css)$' |
-    grep -vE '\.test\.|/tests?/|_test\.dart$' |
-    while read -r f; do [[ -f $f ]] && echo "$f"; done
+    grep -vE '\.test\.|/tests?/|_test\.dart$'
 )
 [[ ${#files[@]} -eq 0 ]] && exit 0
 

@@ -12,12 +12,18 @@ test.beforeEach(({ page }) => {
 test.afterEach(() => expect(errors).toEqual([]));
 
 const icon = (name: string) => `https://pleasance.org/img/werkzeuge/${name}.svg`;
+const musicHub = {
+  name: 'Music Hub',
+  url: 'https://hub.pleasance.org',
+  icon: icon('musichub'),
+  band: { from: 1.35, to: 2.2 },
+};
 
 // pleasance.org answers from here, the test app itself is one of the apps
 async function servePleasance(page: Page, self: string, more: object[] = []) {
   const apps = [
     ...more,
-    { name: 'Music Hub', url: 'https://hub.pleasance.org', icon: icon('musichub'), band: { from: 1.35, to: 2.2 } },
+    musicHub,
     { name: 'Starter', url: self, icon: icon('starter'), band: { from: 3.85, to: 4.55 } },
     {
       name: 'Savor',
@@ -86,13 +92,7 @@ test('the keyboard walks the apps and Escape closes the dock', async ({ page, ba
 });
 
 test('regression: apps.json listing a URL twice still opens the dock', async ({ page, baseURL }) => {
-  const again = {
-    name: 'Music Hub',
-    url: 'https://hub.pleasance.org',
-    icon: icon('musichub'),
-    band: { from: 6.6, to: 7 },
-  };
-  await servePleasance(page, baseURL!, [again]);
+  await servePleasance(page, baseURL!, [{ ...musicHub, band: { from: 6.6, to: 7 } }]);
   await page.goto('/');
   await page.getByRole('button', { name: 'Werkzeuge von Pleasance' }).hover();
   const dock = page.getByRole('list', { name: 'Werkzeuge von Pleasance' });

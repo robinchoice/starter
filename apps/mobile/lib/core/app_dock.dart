@@ -52,11 +52,16 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
     super.dispose();
   }
 
-  // Rotation or a resized window moves the band: place the dock again once the new layout is done
+  // Rotation or a resized window moves the band: place the dock again once the new layout is done.
+  // A finger held through it no longer points where it did, lifting it must not launch that app.
   @override
   void didChangeMetrics() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _portal.isShowing) setState(() {});
+      if (!mounted || !_portal.isShowing) return;
+      setState(() {
+        _pointer = null;
+        _hot = -1;
+      });
     });
   }
 
@@ -374,6 +379,9 @@ class _Tile extends StatelessWidget {
         ),
       );
     }
+    const placeholder = DecoratedBox(
+      decoration: BoxDecoration(color: Color(0xFF121117), borderRadius: BorderRadius.all(Radius.circular(9))),
+    );
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -384,13 +392,9 @@ class _Tile extends StatelessWidget {
               boxShadow: [BoxShadow(color: Color(0x47000000), blurRadius: 6, offset: Offset(0, 3))],
             ),
             child: app.icon == null
-                ? const DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Color(0xFF121117),
-                      borderRadius: BorderRadius.all(Radius.circular(9)),
-                    ),
-                  )
-                : SvgPicture.string(app.icon!),
+                ? placeholder
+                // A tile that is text but no SVG, e.g. an HTML error page
+                : SvgPicture.string(app.icon!, errorBuilder: (_, _, _) => placeholder),
           ),
         ),
         // Like a running app in the Dock

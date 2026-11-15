@@ -165,6 +165,41 @@ void main() {
     expect(find.bySemanticsLabel('Döner'), findsOneWidget);
   });
 
+  testWidgets('regression: a tile that is text but no SVG shows the placeholder', (tester) async {
+    await _pumpFooter(
+      tester,
+      tiles: (url) =>
+          url.path.endsWith('/doener.svg') ? http.Response('<html>Bad Gateway</html>', 200) : http.Response(_tile, 200),
+    );
+    await tester.tap(_band);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+    final placeholder = find.byWidgetPredicate(
+      (w) =>
+          w is DecoratedBox &&
+          w.decoration is BoxDecoration &&
+          (w.decoration as BoxDecoration).color == const Color(0xFF121117),
+    );
+    expect(placeholder, findsOneWidget, reason: 'Music Hub and Savor load, Döner falls back');
+  });
+
+  testWidgets('regression: lifting a finger held through a resize launches nothing', (tester) async {
+    await _pumpFooter(tester);
+    await tester.tap(_band);
+    await tester.pumpAndSettle();
+    final doener = tester.getCenter(_link('Döner'));
+    final gesture = await tester.startGesture(doener + const Offset(0, 30));
+    await gesture.moveTo(doener);
+    await tester.pump();
+    tester.view.physicalSize = Size(400 * tester.view.devicePixelRatio, tester.view.physicalSize.height);
+    addTearDown(tester.view.resetPhysicalSize);
+    await tester.pumpAndSettle();
+    expect(find.text('Döner', findRichText: true), findsNothing);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Music Hub'), findsOneWidget, reason: 'the dock stays open');
+  });
+
   testWidgets('regression: leaving the screen while a drag waits for the list throws nothing', (tester) async {
     final list = Completer<void>();
     final (requests: _, :client) = await _pumpFooter(tester, list: list.future);

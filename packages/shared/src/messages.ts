@@ -195,14 +195,14 @@ const de = {
   preview: 'Vorschau',
   testMail: 'Testmail an mich',
   testSent: (email: string) => `Testmail an ${email} gesendet, auf Deutsch und Englisch`,
-  sendTo: (n: number) => `An ${n} Adressen senden`,
+  sendTo: (n: number) => `An ${n} ${n === 1 ? 'Adresse' : 'Adressen'} senden`,
   confirmSend: (n: number) => `${n} Mails an alle mit Opt-in senden?`,
   confirmSendHint:
     'Alle bekommen die Fassung in ihrer Sprache. Der Versand läuft gedrosselt im Hintergrund, die Seite darf zu. Danach lässt sich das Update nicht mehr ändern.',
   sendNow: 'Jetzt senden',
   sending: (sent: number, total: number, failed: number) => `${sent} von ${total} versendet · ${failed} Fehler`,
   sentOn: (date: string, total: number, failed: number) =>
-    `Versendet am ${date} · ${total} Adressen · ${failed} Fehler`,
+    `Versendet am ${date} · ${total} ${total === 1 ? 'Adresse' : 'Adressen'} · ${failed} Fehler`,
   sentReadOnly: 'Versendete Updates lassen sich nicht mehr ändern.',
   deleteDraft: 'Entwurf löschen',
 

@@ -196,7 +196,7 @@ const de = {
   testMail: 'Testmail an mich',
   testSent: (email: string) => `Testmail an ${email} gesendet, auf Deutsch und Englisch`,
   sendTo: (n: number) => `An ${n} ${n === 1 ? 'Adresse' : 'Adressen'} senden`,
-  confirmSend: (n: number) => `${n} Mails an alle mit Opt-in senden?`,
+  confirmSend: (n: number) => `${n} ${n === 1 ? 'Mail' : 'Mails'} an alle mit Opt-in senden?`,
   confirmSendHint:
     'Alle bekommen die Fassung in ihrer Sprache. Der Versand läuft gedrosselt im Hintergrund, die Seite darf zu. Danach lässt sich das Update nicht mehr ändern.',
   sendNow: 'Jetzt senden',
@@ -426,13 +426,14 @@ const en: Messages = {
   preview: 'Preview',
   testMail: 'Test email to me',
   testSent: (email) => `Test email sent to ${email}, in German and English`,
-  sendTo: (n) => `Send to ${n} subscribers`,
-  confirmSend: (n) => `Send ${n} emails to everyone opted in?`,
+  sendTo: (n) => `Send to ${n} ${n === 1 ? 'subscriber' : 'subscribers'}`,
+  confirmSend: (n) => `Send ${n} ${n === 1 ? 'email' : 'emails'} to everyone opted in?`,
   confirmSendHint:
     'Everyone gets their language. Sending runs throttled in the background, you may close the page. After that the update can no longer be changed.',
   sendNow: 'Send now',
   sending: (sent, total, failed) => `${sent} of ${total} sent · ${failed} failed`,
-  sentOn: (date, total, failed) => `Sent ${date} · ${total} recipients · ${failed} failed`,
+  sentOn: (date, total, failed) =>
+    `Sent ${date} · ${total} ${total === 1 ? 'recipient' : 'recipients'} · ${failed} failed`,
   sentReadOnly: 'Sent updates can no longer be changed.',
   deleteDraft: 'Delete draft',
   agentsIntro: (full) =>

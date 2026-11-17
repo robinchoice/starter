@@ -57,11 +57,7 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
   @override
   void didChangeMetrics() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_portal.isShowing) return;
-      setState(() {
-        _pointer = null;
-        _hot = -1;
-      });
+      if (mounted && _portal.isShowing) _cancel();
     });
   }
 

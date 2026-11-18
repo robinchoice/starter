@@ -19,7 +19,9 @@ export const toPayment = (row: PaymentRow): Payment => ({
 
 // Asks the backend about a pending payment and stores the answer. Only one
 // caller gets `moved` back from the conditional update: an app that unlocks
-// more than the row (credits, a mail) does it there.
+// more than the row (credits, a job for the worker) does it there, in one
+// transaction with the update. A paid row is never asked about again, so a
+// crash between the two would lose what was bought.
 export async function refreshPayment(db: Database, row: PaymentRow): Promise<PaymentRow> {
   const backend = lightning();
   if (row.status !== 'pending' || backend?.name !== row.backend) return row;

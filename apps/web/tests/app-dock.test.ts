@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test';
+import { type CDPSession, expect, type Locator, type Page, test } from '@playwright/test';
 
 // Console errors fail the test, CSP violations included
 let errors: string[] = [];
@@ -107,4 +107,55 @@ test('regression: a page restored from the bfcache shows the dock closed', async
   await expect(band).toHaveAttribute('aria-expanded', 'true');
   await page.evaluate(() => dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
   await expect(band).toHaveAttribute('aria-expanded', 'false');
+});
+
+type Point = { x: number; y: number };
+
+// Real touch input, fingers numbered in the order given
+const touch = (cdp: CDPSession, type: 'touchStart' | 'touchMove' | 'touchEnd', points: Point[]) =>
+  cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map((point, id) => ({ ...point, id })) });
+
+async function center(target: Locator): Promise<Point> {
+  const box = (await target.boundingBox())!;
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+}
+
+test.describe('touch', () => {
+  test.use({ hasTouch: true });
+
+  // A finger goes down on the band, slides onto Music Hub and stays there
+  async function slideToMusicHub(page: Page, baseURL: string) {
+    await servePleasance(page, baseURL);
+    await page.route('https://hub.pleasance.org/**', (route) =>
+      route.fulfill({ contentType: 'text/html', body: 'Hub' }),
+    );
+    await page.goto('/');
+    const band = page.getByRole('button', { name: 'Werkzeuge von Pleasance' });
+    await band.scrollIntoViewIfNeeded();
+    const cdp = await page.context().newCDPSession(page);
+    await touch(cdp, 'touchStart', [await center(band)]);
+    await expect(band).toHaveAttribute('aria-expanded', 'true');
+    const hub = page.getByRole('list', { name: 'Werkzeuge von Pleasance' }).getByRole('link', { name: 'Music Hub' });
+    // Twice, the row moves as the icons under the finger grow
+    await touch(cdp, 'touchMove', [await center(hub)]);
+    const finger = await center(hub);
+    await touch(cdp, 'touchMove', [finger]);
+    return { band, cdp, finger };
+  }
+
+  test('sliding from the band onto an app and lifting the finger opens it', async ({ page, baseURL }) => {
+    const { cdp } = await slideToMusicHub(page, baseURL!);
+    await touch(cdp, 'touchEnd', []);
+    await page.waitForURL('https://hub.pleasance.org/');
+  });
+
+  test('regression: a dock closed while a finger slides opens no app when it lifts', async ({ page, baseURL }) => {
+    const { band, cdp, finger } = await slideToMusicHub(page, baseURL!);
+    // A second finger beside the dock closes it
+    await touch(cdp, 'touchStart', [finger, { x: 20, y: 20 }]);
+    await expect(band).toHaveAttribute('aria-expanded', 'false');
+    await touch(cdp, 'touchEnd', []);
+    await page.waitForTimeout(300);
+    expect(page.url()).toBe(`${baseURL}/`);
+  });
 });

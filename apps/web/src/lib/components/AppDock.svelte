@@ -101,6 +101,8 @@
     open = false;
     pointer = null;
     hot = -1;
+    // A finger still sliding has nothing left to open
+    dragging = false;
   }
   const closeSoon = () => {
     clearTimeout(closeTimer);

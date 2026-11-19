@@ -103,6 +103,10 @@
   :global(a) {
     color: inherit;
   }
+  :global(:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
   .shell {
     display: flex;
     flex-direction: column;

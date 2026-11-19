@@ -125,12 +125,20 @@ Die Produktfarbe ist Identität, kein Status. Zustände, die man nebeneinander a
 
 - Läuft hat keine eigene Farbe: Der Spinner läuft im Produktverlauf, Zahl und Text bleiben Muted.
 - Gefüllte Zähler und Statuspunkte gibt es nur in Signalfarben oder neutral, nie in der Produktfarbe. Die Schrift darauf ist `#17171A`.
+- Eine getönte Statusfläche bekommt ihr eigenes Paar aus Grund und Schrift als Token, so wie `--needs-bg` mit `--text`. Kein Alpha-Tint der Signalfarbe mit beliebigem Text darauf.
 - Auf dunklem Grund glow. Auf hellem Grund deep für Text, Linien und Ränder, gefüllte Zähler bleiben glow.
 - Liegt der Ausschnitt eines Produkts auf einer Signalfarbe, trennt die Form: Signale erscheinen als Zähler, Punkt oder Randlinie, die Produktfarbe nie so.
 - Akzente, Auswahl, Banner und Markierungen bleiben in der Produktfarbe.
 - Neue Signale nur, wenn sie sich sonst nebeneinander verwechseln lassen.
 
 Im Starter liegen sie als `--needs`, `--new`, `--error` (deep) und `--needs-bg`, `--new-bg`, `--error-bg` (glow) im Web-Layout und als `needsGlow`, `needsDeep` usw. in `lib/core/brand.dart`.
+
+## Kontrast und Fokus
+
+`apps/web/tests/contrast.test.ts` rechnet die Paare aus Web-Layout, `lib/core/brand.dart` und den dunklen Neutralen oben nach (Text 4,5:1, Fokus-Ring 3:1) und läuft in `bun run test`.
+
+- Eine neue Farbe kommt im selben Zug für hellen und dunklen Grund in die Angaben oben, nach `:root` im Web-Layout, nach `lib/core/brand.dart` und mit ihrem Paar in den Test. Fehlt eine Variable in `:root`, verwirft der Browser die Regel still.
+- Der Fokus-Ring ist immer sichtbar: 2 px in `--accent` mit 2 px Abstand, global im Web-Layout, Eingabefelder zeichnen ihn innen. In Containern mit `overflow: auto` oder `hidden` haben fokussierbare Elemente mindestens 2 px Abstand zum Rand, sonst schneidet der Container den Ring ab.
 
 ## Absender
 

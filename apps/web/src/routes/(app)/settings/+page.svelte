@@ -194,8 +194,4 @@
   .switch.on::after {
     left: 21px;
   }
-  .switch:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
 </style>

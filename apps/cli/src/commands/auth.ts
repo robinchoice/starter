@@ -4,7 +4,7 @@ import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
 import { z } from 'zod';
 import { createClient } from '../client';
 import { type Command, type Context, EXIT, Failure, str } from '../command';
-import { loadSession, removeSession, saveSession } from '../config';
+import { loadSession, removeSession, type Session, SLUG, saveSession } from '../config';
 
 const meSchema = z.object({ user: userSchema.nullable() });
 const loginSchema = z.object({ user: userSchema, token: z.string() });
@@ -37,6 +37,18 @@ async function withLink({ api, io, m }: Context, link: string) {
   return api.post('/auth/verify', loginSchema, { token, cookie: false });
 }
 
+// Revokes a stored token at the address it was issued for, then drops it here. If that address
+// doesn't answer, the token stays on this device and the message names logout --forget.
+async function revoke({ io, locale, m }: Context, stored: Session) {
+  try {
+    await createClient(stored.url, stored.token, locale, m).post('/auth/logout', okSchema);
+  } catch (error) {
+    if (error instanceof Failure) throw new Failure(`${error.message} ${m.cliForgetHint(SLUG)}`, error.exitCode);
+    throw error;
+  }
+  await removeSession(io.env);
+}
+
 export const auth: Record<string, Command> = {
   login: {
     help: (m) => [
@@ -48,10 +60,7 @@ export const auth: Record<string, Command> = {
       // A new login replaces the token of this device: the old one is revoked first at the address
       // it was issued for, also when --url names another, so none stays valid unseen
       const stored = await loadSession(ctx.io.env);
-      if (stored) {
-        await createClient(stored.url, stored.token, ctx.locale, ctx.m).post('/auth/logout', okSchema);
-        await removeSession(ctx.io.env);
-      }
+      if (stored) await revoke(ctx, stored);
       const link = str(ctx.values.link);
       const { user, token } = link === undefined ? await withCode(ctx) : await withLink(ctx, link);
       // A token that can't be stored is revoked, so no session stays valid without a device holding it
@@ -74,13 +83,21 @@ export const auth: Record<string, Command> = {
   },
 
   logout: {
-    help: (m) => [['logout', m.cliLogoutHelp]],
-    async run({ api, session, io, m }) {
-      if (session) {
-        await api.post('/auth/logout', okSchema);
-        await removeSession(io.env);
+    help: (m) => [
+      ['logout', m.cliLogoutHelp],
+      ['logout --forget', m.cliForgetHelp],
+    ],
+    options: { forget: { type: 'boolean' } },
+    async run(ctx) {
+      // The way out when the address of the stored token no longer answers: whatever --url says,
+      // the token goes from this device only and stays valid at its issuer
+      const stored = ctx.values.forget === true ? await loadSession(ctx.io.env) : null;
+      if (stored) {
+        await removeSession(ctx.io.env);
+        return { data: { ok: true, revoked: false }, text: ctx.m.cliForgotten(stored.url) };
       }
-      return { data: { ok: true }, text: m.cliLoggedOut };
+      if (ctx.session) await revoke(ctx, ctx.session);
+      return { data: { ok: true }, text: ctx.m.cliLoggedOut };
     },
   },
 };

@@ -242,6 +242,31 @@ test('switching API addresses revokes the previous token only at its issuer', as
   }
 });
 
+test('a token whose address no longer answers blocks login and logout until logout --forget drops it', async () => {
+  const other = Bun.serve({ port: 0, fetch: createApp(db).fetch });
+  const gone = other.url.origin;
+  const { cli, token, env } = await device();
+  const email = freshEmail();
+  try {
+    expect((await cli(['login', '--url', gone], { email })).code).toBe(0);
+  } finally {
+    await other.stop(true);
+  }
+  const oldToken = await token();
+  const stuck = { code: 1, err: `${de.cliUnreachable(gone)} ${de.cliForgetHint(SLUG)}` };
+  expect(await cli(['login'], { email })).toMatchObject(stuck);
+  expect(await cli(['logout', '--url', gone])).toMatchObject(stuck);
+  expect(await token()).toBe(oldToken);
+
+  expect(await cli(['logout', '--forget'])).toMatchObject({ code: 0, out: de.cliForgotten(gone) });
+  expect(await Bun.file(sessionFile(env)).exists()).toBe(false);
+  // Not revoked, as the message says
+  expect(await sessionCount(oldToken)).toBe(1);
+  expect((await cli(['logout', '--forget', '--json'])).json()).toEqual({ ok: true });
+  expect((await cli(['login'], { email })).code).toBe(0);
+  expect((await cli(['whoami', '--json'])).json()).toMatchObject({ user: { email } });
+});
+
 test('help, wrong usage and an unreachable app', async () => {
   const { cli } = await device();
   const helpText = await cli([]);

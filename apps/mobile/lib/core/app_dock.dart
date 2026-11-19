@@ -279,6 +279,7 @@ class _AppDockState extends ConsumerState<AppDock> with SingleTickerProviderStat
               height: row[i].size,
               child: Semantics(
                 link: true,
+                linkUrl: app.url,
                 label: [app.name, if (app.desktop) t.desktopApp, if (_isCurrent(app)) t.youAreHere].join(', '),
                 onTap: () => _launch(app),
                 child: const SizedBox.expand(),

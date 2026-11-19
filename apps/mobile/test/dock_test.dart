@@ -138,6 +138,15 @@ void main() {
     expect(find.bySemanticsLabel('Music Hub'), findsNothing);
   });
 
+  testWidgets('regression: screen readers get the address of each app link', (tester) async {
+    await _pumpFooter(tester);
+    await tester.tap(_band);
+    await tester.pumpAndSettle();
+    final link = tester.getSemantics(find.bySemanticsLabel('Music Hub')).getSemanticsData();
+    expect(link.flagsCollection.isLink, isTrue);
+    expect(link.linkUrl, Uri.parse('https://hub.pleasance.org'));
+  });
+
   testWidgets('regression: the name stands centred over the tile under the finger', (tester) async {
     await _pumpFooter(tester);
     await tester.tap(_band);

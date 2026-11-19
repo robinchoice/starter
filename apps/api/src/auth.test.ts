@@ -454,3 +454,22 @@ test('the app links name the app only once it is configured', async () => {
     delete process.env.ANDROID_CERT_SHA256;
   }
 });
+
+test('the boot refuses Android fingerprints that are no SHA-256 as AA:BB:…', async () => {
+  const boot = async (fingerprints: string) => {
+    const child = Bun.spawn([process.execPath, `${import.meta.dir}/env.ts`], {
+      env: { ...process.env, APP_URL: 'http://localhost', ANDROID_CERT_SHA256: fingerprints },
+      stderr: 'pipe',
+    });
+    return { code: await child.exited, err: await child.stderr.text() };
+  };
+  const sha = Array.from({ length: 32 }, (_, i) => i.toString(16).padStart(2, '0')).join(':');
+  expect((await boot('')).code).toBe(0);
+  // As lenient as androidCertificates: any case, spaces and a trailing comma
+  expect((await boot(`${sha}, ${sha.toUpperCase()},`)).code).toBe(0);
+  for (const wrong of [sha.replaceAll(':', ''), sha.slice(3), `SHA256: ${sha}`]) {
+    const { code, err } = await boot(wrong);
+    expect(code).not.toBe(0);
+    expect(err).toContain('ANDROID_CERT_SHA256');
+  }
+});

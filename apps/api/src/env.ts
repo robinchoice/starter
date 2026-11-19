@@ -6,6 +6,16 @@ import { z } from 'zod';
 // .env.example. A new variable with a required value or a format goes here.
 const unset = z.literal('');
 const number = z.string().regex(/^\d+$/);
+// As lib/passkeys.ts reads them: comma-separated, each one 32 bytes as AA:BB:…
+const fingerprints = z.string().refine(
+  (value) =>
+    value
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .every((entry) => /^([0-9a-f]{2}:){31}[0-9a-f]{2}$/i.test(entry)),
+  'comma-separated SHA-256 fingerprints as AA:BB:…',
+);
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
@@ -16,6 +26,7 @@ const envSchema = z.object({
   UPDATE_MAIL_INTERVAL_MS: number.or(unset).exactOptional(),
   MIN_BUILD_IOS: number.or(unset).exactOptional(),
   MIN_BUILD_ANDROID: number.or(unset).exactOptional(),
+  ANDROID_CERT_SHA256: fingerprints.exactOptional(),
   SIGNUP_OPEN: z.enum(['true', 'false']).or(unset).exactOptional(),
   SENTRY_DSN: z.url().or(unset).exactOptional(),
   // README, „Zahlungen“. Empty = off.

@@ -293,3 +293,15 @@ Auf `main` baut die CI für Android ein AAB als Artefakt und lädt es bei einger
   flutter symbolize -i trace.txt -d /tmp/symbols/app.android-arm64.symbols   # iOS: app.ios-arm64.symbols
   ```
   `trace.txt` ist der rohe Stacktrace mit `build_id` und `abs …/virt …`-Zeilen (z. B. aus `adb logcat`). Builds, die älter als 90 Tage sind, lassen sich nicht mehr symbolisieren.
+
+### Vor dem ersten Store-Release
+
+Vor dem ersten Release einer App in App Store oder Google Play gibt es eine Woche ohne neue Features: nur Fixen, Patchen und Härten, keine sichtbaren UI-Umbauten über das hinaus, was ein Punkt verlangt. Die Registrierung bleibt zu (siehe „Registrierung öffnen“), Geld (Domain, Server) nur als Frage an Robin. Jeder Punkt bekommt einen Status: ok (Beleg), gefixt (Commit), offen (braucht Robin) oder entfällt (Grund). Die Woche endet, wenn kein Punkt mehr offen ist, dann ist die App bereit.
+
+1. Update-Pflicht: eingerichtet und im ersten Store-Build, siehe „Update-Pflicht“.
+2. Fehler sehen: GlitchTip in API, Web und App aktiv, auch in Release-Builds („Deploy auf Coolify“, Schritt 6, und `SENTRY_DSN` unter „Release“), Symbole abrufbar (Ende von „Release“), ein Testfehler kommt an. Datenschutzangaben in den Stores und auf der Datenschutzseite passen dazu.
+3. Store-Pflichten: Datenschutz und Impressum erreichbar, Privacy Labels und Data Safety stimmen mit dem Code überein, Konto löschen in der App (sofern es Konten gibt), Texte und Screenshots auf Deutsch und Englisch, keine fremden Markennamen, die Ablehnungen auslösen.
+4. Sicherheit: Dependency-Audit für Web, API und App, Auth, Rate-Limits und Eingabevalidierung jedes öffentlichen Endpunkts gezielt angreifen, keine Secrets im Client, Secret-Scan grün (siehe „Secret-Scan“), Security-Header.
+5. Betrieb: Restore aus dem Backup einmal in eine Wegwerf-Datenbank, Health-Check mit Alarm bei Ausfall („Deploy auf Coolify“, Schritt 9), `POSTGRES_MEMORY`, Lastreserve gegen die Lasttest-Zahlen in `infra.md`. Ob ein eigener Prod-Server nötig ist, nur als Frage an Robin.
+6. Robustheit: Netzfehler, Offline, Timeouts externer Dienste, leere Zustände, lokale Daten älterer Versionen nach einem Update.
+7. Echte Geräte: Was nur Robin prüfen kann, als Testplan mit höchstens 10 Schritten für iPhone und Android, dazu die Kriterien aus „Fenstergrößen, Tablets und Foldables“.

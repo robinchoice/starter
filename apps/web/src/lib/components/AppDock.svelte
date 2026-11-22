@@ -345,8 +345,6 @@
     touch-action: none;
   }
   button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
     border-radius: 4px;
   }
   .band {

@@ -251,18 +251,3 @@ jobs:
             git push origin main && exit 0
           done
           exit 1
-      # Tells pleasance.org that the prototype is live with fresh screenshots.
-      # A step, not its own job: every job is billed in whole minutes.
-      - name: Send prototype-deployed to robinchoice/pleasance
-        env:
-          GH_TOKEN: ${{ secrets.PLEASANCE_DISPATCH_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -z "$GH_TOKEN" ]; then
-            echo "No PLEASANCE_DISPATCH_TOKEN secret yet, skipping"
-            exit 0
-          fi
-          gh api repos/robinchoice/pleasance/dispatches \
-            -f event_type=prototype-deployed \
-            -f "client_payload[slug]=${GITHUB_REPOSITORY#*/}" \
-            -f "client_payload[sha]=$GITHUB_SHA"

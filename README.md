@@ -73,12 +73,11 @@ VPS 1 baut nichts. Die CI baut bei jedem grünen Push auf `main` die Images `ghc
 2. Domain nur beim Service `web` eintragen, mit Port: `https://<domain>:3000`.
 3. Variablen aus `.env.production.example` setzen. `IMAGE_PREFIX` und `IMAGE_TAG` setzt die CI.
 4. In GitHub die Secrets `COOLIFY_TOKEN` (eigener Coolify-API-Token `ci-<repo>` mit den Rechten `read`, `write` und `deploy`, nie den Laptop-Token aus `~/.secrets`) und `COOLIFY_UUID` (UUID der Ressource) setzen. Ohne `COOLIFY_TOKEN` überspringt die CI den Deploy. Mit Token setzt sie `IMAGE_PREFIX` und `IMAGE_TAG`, schaltet das Auto-Deploy der Ressource aus, ersetzt den Build durch `docker compose pull`, startet mit `up -d --no-build --remove-orphans` und wartet, bis Coolify den Deploy abgeschlossen hat und `/api/health` unter der öffentlichen URL den neuen Commit als `revision` meldet.
-5. pleasance.org: Secret `PLEASANCE_DISPATCH_TOKEN` setzen, damit die CI jeden Deploy meldet (siehe „Screenshots“): `with-secret GITHUB_PLEASANCE_DISPATCH_TOKEN -- bash -c 'printf "%s" "$GITHUB_PLEASANCE_DISPATCH_TOKEN" | gh secret set PLEASANCE_DISPATCH_TOKEN -R robinchoice/<slug>'`. Ein Token für alle Prototypen, fein granuliert, nur für `robinchoice/pleasance` mit „Contents: Read and write“. Ohne das Secret überspringt die CI die Meldung.
-6. GlitchTip: Projekt anlegen, DSN in `SENTRY_DSN` und `PUBLIC_SENTRY_DSN`.
-7. Feedback: `FEEDBACK_EMAIL` und `FEEDBACK_GITHUB_TOKEN` setzen. Das Token ist eines für alle Prototypen, fein granuliert, nur „Issues: Read and write“, und liegt in `~/.secrets` als `GITHUB_FEEDBACK_TOKEN`.
-8. PostHog (optional): `PUBLIC_POSTHOG_KEY` aus `~/.secrets` (`POSTHOG_PROTOTYPES_API_KEY`). Alle Prototypen teilen sich ein Projekt in der EU Cloud, Filter in den Insights per `$host`. Läuft cookieless ohne Session Replay, also ohne Cookie-Banner. Der Web-Server leitet `/ingest` an PostHog weiter, die CSP braucht keinen Eintrag. Replay oder Personenprofile nur mit Einwilligungsbanner.
-9. Uptime Kuma: HTTP-Monitor auf `https://<domain>/api/health`.
-10. Neue Software in `vps1/advisory-alarm` aufnehmen, siehe `infra.md`.
+5. GlitchTip: Projekt anlegen, DSN in `SENTRY_DSN` und `PUBLIC_SENTRY_DSN`.
+6. Feedback: `FEEDBACK_EMAIL` und `FEEDBACK_GITHUB_TOKEN` setzen. Das Token ist eines für alle Prototypen, fein granuliert, nur „Issues: Read and write“, und liegt in `~/.secrets` als `GITHUB_FEEDBACK_TOKEN`.
+7. PostHog (optional): `PUBLIC_POSTHOG_KEY` aus `~/.secrets` (`POSTHOG_PROTOTYPES_API_KEY`). Alle Prototypen teilen sich ein Projekt in der EU Cloud, Filter in den Insights per `$host`. Läuft cookieless ohne Session Replay, also ohne Cookie-Banner. Der Web-Server leitet `/ingest` an PostHog weiter, die CSP braucht keinen Eintrag. Replay oder Personenprofile nur mit Einwilligungsbanner.
+8. Uptime Kuma: HTTP-Monitor auf `https://<domain>/api/health`.
+9. Neue Software in `vps1/advisory-alarm` aufnehmen, siehe `infra.md`.
 
 ### Stoppen und weitere Instanzen
 
@@ -116,7 +115,7 @@ Mehr Seite nur, wo sie den Prototyp zeigt statt beschreibt: eine Demo der echten
 
 ## Screenshots
 
-Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-Seite mit headless Chromium: jede Seite aus `PAGES` in `apps/web/screenshots.ts` als Desktop (1440×900) und Handy (390×844, doppelte Dichte), als WebP in `docs/screenshots/<seite>-<gerät>-<sprache>.webp`. Haben sich Bilder geändert, committet der Bot sie mit `[skip ci]` auf `main`, das löst keinen neuen Deploy aus. Danach schickt derselbe Job ein `repository_dispatch` an `robinchoice/pleasance` (`event_type: prototype-deployed`, `client_payload: {slug, sha}`), damit pleasance.org die neuen Bilder übernimmt.
+Nach jedem erfolgreichen Deploy fotografiert der CI-Job `screenshots` die Live-Seite mit headless Chromium: jede Seite aus `PAGES` in `apps/web/screenshots.ts` als Desktop (1440×900) und Handy (390×844, doppelte Dichte), als WebP in `docs/screenshots/<seite>-<gerät>-<sprache>.webp`. Haben sich Bilder geändert, committet der Bot sie mit `[skip ci]` auf `main`, das löst keinen neuen Deploy aus.
 
 - Nur öffentliche Seiten: Die CI hat keinen Login, die Bilder zeigen nie Nutzerdaten. Kernscreens hinter dem Login kommen erst dazu, wenn der Prototyp sie öffentlich zeigt, z. B. als Demo-Seite mit Beispieldaten.
 - Sprachen: `LOCALES` steht auf `de`. `en` nur ergänzen, wenn die englischen Bilder mehr zeigen als dieselben Screens in anderer Sprache.
@@ -299,9 +298,9 @@ Auf `main` baut die CI für Android ein AAB als Artefakt und lädt es bei einger
 Vor dem ersten Release einer App in App Store oder Google Play gibt es eine Woche ohne neue Features: nur Fixen, Patchen und Härten, keine sichtbaren UI-Umbauten über das hinaus, was ein Punkt verlangt. Die Registrierung bleibt zu (siehe „Registrierung öffnen“), Geld (Domain, Server) nur als Frage an Robin. Jeder Punkt bekommt einen Status: ok (Beleg), gefixt (Commit), offen (braucht Robin) oder entfällt (Grund). Die Woche endet, wenn kein Punkt mehr offen ist, dann ist die App bereit.
 
 1. Update-Pflicht: eingerichtet und im ersten Store-Build, siehe „Update-Pflicht“.
-2. Fehler sehen: GlitchTip in API, Web und App aktiv, auch in Release-Builds („Deploy auf Coolify“, Schritt 6, und `SENTRY_DSN` unter „Release“), Symbole abrufbar (Ende von „Release“), ein Testfehler kommt an. Datenschutzangaben in den Stores und auf der Datenschutzseite passen dazu.
+2. Fehler sehen: GlitchTip in API, Web und App aktiv, auch in Release-Builds („Deploy auf Coolify“, Schritt 5, und `SENTRY_DSN` unter „Release“), Symbole abrufbar (Ende von „Release“), ein Testfehler kommt an. Datenschutzangaben in den Stores und auf der Datenschutzseite passen dazu.
 3. Store-Pflichten: Datenschutz und Impressum erreichbar, Privacy Labels und Data Safety stimmen mit dem Code überein, Konto löschen in der App (sofern es Konten gibt), Texte und Screenshots auf Deutsch und Englisch, keine fremden Markennamen, die Ablehnungen auslösen.
 4. Sicherheit: Dependency-Audit für Web, API und App, Auth, Rate-Limits und Eingabevalidierung jedes öffentlichen Endpunkts gezielt angreifen, keine Secrets im Client, Secret-Scan grün (siehe „Secret-Scan“), Security-Header.
-5. Betrieb: Restore aus dem Backup einmal in eine Wegwerf-Datenbank, Health-Check mit Alarm bei Ausfall („Deploy auf Coolify“, Schritt 9), `POSTGRES_MEMORY`, Lastreserve gegen die Lasttest-Zahlen in `infra.md`. Ob ein eigener Prod-Server nötig ist, nur als Frage an Robin.
+5. Betrieb: Restore aus dem Backup einmal in eine Wegwerf-Datenbank, Health-Check mit Alarm bei Ausfall („Deploy auf Coolify“, Schritt 8), `POSTGRES_MEMORY`, Lastreserve gegen die Lasttest-Zahlen in `infra.md`. Ob ein eigener Prod-Server nötig ist, nur als Frage an Robin.
 6. Robustheit: Netzfehler, Offline, Timeouts externer Dienste, leere Zustände, lokale Daten älterer Versionen nach einem Update.
 7. Echte Geräte: Was nur Robin prüfen kann, als Testplan mit höchstens 10 Schritten für iPhone und Android, dazu die Kriterien aus „Fenstergrößen, Tablets und Foldables“.
